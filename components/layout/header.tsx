@@ -80,7 +80,13 @@ export function Header({ breadcrumbs }: HeaderProps) {
 
         {/* User Avatar */}
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user?.picture_url || ""} alt="User" />
+          <AvatarImage
+            src={
+              user?.picture_url ||
+              "https://media.licdn.com/dms/image/v2/D4E03AQGeAAy1tqMunA/profile-displayphoto-shrink_400_400/B4EZZT3pJuHYAg-/0/1745163818003?e=1754524800&v=beta&t=3hO6A2Sr3AY80m-InCoKVyOfZ_5H_hJT4azu8lKHd44"
+            }
+            alt="User"
+          />
           <AvatarFallback>
             {user?.firstname?.[0]}
             {user?.lastname?.[0]}
