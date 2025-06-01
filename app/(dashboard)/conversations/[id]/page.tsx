@@ -1,11 +1,14 @@
 import { ConversationDetails } from "@/components/conversations/conversation-details";
 
 interface ConversationPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ConversationPage({ params }: ConversationPageProps) {
-  return <ConversationDetails conversationId={params.id} />;
+export default async function ConversationPage({
+  params,
+}: ConversationPageProps) {
+  const { id } = await params;
+  return <ConversationDetails conversationId={id} />;
 }

@@ -9,9 +9,9 @@ import {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const conversationId = params.id;
+  const { id: conversationId } = await params;
   console.log("🚀 Starting conversation end process for ID:", conversationId);
 
   try {
