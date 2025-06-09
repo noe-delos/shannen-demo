@@ -4,14 +4,15 @@ import Link from "next/link";
 import { Icon } from "@iconify/react";
 
 interface ErrorPageProps {
-  searchParams: {
+  searchParams: Promise<{
     message?: string;
-  };
+  }>;
 }
 
-export default function ErrorPage({ searchParams }: ErrorPageProps) {
+export default async function ErrorPage({ searchParams }: ErrorPageProps) {
+  const params = await searchParams;
   const errorMessage =
-    searchParams.message ||
+    params.message ||
     "Une erreur s'est produite lors de l'authentification. Veuillez réessayer.";
 
   return (

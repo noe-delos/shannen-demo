@@ -196,7 +196,9 @@ export default function SignupForm() {
       <div className="space-y-4">
         <button
           type="submit"
-          disabled={isSubmitting || (confirmPassword && !passwordsMatch)}
+          disabled={
+            isSubmitting || (confirmPassword.length > 0 && !passwordsMatch)
+          }
           className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isSubmitting ? (
