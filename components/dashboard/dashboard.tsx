@@ -253,7 +253,7 @@ export function Dashboard() {
                                     {conversation.agents?.name ||
                                       "Agent inconnu"}
                                   </p>
-                                  <p className="text-xs text-muted-foreground truncate">
+                                  <p className="text-xs text-muted-foreground max-w-28 truncate">
                                     {conversation.agents?.job_title}
                                   </p>
                                 </div>

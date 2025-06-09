@@ -8,8 +8,12 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <main className="flex flex-1 flex-col">{children}</main>
+      <div className="flex h-screen w-full overflow-hidden">
+        <AppSidebar />
+        <main className="flex flex-1 flex-col overflow-auto">
+          <div className="w-full max-w-full">{children}</div>
+        </main>
+      </div>
     </SidebarProvider>
   );
 }
