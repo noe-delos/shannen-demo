@@ -1,8 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 
-import { login, signup } from "./actions";
+import { login } from "./actions";
 import { Icon } from "@iconify/react";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -167,25 +168,21 @@ export default function LoginPage() {
                 <Icon icon="material-symbols:login" className="w-5 h-5" />
                 Se connecter
               </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gray-50 text-gray-500">ou</span>
-                </div>
-              </div>
-
-              <button
-                formAction={signup}
-                className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border-2 border-gray-300 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:scale-[1.02]"
-              >
-                <Icon icon="material-symbols:person-add" className="w-5 h-5" />
-                Créer un compte
-              </button>
             </div>
           </form>
+
+          {/* Signup Link */}
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Vous n'avez pas encore de compte ?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+              >
+                Créer un compte
+              </Link>
+            </p>
+          </div>
 
           {/* Footer */}
           <div className="text-center">
