@@ -111,18 +111,48 @@ export async function POST(request: NextRequest) {
           agent: {
             prompt: {
               prompt: "Tu es un assistant commercial professionnel.",
-              llm: "claude-3-7-sonnet",
-              temperature: 0.3,
+              tools: [
+                {
+                  type: "system",
+                  description: "",
+                  name: "end_call",
+                },
+              ],
+              llm: "gemini-1.5-flash",
             },
+            first_message: "Bonjour",
+            language: "fr",
           },
           tts: {
+            agent_output_audio_format: "ulaw_8000",
             voice_id: "T9VNN91AsQKnhGF6hTi8",
+            model_id: "eleven_flash_v2_5",
             stability: 0.5,
             similarity_boost: 0.8,
             speed: 1.0,
           },
+          asr: {
+            user_input_audio_format: "ulaw_8000",
+          },
           conversation: {
+            client_events: [
+              "agent_response",
+              "agent_response_correction",
+              "audio",
+              "interruption",
+              "user_transcript",
+            ],
             max_duration_seconds: 1800,
+          },
+        },
+        platform_settings: {
+          evaluation: {
+            criteria: [
+              {
+                id: "1",
+                conversation_goal_prompt: "Assistant commercial professionnel",
+              },
+            ],
           },
         },
         name: `Agent_${user.id.substring(0, 8)}`,
@@ -337,6 +367,7 @@ INSTRUCTIONS:
               },
             ],
           },
+          language: "fr",
         },
         language_presets: {
           fr: {
@@ -348,14 +379,17 @@ INSTRUCTIONS:
           },
         },
         tts: {
-          model_id: "eleven_turbo_v2",
+          agent_output_audio_format: "ulaw_8000",
+          model_id: "eleven_flash_v2_5",
           voice_id: selectedVoiceId,
           stability: 0.5,
           similarity_boost: 0.8,
           speed: 1.0,
         },
+        asr: {
+          user_input_audio_format: "ulaw_8000",
+        },
         conversation: {
-          max_duration_seconds: 1800,
           client_events: [
             "user_transcript",
             "agent_response",
@@ -363,6 +397,7 @@ INSTRUCTIONS:
             "interruption",
             "agent_response_correction",
           ],
+          max_duration_seconds: 1800,
         },
       },
       name: `${agent.name}_${conversationDetails.call_type}`,
