@@ -148,17 +148,43 @@ export function AgentsGrid() {
               <DialogTitle>Créer un nouvel agent</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstname">Prénom</Label>
+                  <Input
+                    id="firstname"
+                    placeholder="Ex: Marc"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastname">Nom</Label>
+                  <Input
+                    id="lastname"
+                    placeholder="Ex: Dubois"
+                    className="mt-2"
+                  />
+                </div>
+              </div>
               <div>
-                <Label htmlFor="name">Nom de l'agent</Label>
-                <Input id="name" placeholder="Ex: CEO Pressé" />
+                <Label htmlFor="name">Nom de l'agent (rôle)</Label>
+                <Input
+                  id="name"
+                  placeholder="Ex: CEO Pressé"
+                  className="mt-2"
+                />
               </div>
               <div>
                 <Label htmlFor="job_title">Poste</Label>
-                <Input id="job_title" placeholder="Ex: Directeur Général" />
+                <Input
+                  id="job_title"
+                  placeholder="Ex: Directeur Général"
+                  className="mt-2"
+                />
               </div>
               <div>
                 <Label htmlFor="difficulty">Difficulté</Label>
-                <select className="w-full p-2 border rounded-md">
+                <select className="w-full p-2 border rounded-md mt-2">
                   <option value="facile">Facile</option>
                   <option value="moyen">Moyen</option>
                   <option value="difficile">Difficile</option>
@@ -169,6 +195,7 @@ export function AgentsGrid() {
                 <Textarea
                   id="description"
                   placeholder="Décrivez la personnalité de l'agent..."
+                  className="mt-2"
                 />
               </div>
               <Button className="w-full">Créer l'agent</Button>
@@ -223,6 +250,11 @@ export function AgentsGrid() {
                     <h3 className="font-semibold text-lg truncate">
                       {agent.name}
                     </h3>
+                    {(agent.firstname || agent.lastname) && (
+                      <p className="text-sm font-medium text-blue-600">
+                        {agent.firstname} {agent.lastname}
+                      </p>
+                    )}
                     <p className="text-sm text-muted-foreground truncate">
                       {agent.job_title}
                     </p>

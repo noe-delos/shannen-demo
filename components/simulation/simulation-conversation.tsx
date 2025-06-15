@@ -50,7 +50,7 @@ export function SimulationConversation({
   const [loading, setLoading] = useState(true);
   const [duration, setDuration] = useState(0);
   const [signedUrl, setSignedUrl] = useState<string>("");
-  const [agentId, setAgentId] = useState<string>("");
+  const [agentId, setAgentId] = useState<string | null>(null);
   const [loadingSignedUrl, setLoadingSignedUrl] = useState(false);
   const [urlFetchFailed, setUrlFetchFailed] = useState(false);
   const [initializing, setInitializing] = useState(true);
@@ -641,7 +641,18 @@ export function SimulationConversation({
                       {conversationData.agents?.name}
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      {conversationData.agents?.job_title}
+                      {(conversationData.agents?.firstname ||
+                        conversationData.agents?.lastname) && (
+                        <span className="font-medium text-blue-600">
+                          {conversationData.agents?.firstname}{" "}
+                          {conversationData.agents?.lastname}
+                        </span>
+                      )}
+                      {conversationData.agents?.job_title && (
+                        <span className="block text-sm">
+                          {conversationData.agents?.job_title}
+                        </span>
+                      )}
                     </p>
                     <Button
                       onClick={startConversation}
@@ -1030,6 +1041,13 @@ export function SimulationConversation({
                   <p className="text-sm text-muted-foreground">
                     {conversationData.agents?.name}
                   </p>
+                  {(conversationData.agents?.firstname ||
+                    conversationData.agents?.lastname) && (
+                    <p className="text-xs font-medium text-blue-600">
+                      {conversationData.agents?.firstname}{" "}
+                      {conversationData.agents?.lastname}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {conversationData.agents?.job_title}
                   </p>

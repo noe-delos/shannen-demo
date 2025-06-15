@@ -307,6 +307,11 @@ export function SimulationStepper() {
                               </div>
                               <div className="flex-1">
                                 <h3 className="font-semibold">{agent.name}</h3>
+                                {(agent.firstname || agent.lastname) && (
+                                  <p className="text-xs font-medium text-blue-600">
+                                    {agent.firstname} {agent.lastname}
+                                  </p>
+                                )}
                                 <p className="text-sm text-muted-foreground truncate max-w-[10rem]">
                                   {agent.job_title}
                                 </p>

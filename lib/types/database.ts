@@ -86,6 +86,8 @@ export type Database = {
           picture_url: string | null;
           voice_id: string | null;
           name: string | null;
+          firstname: string | null;
+          lastname: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -104,6 +106,8 @@ export type Database = {
           picture_url?: string | null;
           voice_id?: string | null;
           name?: string | null;
+          firstname?: string | null;
+          lastname?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -122,6 +126,8 @@ export type Database = {
           picture_url?: string | null;
           voice_id?: string | null;
           name?: string | null;
+          firstname?: string | null;
+          lastname?: string | null;
           created_at?: string;
           updated_at?: string;
         };

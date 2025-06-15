@@ -152,6 +152,7 @@ CREATE POLICY "Users can view own feedback" ON public.feedback FOR SELECT USING 
 CREATE POLICY "Users can insert own feedback" ON public.feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Anyone can view products" ON public.products FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Anyone can insert products" ON public.products FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "Anyone can view agents" ON public.agents FOR SELECT TO authenticated USING (true);
 
 -- Create function to handle new user registration
@@ -192,4 +193,34 @@ CREATE TRIGGER handle_conversations_updated_at BEFORE UPDATE ON public.conversat
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 CREATE TRIGGER handle_feedback_updated_at BEFORE UPDATE ON public.feedback
-  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at(); 
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- Migration: Add firstname and lastname to agents table
+ALTER TABLE public.agents ADD COLUMN firstname TEXT;
+ALTER TABLE public.agents ADD COLUMN lastname TEXT;
+
+-- Update existing agents with proper first and last names
+UPDATE public.agents SET 
+  firstname = 'Marc', 
+  lastname = 'Dubois'
+WHERE name = 'CEO Pressé';
+
+UPDATE public.agents SET 
+  firstname = 'Sophie', 
+  lastname = 'Martin'
+WHERE name = 'Directrice Analytique';
+
+UPDATE public.agents SET 
+  firstname = 'Pierre', 
+  lastname = 'Moreau'
+WHERE name = 'DSI Prudent';
+
+UPDATE public.agents SET 
+  firstname = 'Julie', 
+  lastname = 'Leblanc'
+WHERE name = 'Manager Enthousiaste';
+
+UPDATE public.agents SET 
+  firstname = 'Thomas', 
+  lastname = 'Rousseau'
+WHERE name = 'Startup Founder'; 

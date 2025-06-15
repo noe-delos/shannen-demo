@@ -81,6 +81,40 @@ export function ProductsGrid() {
     }
   };
 
+  const handleCreateProduct = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Le nom du produit est requis");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("products").insert({
+        name: formData.name,
+        price: formData.price ? parseFloat(formData.price) : null,
+        marche: formData.marche,
+        pitch: formData.pitch,
+        principales_objections_attendues:
+          formData.principales_objections_attendues,
+      });
+
+      if (error) throw error;
+
+      toast.success("Produit créé avec succès");
+      setIsCreateDialogOpen(false);
+      setFormData({
+        name: "",
+        price: "",
+        marche: "",
+        pitch: "",
+        principales_objections_attendues: "",
+      });
+      loadProducts();
+    } catch (error) {
+      console.error("Error creating product:", error);
+      toast.error("Erreur lors de la création du produit");
+    }
+  };
+
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setFormData({
@@ -233,11 +267,28 @@ export function ProductsGrid() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Nom du produit</Label>
-                  <Input id="name" placeholder="Ex: CRM Pro" />
+                  <Input
+                    id="name"
+                    placeholder="Ex: CRM Pro"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="mt-2"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="price">Prix (€)</Label>
-                  <Input id="price" type="number" placeholder="299.99" />
+                  <Input
+                    id="price"
+                    type="number"
+                    placeholder="299.99"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    className="mt-2"
+                  />
                 </div>
               </div>
               <div>
@@ -245,6 +296,11 @@ export function ProductsGrid() {
                 <Input
                   id="marche"
                   placeholder="Ex: PME/Startups, E-commerce..."
+                  value={formData.marche}
+                  onChange={(e) =>
+                    setFormData({ ...formData, marche: e.target.value })
+                  }
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -253,6 +309,11 @@ export function ProductsGrid() {
                   id="pitch"
                   placeholder="Ex: Solution CRM complète pour optimiser votre relation client..."
                   rows={3}
+                  value={formData.pitch}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pitch: e.target.value })
+                  }
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -263,9 +324,19 @@ export function ProductsGrid() {
                   id="objections"
                   placeholder="Ex: Prix trop élevé, complexité, temps d'implémentation..."
                   rows={3}
+                  value={formData.principales_objections_attendues}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      principales_objections_attendues: e.target.value,
+                    })
+                  }
+                  className="mt-2"
                 />
               </div>
-              <Button className="w-full">Ajouter le produit</Button>
+              <Button className="w-full" onClick={handleCreateProduct}>
+                Ajouter le produit
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -288,6 +359,7 @@ export function ProductsGrid() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="Ex: CRM Pro"
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -300,6 +372,7 @@ export function ProductsGrid() {
                     setFormData({ ...formData, price: e.target.value })
                   }
                   placeholder="299.99"
+                  className="mt-2"
                 />
               </div>
             </div>
@@ -312,6 +385,7 @@ export function ProductsGrid() {
                   setFormData({ ...formData, marche: e.target.value })
                 }
                 placeholder="Ex: PME/Startups, E-commerce..."
+                className="mt-2"
               />
             </div>
             <div>
@@ -324,6 +398,7 @@ export function ProductsGrid() {
                 }
                 placeholder="Ex: Solution CRM complète pour optimiser votre relation client..."
                 rows={3}
+                className="mt-2"
               />
             </div>
             <div>
@@ -341,6 +416,7 @@ export function ProductsGrid() {
                 }
                 placeholder="Ex: Prix trop élevé, complexité, temps d'implémentation..."
                 rows={3}
+                className="mt-2"
               />
             </div>
             <div className="flex gap-2">
