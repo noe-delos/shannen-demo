@@ -63,7 +63,9 @@ export function ConversationDetails({
               job_title,
               picture_url,
               difficulty,
-              personnality
+              personnality,
+              firstname,
+              lastname
             ),
             products:product_id (
               id,
@@ -365,6 +367,14 @@ export function ConversationDetails({
                     <span>
                       Conversation avec{" "}
                       {conversation.agents?.name || "Agent inconnu"}
+                      {(conversation.agents?.firstname ||
+                        conversation.agents?.lastname) && (
+                        <span className="text-blue-600 font-medium">
+                          {" "}
+                          ({conversation.agents?.firstname}{" "}
+                          {conversation.agents?.lastname})
+                        </span>
+                      )}
                     </span>
                     {conversation.feedback?.note && (
                       <Badge
@@ -787,6 +797,13 @@ export function ConversationDetails({
                       <h3 className="font-semibold">
                         {conversation.agents.name}
                       </h3>
+                      {(conversation.agents.firstname ||
+                        conversation.agents.lastname) && (
+                        <p className="text-sm font-medium text-blue-600">
+                          {conversation.agents.firstname}{" "}
+                          {conversation.agents.lastname}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {conversation.agents.job_title}
                       </p>

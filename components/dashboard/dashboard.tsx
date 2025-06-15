@@ -37,7 +37,7 @@ export function Dashboard() {
             .select(
               `
               *,
-              agents:agent_id (name, job_title, picture_url),
+              agents:agent_id (name, job_title, picture_url, firstname, lastname),
               feedback:feedback_id (note)
             `
             )
@@ -253,6 +253,13 @@ export function Dashboard() {
                                     {conversation.agents?.name ||
                                       "Agent inconnu"}
                                   </p>
+                                  {(conversation.agents?.firstname ||
+                                    conversation.agents?.lastname) && (
+                                    <p className="text-xs font-medium text-blue-600 truncate">
+                                      {conversation.agents?.firstname}{" "}
+                                      {conversation.agents?.lastname}
+                                    </p>
+                                  )}
                                   <p className="text-xs text-muted-foreground max-w-28 truncate">
                                     {conversation.agents?.job_title}
                                   </p>
@@ -339,6 +346,11 @@ export function Dashboard() {
                       <p className="font-medium text-sm truncate">
                         {agent.name}
                       </p>
+                      {(agent.firstname || agent.lastname) && (
+                        <p className="text-xs font-medium text-blue-600 truncate">
+                          {agent.firstname} {agent.lastname}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground truncate">
                         {agent.job_title}
                       </p>
