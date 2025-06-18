@@ -65,6 +65,7 @@ export function SimulationConversation({
   const supabase = createClient();
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
 
   // Add debug logging for state changes
   useEffect(() => {
@@ -77,6 +78,18 @@ export function SimulationConversation({
       conversationStatus
     );
   }, [initializing, loadingSignedUrl, conversationStatus]);
+
+  // Smooth scroll to feedback when it's available
+  useEffect(() => {
+    if (feedback && feedbackRef.current) {
+      setTimeout(() => {
+        feedbackRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 500);
+    }
+  }, [feedback]);
 
   // ElevenLabs conversation hook
   const conversation = useConversation({
@@ -581,10 +594,6 @@ export function SimulationConversation({
                     <h1 className="text-2xl font-bold">
                       Simulation Commerciale
                     </h1>
-                    <p className="text-muted-foreground">
-                      {getCallTypeLabel(conversationData.call_type)} •{" "}
-                      {conversationData.agents?.name}
-                    </p>
                   </div>
                 </div>
                 <Badge
@@ -598,565 +607,459 @@ export function SimulationConversation({
                   {conversationStatus === "ended" && "Terminée"}
                 </Badge>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-mono font-bold">
-                  {formatTime(elapsedTime)}
-                </div>
-                <p className="text-sm text-muted-foreground">Durée</p>
-              </div>
             </div>
           </CardHeader>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Conversation Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Conversation Interface */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon
-                    icon="material-symbols:headset-mic"
-                    className="w-5 h-5"
-                  />
-                  Interface de Conversation
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {conversationStatus === "waiting" && (
-                  <div className="text-center py-12">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <div className="size-20 rounded-full overflow-hidden flex-shrink-0">
-                        <img
-                          src={
-                            conversationData.agents?.picture_url ||
-                            "/default-avatar.png"
-                          }
-                          alt={conversationData.agents?.name}
-                          className="w-full h-full object-cover object-top"
+        <div className="flex flex-row gap-6">
+          {/* Left Context Cards */}
+          <div className="lg:col-span-1 space-y-3">
+            {/* Agent Card */}
+            <Card className="shadow-soft w-[20rem]  h-fit py-0">
+              <CardContent className="p-3 h-fit px-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Agent:</span>
+                  <span className="font-medium text-sm">
+                    {conversationData.agents?.firstname &&
+                    conversationData.agents?.lastname
+                      ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
+                      : conversationData.agents?.name}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Job Title Card */}
+            <Card className="shadow-soft w-[20rem] ">
+              <CardContent className="p-3 h-fit px-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Poste:</span>
+                  <span className="font-medium text-sm">
+                    {conversationData.agents?.job_title}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Objectif Card */}
+            <Card className="shadow-soft w-[20rem] ">
+              <CardContent className="p-3 h-fit px-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Objectif:
+                  </span>
+                  <span className="font-medium text-sm">
+                    {conversationData.goal}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Secteur Card */}
+            <Card className="shadow-soft w-[20rem] ">
+              <CardContent className="p-3 h-fit px-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Secteur:
+                  </span>
+                  <span className="font-medium text-sm">
+                    {conversationData.context?.secteur || "Non spécifié"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Entreprise Card */}
+            <Card className="shadow-soft w-[20rem] ">
+              <CardContent className="p-3 h-fit px-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Entreprise:
+                  </span>
+                  <span className="font-medium text-sm">
+                    {conversationData.context?.company || "Non spécifiée"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Produit Card */}
+            <Card className="shadow-soft w-[20rem] ">
+              <CardContent className="p-3 h-fit px-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Produit:
+                  </span>
+                  <span className="font-medium text-sm">
+                    {conversationData.products?.name}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* iPhone Interface */}
+          <div className="lg:col-span-3 flex justify-center">
+            <div
+              className="relative w-72 h-[600px] rounded-[3rem] bg-cover bg-center bg-no-repeat shadow-2xl border-8 border-gray-800"
+              style={{
+                backgroundImage:
+                  "url('https://wallpapers.com/images/hd/gradient-iphone-t8gspe8mzt77so74.jpg')",
+              }}
+            >
+              {/* iPhone Content */}
+              <div className="absolute inset-4 flex flex-col justify-between">
+                {/* Top area with agent */}
+                <div className="flex-1 flex flex-col items-center justify-center">
+                  {conversationStatus === "waiting" && (
+                    <div className="text-center">
+                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <div className="w-28 h-28 rounded-full overflow-hidden">
+                          <img
+                            src={
+                              conversationData.agents?.picture_url ||
+                              "/default-avatar.png"
+                            }
+                            alt={conversationData.agents?.name}
+                            className="w-full h-full object-cover object-top"
+                          />
+                        </div>
+                      </div>
+                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                        {conversationData.agents?.firstname &&
+                        conversationData.agents?.lastname
+                          ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
+                          : conversationData.agents?.name}
+                      </h3>
+                    </div>
+                  )}
+
+                  {conversationStatus === "connected" && (
+                    <div className="text-center">
+                      <motion.div
+                        className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center relative"
+                        animate={
+                          conversation.isSpeaking
+                            ? {
+                                scale: [1, 1.05, 1],
+                                boxShadow: [
+                                  "0 0 0 0 rgba(255, 255, 255, 0.4)",
+                                  "0 0 0 10px rgba(255, 255, 255, 0.1)",
+                                  "0 0 0 0 rgba(255, 255, 255, 0)",
+                                ],
+                              }
+                            : {}
+                        }
+                        transition={{
+                          duration: 1.5,
+                          repeat: conversation.isSpeaking ? Infinity : 0,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        <div className="w-28 h-28 rounded-full overflow-hidden">
+                          <img
+                            src={
+                              conversationData.agents?.picture_url ||
+                              "/default-avatar.png"
+                            }
+                            alt={conversationData.agents?.name}
+                            className="w-full h-full object-cover object-top"
+                          />
+                        </div>
+                      </motion.div>
+                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                        {conversationData.agents?.firstname &&
+                        conversationData.agents?.lastname
+                          ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
+                          : conversationData.agents?.name}
+                      </h3>
+                      <motion.p
+                        className="text-white/80 text-sm drop-shadow-lg"
+                        animate={{
+                          color: conversation.isSpeaking
+                            ? "#ffffff"
+                            : "rgba(255, 255, 255, 0.8)",
+                        }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {conversation.isSpeaking
+                          ? "En train de parler..."
+                          : `${formatTime(elapsedTime)}`}
+                      </motion.p>
+                    </div>
+                  )}
+
+                  {conversationStatus === "analyzing" && (
+                    <div className="text-center">
+                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Icon
+                          icon="svg-spinners:ring-resize"
+                          className="w-16 h-16 text-white"
                         />
                       </div>
+                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                        Analyse en cours...
+                      </h3>
+                      <p className="text-white/80 text-sm drop-shadow-lg">
+                        Génération du feedback
+                      </p>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">
-                      {conversationData.agents?.name}
-                    </h3>
-                    <p className="text-muted-foreground mb-6">
-                      {(conversationData.agents?.firstname ||
-                        conversationData.agents?.lastname) && (
-                        <span className="font-medium text-blue-600">
-                          {conversationData.agents?.firstname}{" "}
-                          {conversationData.agents?.lastname}
-                        </span>
-                      )}
-                      {conversationData.agents?.job_title && (
-                        <span className="block text-sm">
-                          {conversationData.agents?.job_title}
-                        </span>
-                      )}
-                    </p>
+                  )}
+
+                  {conversationStatus === "ended" && feedback && (
+                    <div className="text-center">
+                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Icon
+                          icon="material-symbols:check-circle"
+                          className="w-16 h-16 text-green-400"
+                        />
+                      </div>
+                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                        Appel terminé
+                      </h3>
+                      <p className="text-white/80 text-sm drop-shadow-lg">
+                        Score: {feedback.note}/100
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom button area */}
+                <div className="flex flex-col items-center pb-8 space-y-4">
+                  {conversationStatus === "waiting" && (
                     <Button
                       onClick={startConversation}
                       size="lg"
-                      className="bg-green-600 hover:bg-green-700"
                       disabled={initializing || loadingSignedUrl}
+                      className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 border-0 shadow-lg"
                     >
                       {initializing || loadingSignedUrl ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                       ) : (
-                        <Phone className="w-5 h-5 mr-2" />
+                        <Icon icon="ion:call" className="w-6 h-6" />
                       )}
-                      {initializing || loadingSignedUrl
-                        ? "Initialisation..."
-                        : "Démarrer l'appel"}
                     </Button>
-                  </div>
-                )}
+                  )}
 
-                {conversationStatus === "connected" && (
-                  <div className="space-y-6">
-                    {/* Live conversation display */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Agent visual */}
-                      <div className="text-center">
-                        <motion.div
-                          className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center relative"
-                          animate={
-                            conversation.isSpeaking
-                              ? {
-                                  scale: [1, 1.05, 1],
-                                  boxShadow: [
-                                    "0 0 0 0 rgba(34, 197, 94, 0.4)",
-                                    "0 0 0 10px rgba(34, 197, 94, 0.1)",
-                                    "0 0 0 0 rgba(34, 197, 94, 0)",
-                                  ],
-                                }
-                              : {}
-                          }
-                          transition={{
-                            duration: 1.5,
-                            repeat: conversation.isSpeaking ? Infinity : 0,
-                            ease: "easeInOut",
-                          }}
-                        >
-                          <AnimatePresence>
-                            {conversation.isSpeaking && (
-                              <motion.div
-                                className="absolute inset-0 rounded-full border-4 border-white"
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{
-                                  scale: [0.8, 1.1, 0.8],
-                                  opacity: [0, 1, 0],
-                                }}
-                                exit={{ scale: 0.8, opacity: 0 }}
-                                transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  ease: "easeInOut",
-                                }}
-                              />
-                            )}
-                          </AnimatePresence>
-                          <div className="size-28 rounded-full overflow-hidden flex-shrink-0">
-                            <img
-                              src={
-                                conversationData.agents?.picture_url ||
-                                "/default-avatar.png"
-                              }
-                              alt={conversationData.agents?.name}
-                              className="w-full h-full object-cover object-top"
-                            />
-                          </div>
-                        </motion.div>
-                        <motion.p
-                          className="text-sm text-muted-foreground"
-                          animate={{
-                            color: conversation.isSpeaking
-                              ? "#22c55e"
-                              : "#6b7280",
-                          }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {conversation.isSpeaking
-                            ? "En train de parler..."
-                            : "À l'écoute"}
-                        </motion.p>
-                      </div>
-
-                      {/* User camera */}
-                      <div className="text-center">
-                        <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-100">
-                          <img
-                            src={USER_PROFILE_PICTURE}
-                            alt="Votre profil"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <p className="text-sm text-muted-foreground">Vous</p>
-                      </div>
-                    </div>
-
-                    {/* Controls */}
-                    <div className="flex justify-center gap-4">
+                  {conversationStatus === "connected" && (
+                    <div className="flex flex-col items-center space-y-4">
                       <Button
                         variant="outline"
                         size="lg"
                         onClick={() => setIsMuted(!isMuted)}
-                        className="flex items-center gap-2"
+                        className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
                       >
                         {isMuted ? (
                           <VolumeX className="w-5 h-5" />
                         ) : (
                           <Volume2 className="w-5 h-5" />
                         )}
-                        {isMuted ? "Réactiver" : "Couper le son"}
                       </Button>
                       <Button
-                        variant="destructive"
-                        size="lg"
                         onClick={stopConversation}
-                        className="flex items-center gap-2"
+                        size="lg"
+                        className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 border-0 shadow-lg"
                       >
-                        <PhoneOff className="w-5 h-5" />
-                        Terminer l'appel
+                        <Icon
+                          icon="majesticons:phone-hangup"
+                          className="w-6 h-6"
+                        />
                       </Button>
                     </div>
-                  </div>
-                )}
-
-                {conversationStatus === "analyzing" && (
-                  <div className="text-center py-8 space-y-6">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center"
-                    >
-                      <Icon
-                        icon="svg-spinners:ring-resize"
-                        className="w-16 h-16 mx-auto mb-4 text-blue-600"
-                      />
-                      <h3 className="text-xl font-semibold mb-2">
-                        Analyse en cours...
-                      </h3>
-                      <p className="text-muted-foreground mb-6">
-                        Nous analysons votre conversation pour générer un
-                        feedback personnalisé
-                      </p>
-                    </motion.div>
-
-                    {/* Skeleton for feedback */}
-                    <div className="space-y-4">
-                      <Skeleton className="h-8 w-32 mx-auto" />
-                      <Skeleton className="h-4 w-64 mx-auto" />
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="space-y-2">
-                            <Skeleton className="h-6 w-full" />
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-4 w-1/2" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {conversationStatus === "ended" && feedback && (
-                  <motion.div
-                    className="text-center py-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Icon
-                      icon="material-symbols:check-circle"
-                      className="w-16 h-16 mx-auto mb-4 text-green-600"
-                    />
-                    <h3 className="text-xl font-semibold mb-2">
-                      Conversation terminée
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Votre performance a été analysée
-                    </p>
-                    <div className="text-3xl font-bold text-blue-600 mb-2">
-                      {feedback.note}/100
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Score global
-                    </p>
-                  </motion.div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Feedback Section */}
-            {feedback && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Card className="shadow-soft">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Icon
-                        icon="material-symbols:analytics"
-                        className="w-5 h-5"
-                      />
-                      Analyse de Performance
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Score */}
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-blue-600 mb-2">
-                        {feedback.note}/100
-                      </div>
-                      <Progress
-                        value={feedback.note}
-                        className="w-full max-w-md mx-auto"
-                      />
-                    </div>
-
-                    {/* Points forts */}
-                    {feedback.points_forts &&
-                      feedback.points_forts.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
-                            <Icon
-                              icon="material-symbols:thumb-up"
-                              className="w-4 h-4"
-                            />
-                            Points forts
-                          </h4>
-                          <ul className="space-y-1">
-                            {feedback.points_forts?.map(
-                              (point: string, index: number) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2"
-                                >
-                                  <Icon
-                                    icon="material-symbols:check"
-                                    className="w-4 h-4 text-green-600 mt-0.5"
-                                  />
-                                  <span className="text-sm">{point}</span>
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                    {/* Axes d'amélioration */}
-                    {feedback.axes_amelioration &&
-                      feedback.axes_amelioration.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-orange-600 mb-2 flex items-center gap-2">
-                            <Icon
-                              icon="material-symbols:trending-up"
-                              className="w-4 h-4"
-                            />
-                            Axes d'amélioration
-                          </h4>
-                          <ul className="space-y-1">
-                            {feedback.axes_amelioration?.map(
-                              (axe: string, index: number) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2"
-                                >
-                                  <Icon
-                                    icon="material-symbols:arrow-right"
-                                    className="w-4 h-4 text-orange-600 mt-0.5"
-                                  />
-                                  <span className="text-sm">{axe}</span>
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                    {/* Moments clés */}
-                    {feedback.moments_cles &&
-                      feedback.moments_cles.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-purple-600 mb-2 flex items-center gap-2">
-                            <Icon
-                              icon="material-symbols:key"
-                              className="w-4 h-4"
-                            />
-                            Moments clés
-                          </h4>
-                          <ul className="space-y-1">
-                            {feedback.moments_cles?.map(
-                              (moment: string, index: number) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2"
-                                >
-                                  <Icon
-                                    icon="material-symbols:timeline"
-                                    className="w-4 h-4 text-purple-600 mt-0.5"
-                                  />
-                                  <span className="text-sm">{moment}</span>
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                    {/* Suggestions */}
-                    {feedback.suggestions &&
-                      feedback.suggestions.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
-                            <Icon
-                              icon="material-symbols:lightbulb"
-                              className="w-4 h-4"
-                            />
-                            Suggestions
-                          </h4>
-                          <ul className="space-y-1">
-                            {feedback.suggestions?.map(
-                              (suggestion: string, index: number) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2"
-                                >
-                                  <Icon
-                                    icon="material-symbols:star"
-                                    className="w-4 h-4 text-blue-600 mt-0.5"
-                                  />
-                                  <span className="text-sm">{suggestion}</span>
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                    {/* Analyse complète */}
-                    {feedback.analyse_complete &&
-                      typeof feedback.analyse_complete === "string" && (
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <h4 className="font-semibold mb-3 flex items-center gap-2">
-                            <Icon
-                              icon="material-symbols:article"
-                              className="w-4 h-4"
-                            />
-                            Analyse détaillée
-                          </h4>
-                          <div className="space-y-3">
-                            {feedback.analyse_complete
-                              .split("\n\n")
-                              .map((paragraph: string, index: number) => (
-                                <p
-                                  key={index}
-                                  className="text-sm text-muted-foreground leading-relaxed text-justify"
-                                >
-                                  {paragraph.trim()}
-                                </p>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Context Info */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="text-lg">Contexte</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-1">Agent</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {conversationData.agents?.name}
-                  </p>
-                  {(conversationData.agents?.firstname ||
-                    conversationData.agents?.lastname) && (
-                    <p className="text-xs font-medium text-blue-600">
-                      {conversationData.agents?.firstname}{" "}
-                      {conversationData.agents?.lastname}
-                    </p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    {conversationData.agents?.job_title}
-                  </p>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-1">Produit</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {conversationData.products?.name}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Objectif</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {conversationData.goal}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Secteur</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {conversationData.context?.secteur || "Non spécifié"}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Entreprise</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {conversationData.context?.company || "Non spécifiée"}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Messages in sidebar during conversation */}
-            {conversationStatus === "connected" && messages.length > 0 && (
-              <Card className="shadow-soft">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Icon icon="material-symbols:chat" className="w-4 h-4" />
-                    Messages ({messages.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {messages.slice(-5).map((msg, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{
-                          opacity: 0,
-                          x: msg.role === "user" ? 20 : -20,
-                        }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className={`text-xs p-2 rounded ${
-                          msg.role === "user"
-                            ? "bg-blue-100 text-blue-800 ml-4"
-                            : "bg-gray-100 text-gray-800 mr-4"
-                        }`}
-                      >
-                        <div className="font-medium">
-                          {msg.role === "user" ? "Vous" : "Agent"}
-                        </div>
-                        <div className="truncate">{msg.content}</div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Actions */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="text-lg">Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link href="/simulation/configure" className="block">
-                  <Button variant="outline" className="w-full">
-                    <Icon
-                      icon="material-symbols:refresh"
-                      className="w-4 h-4 mr-2"
-                    />
-                    Nouvelle simulation
-                  </Button>
-                </Link>
-                <Link href="/" className="block">
-                  <Button variant="outline" className="w-full">
-                    <Icon
-                      icon="material-symbols:home"
-                      className="w-4 h-4 mr-2"
-                    />
-                    Retour dashboard
-                  </Button>
-                </Link>
-                {feedback && (
-                  <Link
-                    href={`/conversations/${conversationId}`}
-                    className="block"
-                  >
-                    <Button variant="outline" className="w-full">
-                      <Icon
-                        icon="material-symbols:visibility"
-                        className="w-4 h-4 mr-2"
-                      />
-                      Voir les détails
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Actions below iPhone */}
+        <div className="flex justify-center">
+          <div className="flex gap-4">
+            <Link href="/simulation/configure">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Icon icon="material-symbols:refresh" className="w-4 h-4" />
+                Nouvelle simulation
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Icon icon="material-symbols:home" className="w-4 h-4" />
+                Retour dashboard
+              </Button>
+            </Link>
+            {feedback && (
+              <Link href={`/conversations/${conversationId}`}>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Icon
+                    icon="material-symbols:visibility"
+                    className="w-4 h-4"
+                  />
+                  Voir les détails
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Feedback Section */}
+        {feedback && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            ref={feedbackRef}
+          >
+            <Card className="shadow-soft">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon icon="material-symbols:analytics" className="w-5 h-5" />
+                  Analyse de Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Score */}
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
+                    {feedback.note}/100
+                  </div>
+                  <Progress
+                    value={feedback.note}
+                    className="w-full max-w-md mx-auto"
+                  />
+                </div>
+
+                {/* Points forts */}
+                {feedback.points_forts && feedback.points_forts.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
+                      <Icon
+                        icon="material-symbols:thumb-up"
+                        className="w-4 h-4"
+                      />
+                      Points forts
+                    </h4>
+                    <ul className="space-y-1">
+                      {feedback.points_forts?.map(
+                        (point: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Icon
+                              icon="material-symbols:check"
+                              className="w-4 h-4 text-green-600 mt-0.5"
+                            />
+                            <span className="text-sm">{point}</span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Axes d'amélioration */}
+                {feedback.axes_amelioration &&
+                  feedback.axes_amelioration.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-orange-600 mb-2 flex items-center gap-2">
+                        <Icon
+                          icon="material-symbols:trending-up"
+                          className="w-4 h-4"
+                        />
+                        Axes d'amélioration
+                      </h4>
+                      <ul className="space-y-1">
+                        {feedback.axes_amelioration?.map(
+                          (axe: string, index: number) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <Icon
+                                icon="material-symbols:arrow-right"
+                                className="w-4 h-4 text-orange-600 mt-0.5"
+                              />
+                              <span className="text-sm">{axe}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                {/* Moments clés */}
+                {feedback.moments_cles && feedback.moments_cles.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-purple-600 mb-2 flex items-center gap-2">
+                      <Icon icon="material-symbols:key" className="w-4 h-4" />
+                      Moments clés
+                    </h4>
+                    <ul className="space-y-1">
+                      {feedback.moments_cles?.map(
+                        (moment: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Icon
+                              icon="material-symbols:timeline"
+                              className="w-4 h-4 text-purple-600 mt-0.5"
+                            />
+                            <span className="text-sm">{moment}</span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Suggestions */}
+                {feedback.suggestions && feedback.suggestions.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
+                      <Icon
+                        icon="material-symbols:lightbulb"
+                        className="w-4 h-4"
+                      />
+                      Suggestions
+                    </h4>
+                    <ul className="space-y-1">
+                      {feedback.suggestions?.map(
+                        (suggestion: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Icon
+                              icon="material-symbols:star"
+                              className="w-4 h-4 text-blue-600 mt-0.5"
+                            />
+                            <span className="text-sm">{suggestion}</span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Analyse complète */}
+                {feedback.analyse_complete &&
+                  typeof feedback.analyse_complete === "string" && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Icon
+                          icon="material-symbols:article"
+                          className="w-4 h-4"
+                        />
+                        Analyse détaillée
+                      </h4>
+                      <div className="space-y-3">
+                        {feedback.analyse_complete
+                          .split("\n\n")
+                          .map((paragraph: string, index: number) => (
+                            <p
+                              key={index}
+                              className="text-sm text-muted-foreground leading-relaxed text-justify"
+                            >
+                              {paragraph.trim()}
+                            </p>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
     </div>
   );

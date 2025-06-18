@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 "use client";
 
@@ -19,6 +20,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
@@ -126,6 +128,14 @@ export function AppSidebar() {
     return pathname === `/conversations/${conversationId}`;
   };
 
+  const getScoreBadgeColor = (score: number) => {
+    if (score <= 20) return "bg-red-600";
+    if (score <= 40) return "bg-orange-600";
+    if (score <= 60) return "bg-yellow-600";
+    if (score <= 80) return "bg-[#33a725]";
+    return "bg-emerald-600";
+  };
+
   return (
     <Sidebar className="scrollbar-hide">
       <SidebarContent className="scrollbar-hide">
@@ -135,23 +145,31 @@ export function AppSidebar() {
             <p className="text-xl font-bold text-foreground">SforSales</p>
           </SidebarGroupLabel>
           <SidebarGroupContent className="pt-4">
+            <div className="mb-4">
+              <Link href="/simulation/configure">
+                <Button className="w-[60%] shannen-gradient font-bold hover:brightness-105 py-5 border-purple-200/50 text-white transition-opacity">
+                  <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
+                  Démarrer !
+                </Button>
+              </Link>
+            </div>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link
                       href={item.url}
-                      className={
+                      className={`flex items-center gap-3 ${
                         isActiveRoute(item.url)
                           ? "bg-accent text-accent-foreground"
                           : ""
-                      }
+                      }`}
                     >
                       <Icon
                         icon={item.icon}
                         className="size-5 text-foreground/80"
                       />
-                      <span>{item.title}</span>
+                      <span className="flex-1">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -173,7 +191,7 @@ export function AppSidebar() {
                   {[...Array(3)].map((_, i) => (
                     <div
                       key={i}
-                      className="h-12 bg-gray-100 rounded animate-pulse"
+                      className="h-8 bg-gray-100 rounded animate-pulse"
                     />
                   ))}
                 </div>
@@ -184,38 +202,33 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={`/conversations/${conversation.id}`}
-                        className={`flex items-center gap-3 p-2 min-h-[3rem] ${
+                        className={`flex items-center gap-2 p-2 min-h-[2rem] ${
                           isActiveConversation(conversation.id)
                             ? "bg-accent text-accent-foreground"
                             : ""
                         }`}
                       >
-                        <div className="flex items-center justify-between w-full min-w-0">
-                          {/* Left side - Emoji + Agent name */}
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-xs flex-shrink-0">
-                              {getCallTypeEmoji(conversation.call_type)}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium truncate">
-                                {conversation.agents?.name || "Agent inconnu"}
-                              </p>
-                              {conversation.feedback?.note && (
-                                <div className="flex items-center gap-1 mt-0.5">
-                                  <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
-                                    {conversation.feedback.note}/100
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-2 w-full min-w-0">
+                          {/* Agent name */}
+                          <p className="text-xs font-medium truncate flex-1">
+                            {conversation.agents?.name || "Agent inconnu"}
+                          </p>
 
-                          {/* Right side - Date */}
-                          <div className="flex-shrink-0 text-right">
-                            <p className="text-xs text-muted-foreground">
-                              {formatDate(conversation.created_at)}
-                            </p>
-                          </div>
+                          {/* Score */}
+                          {conversation.feedback?.note && (
+                            <Badge
+                              className={`${getScoreBadgeColor(
+                                conversation.feedback.note
+                              )} rounded-sm font-mono px-1 text-white text-[.6rem] font-bold`}
+                            >
+                              {conversation.feedback.note}/100
+                            </Badge>
+                          )}
+
+                          {/* Date */}
+                          <p className="text-xs text-muted-foreground flex-shrink-0">
+                            {formatDate(conversation.created_at)}
+                          </p>
                         </div>
                       </Link>
                     </SidebarMenuButton>
@@ -224,12 +237,12 @@ export function AppSidebar() {
               ) : (
                 // No conversations
                 <div className="px-3 py-2">
-                  <p className="text-xs text-muted-foreground text-center">
+                  <p className="text-sm text-muted-foreground text-center">
                     Aucune conversation
                   </p>
                   <Link
                     href="/simulation/configure"
-                    className="text-xs text-[#781397] hover:text-[#79408a] block text-center mt-1"
+                    className="text-sm text-[#781397] hover:text-[#79408a] block text-center mt-2"
                   >
                     Créer votre première
                   </Link>

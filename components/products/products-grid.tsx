@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/no-unescaped-entities */
 
 "use client";
 
@@ -14,14 +16,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Icon } from "@iconify/react";
-import { Plus, Search, Package } from "lucide-react";
+import { Plus, Search, Package, Trash2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { Product } from "@/lib/types/database";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+
+// Protected product IDs that cannot be deleted
+const PROTECTED_PRODUCTS = [
+  "7719e3fe-2131-4ac7-8e80-01b4d9776f12",
+  "97c80b6e-2420-4f97-9ae0-5e0ebd90fda0",
+  "aa4ef3bd-b8e6-4199-ae63-7ac3c0962824",
+  "c714524c-eed7-491d-8cc3-7e5372b077bb",
+  "caa87373-8e92-4f0f-9cfc-2d9286b12a8b",
+];
 
 interface ProductForm {
   id?: string;
@@ -39,7 +60,12 @@ export function ProductsGrid() {
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [formData, setFormData] = useState<ProductForm>({
     name: "",
     price: "",
@@ -88,14 +114,18 @@ export function ProductsGrid() {
     }
 
     try {
-      const { error } = await supabase.from("products").insert({
-        name: formData.name,
-        price: formData.price ? parseFloat(formData.price) : null,
-        marche: formData.marche,
-        pitch: formData.pitch,
-        principales_objections_attendues:
-          formData.principales_objections_attendues,
-      });
+      setCreateLoading(true);
+      const { data, error } = await supabase
+        .from("products")
+        .insert({
+          name: formData.name,
+          price: formData.price ? parseFloat(formData.price) : null,
+          marche: formData.marche,
+          pitch: formData.pitch,
+          principales_objections_attendues:
+            formData.principales_objections_attendues,
+        })
+        .select();
 
       if (error) throw error;
 
@@ -112,6 +142,8 @@ export function ProductsGrid() {
     } catch (error) {
       console.error("Error creating product:", error);
       toast.error("Erreur lors de la création du produit");
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -136,7 +168,8 @@ export function ProductsGrid() {
     }
 
     try {
-      const { error } = await supabase
+      setUpdateLoading(true);
+      const { data, error } = await supabase
         .from("products")
         .update({
           name: formData.name,
@@ -146,7 +179,8 @@ export function ProductsGrid() {
           principales_objections_attendues:
             formData.principales_objections_attendues,
         })
-        .eq("id", editingProduct.id);
+        .eq("id", editingProduct.id)
+        .select();
 
       if (error) throw error;
 
@@ -164,7 +198,49 @@ export function ProductsGrid() {
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("Erreur lors de la mise à jour du produit");
+    } finally {
+      setUpdateLoading(false);
     }
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!deletingProduct) return;
+
+    try {
+      setDeleteLoading(true);
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", deletingProduct.id);
+
+      if (error) throw error;
+
+      toast.success("Produit supprimé avec succès");
+
+      // Close all dialogs
+      setIsDeleteDialogOpen(false);
+      setIsEditDialogOpen(false);
+      setDeletingProduct(null);
+      setEditingProduct(null);
+      setFormData({
+        name: "",
+        price: "",
+        marche: "",
+        pitch: "",
+        principales_objections_attendues: "",
+      });
+
+      loadProducts();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Erreur lors de la suppression du produit");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const isProtectedProduct = (productId: string) => {
+    return PROTECTED_PRODUCTS.includes(productId);
   };
 
   const getMarcheColor = (marche: string) => {
@@ -259,16 +335,16 @@ export function ProductsGrid() {
               Ajouter un produit
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Ajouter un nouveau produit</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Nom du produit</Label>
+                  <Label htmlFor="create-name">Nom du produit</Label>
                   <Input
-                    id="name"
+                    id="create-name"
                     placeholder="Ex: CRM Pro"
                     value={formData.name}
                     onChange={(e) =>
@@ -278,9 +354,9 @@ export function ProductsGrid() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="price">Prix (€)</Label>
+                  <Label htmlFor="create-price">Prix (€)</Label>
                   <Input
-                    id="price"
+                    id="create-price"
                     type="number"
                     placeholder="299.99"
                     value={formData.price}
@@ -292,9 +368,9 @@ export function ProductsGrid() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="marche">Marché cible</Label>
+                <Label htmlFor="create-marche">Marché cible</Label>
                 <Input
-                  id="marche"
+                  id="create-marche"
                   placeholder="Ex: PME/Startups, E-commerce..."
                   value={formData.marche}
                   onChange={(e) =>
@@ -304,9 +380,9 @@ export function ProductsGrid() {
                 />
               </div>
               <div>
-                <Label htmlFor="pitch">Pitch du produit</Label>
+                <Label htmlFor="create-pitch">Pitch du produit</Label>
                 <Textarea
-                  id="pitch"
+                  id="create-pitch"
                   placeholder="Ex: Solution CRM complète pour optimiser votre relation client..."
                   rows={3}
                   value={formData.pitch}
@@ -317,11 +393,11 @@ export function ProductsGrid() {
                 />
               </div>
               <div>
-                <Label htmlFor="objections">
+                <Label htmlFor="create-objections">
                   Principales objections attendues
                 </Label>
                 <Textarea
-                  id="objections"
+                  id="create-objections"
                   placeholder="Ex: Prix trop élevé, complexité, temps d'implémentation..."
                   rows={3}
                   value={formData.principales_objections_attendues}
@@ -334,8 +410,12 @@ export function ProductsGrid() {
                   className="mt-2"
                 />
               </div>
-              <Button className="w-full" onClick={handleCreateProduct}>
-                Ajouter le produit
+              <Button
+                className="w-full"
+                onClick={handleCreateProduct}
+                disabled={createLoading}
+              >
+                {createLoading ? "Création en cours..." : "Ajouter le produit"}
               </Button>
             </div>
           </DialogContent>
@@ -344,11 +424,18 @@ export function ProductsGrid() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifier le produit</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {editingProduct && isProtectedProduct(editingProduct.id) && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-800 italic">
+                  Ce produit par défaut ne peut pas être modifié
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="edit-name">Nom du produit</Label>
@@ -360,6 +447,9 @@ export function ProductsGrid() {
                   }
                   placeholder="Ex: CRM Pro"
                   className="mt-2"
+                  disabled={
+                    !!(editingProduct && isProtectedProduct(editingProduct.id))
+                  }
                 />
               </div>
               <div>
@@ -373,6 +463,9 @@ export function ProductsGrid() {
                   }
                   placeholder="299.99"
                   className="mt-2"
+                  disabled={
+                    !!(editingProduct && isProtectedProduct(editingProduct.id))
+                  }
                 />
               </div>
             </div>
@@ -386,6 +479,9 @@ export function ProductsGrid() {
                 }
                 placeholder="Ex: PME/Startups, E-commerce..."
                 className="mt-2"
+                disabled={
+                  !!(editingProduct && isProtectedProduct(editingProduct.id))
+                }
               />
             </div>
             <div>
@@ -399,6 +495,9 @@ export function ProductsGrid() {
                 placeholder="Ex: Solution CRM complète pour optimiser votre relation client..."
                 rows={3}
                 className="mt-2"
+                disabled={
+                  !!(editingProduct && isProtectedProduct(editingProduct.id))
+                }
               />
             </div>
             <div>
@@ -417,23 +516,91 @@ export function ProductsGrid() {
                 placeholder="Ex: Prix trop élevé, complexité, temps d'implémentation..."
                 rows={3}
                 className="mt-2"
+                disabled={
+                  !!(editingProduct && isProtectedProduct(editingProduct.id))
+                }
               />
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => setIsEditDialogOpen(false)}
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setEditingProduct(null);
+                  setFormData({
+                    name: "",
+                    price: "",
+                    marche: "",
+                    pitch: "",
+                    principales_objections_attendues: "",
+                  });
+                }}
               >
-                Annuler
+                {editingProduct && isProtectedProduct(editingProduct.id)
+                  ? "Fermer"
+                  : "Annuler"}
               </Button>
-              <Button className="flex-1" onClick={handleUpdateProduct}>
-                Mettre à jour
-              </Button>
+              {editingProduct && !isProtectedProduct(editingProduct.id) && (
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setDeletingProduct(editingProduct);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Supprimer
+                </Button>
+              )}
+              {editingProduct && !isProtectedProduct(editingProduct.id) && (
+                <Button
+                  className="flex-1"
+                  onClick={handleUpdateProduct}
+                  disabled={updateLoading}
+                >
+                  {updateLoading ? "Modification en cours..." : "Mettre à jour"}
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer le produit</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Êtes-vous sûr de vouloir supprimer le produit "
+                {deletingProduct?.name}" ?
+              </p>
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <p className="text-sm text-orange-800 font-medium">
+                  ⚠️ Attention ! Si vous supprimez ce produit, les conversations
+                  et feedbacks liés seront également supprimés.
+                </p>
+              </div>
+              <p className="text-sm">Cette action est irréversible.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProduct}
+              disabled={deleteLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteLoading ? "Suppression..." : "Supprimer définitivement"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Search */}
       <div className="relative">
@@ -442,7 +609,7 @@ export function ProductsGrid() {
           placeholder="Rechercher un produit..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 w-[60%] "
         />
       </div>
 
@@ -460,6 +627,7 @@ export function ProductsGrid() {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
             className="cursor-pointer"
+            onClick={() => handleEditProduct(product)}
           >
             <Card className="hover:shadow-soft transition-shadow h-full shadow-soft py-2">
               <CardContent className="p-6 py-3">
@@ -471,6 +639,14 @@ export function ProductsGrid() {
                           {getMarcheEmoji(product.marche || "")}
                         </span>
                       </div>
+                      {isProtectedProduct(product.id) && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <Icon
+                            icon="mdi:shield"
+                            className="h-2.5 w-2.5 text-white"
+                          />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg truncate">
@@ -521,19 +697,6 @@ export function ProductsGrid() {
                           {product.price}€
                         </span>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditProduct(product);
-                        }}
-                      >
-                        <Icon
-                          icon="material-symbols:edit"
-                          className="h-4 w-4"
-                        />
-                      </Button>
                     </div>
                   </div>
                 </div>

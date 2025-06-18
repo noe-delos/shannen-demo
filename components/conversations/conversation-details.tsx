@@ -181,9 +181,11 @@ export function ConversationDetails({
   };
 
   const getScoreBadgeColor = (score: number) => {
-    if (score >= 80) return "bg-green-100 text-green-800 border-green-200";
-    if (score >= 60) return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    return "bg-red-100 text-red-800 border-red-200";
+    if (score <= 20) return "bg-red-600";
+    if (score <= 40) return "bg-orange-600";
+    if (score <= 60) return "bg-yellow-600";
+    if (score <= 80) return "bg-[#33a725]";
+    return "bg-emerald-600";
   };
 
   const getScoreLevel = (score: number) => {
@@ -378,9 +380,9 @@ export function ConversationDetails({
                     </span>
                     {conversation.feedback?.note && (
                       <Badge
-                        className={getScoreBadgeColor(
+                        className={`${getScoreBadgeColor(
                           conversation.feedback.note
-                        )}
+                        )} rounded-sm font-mono px-1 text-white text-[.6rem] font-bold`}
                       >
                         {conversation.feedback.note}/100
                       </Badge>
@@ -659,9 +661,9 @@ export function ConversationDetails({
                                       <span className="text-2xl">/100</span>
                                     </div>
                                     <Badge
-                                      className={getScoreBadgeColor(
+                                      className={`${getScoreBadgeColor(
                                         conversation.feedback.note
-                                      )}
+                                      )} rounded-sm font-mono px-2 py-1 text-white font-bold`}
                                     >
                                       {getScoreLevel(
                                         conversation.feedback.note
@@ -893,30 +895,6 @@ export function ConversationDetails({
                 </CardContent>
               </Card>
             )}
-
-            {/* Quick Actions */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon icon="mdi:cog" className="h-5 w-5" />
-                  Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Icon icon="mdi:refresh" className="h-4 w-4 mr-2" />
-                  Rejouer la simulation
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Icon icon="mdi:download" className="h-4 w-4 mr-2" />
-                  Exporter le transcript
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Icon icon="mdi:share" className="h-4 w-4 mr-2" />
-                  Partager les résultats
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

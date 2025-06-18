@@ -17,6 +17,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -27,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Icon } from "@iconify/react";
-import { Plus, Search, Upload, X } from "lucide-react";
+import { Plus, Search, Upload, X, Trash2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { Agent } from "@/lib/types/database";
 import { motion } from "framer-motion";
@@ -66,9 +76,12 @@ export function AgentsGrid() {
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [deletingAgent, setDeletingAgent] = useState<Agent | null>(null);
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -245,6 +258,36 @@ export function AgentsGrid() {
       toast.error("Erreur lors de la modification de l'agent");
     } finally {
       setUpdateLoading(false);
+    }
+  };
+
+  const handleDeleteAgent = async () => {
+    if (!deletingAgent) return;
+
+    try {
+      setDeleteLoading(true);
+      const { error } = await supabase
+        .from("agents")
+        .delete()
+        .eq("id", deletingAgent.id);
+
+      if (error) throw error;
+
+      toast.success("Agent supprimé avec succès");
+
+      // Close all dialogs
+      setIsDeleteDialogOpen(false);
+      setIsEditDialogOpen(false);
+      setDeletingAgent(null);
+      setSelectedAgent(null);
+      setEditForm({});
+
+      loadAgents();
+    } catch (error) {
+      console.error("Error deleting agent:", error);
+      toast.error("Erreur lors de la suppression de l'agent");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -510,7 +553,7 @@ export function AgentsGrid() {
           placeholder="Rechercher un agent..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 max-w-[20rem]"
         />
       </div>
 
@@ -541,10 +584,17 @@ export function AgentsGrid() {
                         className="w-full h-full object-cover object-top"
                       />
                     </div>
-
                     <span className="absolute -bottom-1 -right-1 text-lg">
                       {getDifficultyEmoji(agent.difficulty || "")}
                     </span>
+                    {isNonModifiable(agent.id) && (
+                      <div className="absolute -top-1 -left-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                        <Icon
+                          icon="mdi:shield"
+                          className="h-2.5 w-2.5 text-white"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-lg truncate">
@@ -870,21 +920,81 @@ export function AgentsGrid() {
                   </div>
                 </div>
               )}
-              {!isNonModifiable(selectedAgent.id) && (
+              <div className="flex gap-2">
                 <Button
-                  className="w-full"
-                  onClick={handleEditAgent}
-                  disabled={updateLoading || uploadingImage}
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsEditDialogOpen(false);
+                    setSelectedAgent(null);
+                    setEditForm({});
+                  }}
                 >
-                  {updateLoading || uploadingImage
-                    ? "Modification en cours..."
-                    : "Modifier l'agent"}
+                  {isNonModifiable(selectedAgent.id) ? "Fermer" : "Annuler"}
                 </Button>
-              )}
+                {!isNonModifiable(selectedAgent.id) && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setDeletingAgent(selectedAgent);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={handleEditAgent}
+                      disabled={updateLoading || uploadingImage}
+                    >
+                      {updateLoading || uploadingImage
+                        ? "Modification en cours..."
+                        : "Modifier l'agent"}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer l'agent</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Êtes-vous sûr de vouloir supprimer l'agent "
+                {deletingAgent?.name}" ?
+              </p>
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <p className="text-sm text-orange-800 font-medium">
+                  ⚠️ Attention ! Si vous supprimez cet agent, les conversations
+                  et feedbacks liés seront également supprimés.
+                </p>
+              </div>
+              <p className="text-sm">Cette action est irréversible.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAgent}
+              disabled={deleteLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteLoading ? "Suppression..." : "Supprimer définitivement"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {filteredAgents.length === 0 && !loading && (
         <div className="text-center py-12">

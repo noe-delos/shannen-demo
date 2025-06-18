@@ -81,6 +81,7 @@ export function SimulationStepper() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startingSimulation, setStartingSimulation] = useState(false);
   const [config, setConfig] = useState<SimulationConfig>({
     agent: null,
     product: null,
@@ -158,6 +159,7 @@ export function SimulationStepper() {
     if (!canProceed()) return;
 
     try {
+      setStartingSimulation(true);
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -187,6 +189,8 @@ export function SimulationStepper() {
     } catch (error) {
       console.error("Error starting simulation:", error);
       toast.error("Erreur lors du démarrage de la simulation");
+    } finally {
+      setStartingSimulation(false);
     }
   };
 
@@ -306,12 +310,11 @@ export function SimulationStepper() {
                                 />
                               </div>
                               <div className="flex-1">
-                                <h3 className="font-semibold">{agent.name}</h3>
-                                {(agent.firstname || agent.lastname) && (
-                                  <p className="text-xs font-medium text-blue-600">
-                                    {agent.firstname} {agent.lastname}
-                                  </p>
-                                )}
+                                <h3 className="font-semibold">
+                                  {agent.firstname && agent.lastname
+                                    ? `${agent.firstname} ${agent.lastname}`
+                                    : agent.name}
+                                </h3>
                                 <p className="text-sm text-muted-foreground truncate max-w-[10rem]">
                                   {agent.job_title}
                                 </p>
@@ -537,7 +540,10 @@ export function SimulationStepper() {
 
                             <div>
                               <p className="text-sm font-medium">
-                                {config.agent?.name}
+                                {config.agent?.firstname &&
+                                config.agent?.lastname
+                                  ? `${config.agent.firstname} ${config.agent.lastname}`
+                                  : config.agent?.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {config.agent?.job_title}
@@ -596,11 +602,15 @@ export function SimulationStepper() {
         ) : (
           <Button
             onClick={startSimulation}
-            disabled={!canProceed()}
+            disabled={!canProceed() || startingSimulation}
             className="bg-[#9516C7] hover:bg-[#c074de] cursor-pointer"
           >
-            <Play className="h-4 w-4 mr-2" />
-            Démarrer la simulation
+            {startingSimulation ? (
+              <Icon icon="mdi:loading" className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4 mr-2" />
+            )}
+            {startingSimulation ? "Démarrage..." : "Démarrer la simulation"}
           </Button>
         )}
       </div>

@@ -114,6 +114,45 @@ export function Dashboard() {
     return "📦";
   };
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "facile":
+        return "bg-green-100 text-green-800";
+      case "moyen":
+        return "bg-yellow-100 text-yellow-800";
+      case "difficile":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getDifficultyEmoji = (difficulty: string) => {
+    switch (difficulty) {
+      case "facile":
+        return "😊";
+      case "moyen":
+        return "😐";
+      case "difficile":
+        return "😤";
+      default:
+        return "🤖";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffInDays === 0) return "Aujourd'hui";
+    if (diffInDays === 1) return "Hier";
+    if (diffInDays < 7) return `Il y a ${diffInDays} jours`;
+    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  };
+
   if (loading) {
     return (
       <div className="space-y-8">
@@ -250,25 +289,19 @@ export function Dashboard() {
                                 </div>
                                 <div className="flex-1 min-w-0 text-center">
                                   <p className="font-medium text-xs md:text-sm truncate">
-                                    {conversation.agents?.name ||
-                                      "Agent inconnu"}
+                                    {conversation.agents?.firstname &&
+                                    conversation.agents?.lastname
+                                      ? `${conversation.agents.firstname} ${conversation.agents.lastname}`
+                                      : conversation.agents?.name ||
+                                        "Agent inconnu"}
                                   </p>
-                                  {(conversation.agents?.firstname ||
-                                    conversation.agents?.lastname) && (
-                                    <p className="text-xs font-medium text-blue-600 truncate">
-                                      {conversation.agents?.firstname}{" "}
-                                      {conversation.agents?.lastname}
-                                    </p>
-                                  )}
                                   <p className="text-xs text-muted-foreground max-w-28 truncate">
                                     {conversation.agents?.job_title}
                                   </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {formatDate(conversation.created_at)}
+                                  </p>
                                 </div>
-                                {conversation.feedback?.note && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {conversation.feedback.note}/100
-                                  </Badge>
-                                )}
                               </div>
                             </CardContent>
                           </Card>
@@ -334,28 +367,32 @@ export function Dashboard() {
               <Card className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft">
                 <CardContent className="p-4 py-0">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
-                      <img
-                        src={agent.picture_url || "/default-avatar.png"}
-                        alt={agent.name || "Agent"}
-                        className="w-full h-full object-cover object-top"
-                      />
+                    <div className="relative">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
+                        <img
+                          src={agent.picture_url || "/default-avatar.png"}
+                          alt={agent.name || "Agent"}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <span className="absolute -bottom-1 -right-1 text-lg">
+                        {getDifficultyEmoji(agent.difficulty || "")}
+                      </span>
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">
-                        {agent.name}
+                        {agent.firstname && agent.lastname
+                          ? `${agent.firstname} ${agent.lastname}`
+                          : agent.name}
                       </p>
-                      {(agent.firstname || agent.lastname) && (
-                        <p className="text-xs font-medium text-blue-600 truncate">
-                          {agent.firstname} {agent.lastname}
-                        </p>
-                      )}
                       <p className="text-xs text-muted-foreground truncate">
                         {agent.job_title}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge
+                      className={getDifficultyColor(agent.difficulty || "")}
+                    >
                       {agent.difficulty}
                     </Badge>
                   </div>

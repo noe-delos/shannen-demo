@@ -13,6 +13,7 @@
     "@aws-sdk/client-bedrock-runtime": "^3.821.0",
     "@elevenlabs/react": "^0.1.6",
     "@iconify/react": "^6.0.0",
+    "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
