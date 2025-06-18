@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Agent } from "@/lib/types/database";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // Non-modifiable agent IDs
 const NON_MODIFIABLE_AGENTS = [
@@ -103,6 +104,18 @@ export function AgentsGrid() {
   >({});
 
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Define handleAgentClick using useCallback
+  const handleAgentClick = useCallback((agent: Agent) => {
+    setSelectedAgent(agent);
+    setEditForm({
+      ...agent,
+      picture_file: null,
+    });
+    setIsEditDialogOpen(true);
+  }, []);
 
   useEffect(() => {
     loadAgents();
@@ -117,6 +130,21 @@ export function AgentsGrid() {
     );
     setFilteredAgents(filtered);
   }, [agents, searchTerm]);
+
+  // Auto-open agent dialog from URL parameter
+  useEffect(() => {
+    const openAgentId = searchParams.get("open");
+    if (openAgentId && agents.length > 0 && !isEditDialogOpen) {
+      const agentToOpen = agents.find((agent) => agent.id === openAgentId);
+      if (agentToOpen) {
+        handleAgentClick(agentToOpen);
+        // Clear the URL parameter after opening
+        const url = new URL(window.location.href);
+        url.searchParams.delete("open");
+        router.replace(url.pathname + url.search, { scroll: false });
+      }
+    }
+  }, [agents, searchParams, isEditDialogOpen, router, handleAgentClick]);
 
   const loadAgents = async () => {
     try {
@@ -289,15 +317,6 @@ export function AgentsGrid() {
     } finally {
       setDeleteLoading(false);
     }
-  };
-
-  const handleAgentClick = (agent: Agent) => {
-    setSelectedAgent(agent);
-    setEditForm({
-      ...agent,
-      picture_file: null,
-    });
-    setIsEditDialogOpen(true);
   };
 
   const isNonModifiable = (agentId: string) => {

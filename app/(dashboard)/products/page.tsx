@@ -1,5 +1,5 @@
 import { Header } from "@/components/layout/header";
-import { ProductsGrid } from "@/components/products/products-grid";
+import { ProductsGridWrapper } from "@/components/products/products-grid-wrapper";
 
 export default function ProductsPage() {
   const breadcrumbs = [
@@ -11,7 +11,7 @@ export default function ProductsPage() {
     <>
       <Header breadcrumbs={breadcrumbs} />
       <div className="flex flex-1 flex-col gap-4 p-6">
-        <ProductsGrid />
+        <ProductsGridWrapper />
       </div>
     </>
   );

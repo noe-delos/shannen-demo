@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Product } from "@/lib/types/database";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // Protected product IDs that cannot be deleted
 const PROTECTED_PRODUCTS = [
@@ -75,6 +76,8 @@ export function ProductsGrid() {
   });
 
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     loadProducts();
@@ -89,6 +92,23 @@ export function ProductsGrid() {
     );
     setFilteredProducts(filtered);
   }, [products, searchTerm]);
+
+  // Auto-open product dialog from URL parameter
+  useEffect(() => {
+    const openProductId = searchParams.get("open");
+    if (openProductId && products.length > 0 && !isEditDialogOpen) {
+      const productToOpen = products.find(
+        (product) => product.id === openProductId
+      );
+      if (productToOpen) {
+        handleEditProduct(productToOpen);
+        // Clear the URL parameter after opening
+        const url = new URL(window.location.href);
+        url.searchParams.delete("open");
+        router.replace(url.pathname + url.search, { scroll: false });
+      }
+    }
+  }, [products, searchParams, isEditDialogOpen, router]);
 
   const loadProducts = async () => {
     try {

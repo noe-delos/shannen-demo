@@ -14,6 +14,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Conversation, Agent, Product } from "@/lib/types/database";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export function Dashboard() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -22,6 +23,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     const loadData = async () => {
@@ -151,6 +153,14 @@ export function Dashboard() {
     if (diffInDays === 1) return "Hier";
     if (diffInDays < 7) return `Il y a ${diffInDays} jours`;
     return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  };
+
+  const handleAgentClick = (agent: Agent) => {
+    router.push(`/agents?open=${agent.id}`);
+  };
+
+  const handleProductClick = (product: Product) => {
+    router.push(`/products?open=${product.id}`);
   };
 
   if (loading) {
@@ -364,7 +374,10 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {agents.map((agent) => (
             <motion.div key={agent.id} whileHover={{ scale: 1.02 }}>
-              <Card className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft">
+              <Card
+                className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft"
+                onClick={() => handleAgentClick(agent)}
+              >
                 <CardContent className="p-4 py-0">
                   <div className="flex items-start gap-3">
                     <div className="relative">
@@ -418,7 +431,10 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {products.map((product) => (
             <motion.div key={product.id} whileHover={{ scale: 1.02 }}>
-              <Card className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft">
+              <Card
+                className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft"
+                onClick={() => handleProductClick(product)}
+              >
                 <CardContent className="p-4 py-0">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
