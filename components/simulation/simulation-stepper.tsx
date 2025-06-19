@@ -101,6 +101,58 @@ export function SimulationStepper() {
     loadData();
   }, []);
 
+  // Load saved config when agent is selected
+  useEffect(() => {
+    if (config.agent?.id) {
+      loadSavedConfig(config.agent.id);
+    }
+  }, [config.agent?.id]);
+
+  const loadSavedConfig = (agentId: string) => {
+    try {
+      const savedConfig = localStorage.getItem(`agent_config_${agentId}`);
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          goal: parsedConfig.goal || "",
+          context: {
+            ...prevConfig.context,
+            secteur: parsedConfig.context?.secteur || "",
+            company: parsedConfig.context?.company || "",
+            historique_relation:
+              parsedConfig.context?.historique_relation || "Premier contact",
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading saved config:", error);
+    }
+  };
+
+  const saveConfig = (agentId: string, configToSave: any) => {
+    try {
+      const currentSaved = localStorage.getItem(`agent_config_${agentId}`);
+      const existingConfig = currentSaved ? JSON.parse(currentSaved) : {};
+
+      const updatedConfig = {
+        ...existingConfig,
+        ...configToSave,
+        context: {
+          ...existingConfig.context,
+          ...configToSave.context,
+        },
+      };
+
+      localStorage.setItem(
+        `agent_config_${agentId}`,
+        JSON.stringify(updatedConfig)
+      );
+    } catch (error) {
+      console.error("Error saving config:", error);
+    }
+  };
+
   const loadData = async () => {
     try {
       const [agentsResponse, productsResponse] = await Promise.all([
@@ -441,15 +493,25 @@ export function SimulationStepper() {
                           id="secteur"
                           placeholder="Ex: E-commerce, SaaS, Finance..."
                           value={config.context.secteur}
-                          onChange={(e) =>
-                            setConfig({
+                          onChange={(e) => {
+                            const newConfig = {
                               ...config,
                               context: {
                                 ...config.context,
                                 secteur: e.target.value,
                               },
-                            })
-                          }
+                            };
+                            setConfig(newConfig);
+                            // Save to localStorage
+                            if (config.agent?.id) {
+                              saveConfig(config.agent.id, {
+                                context: {
+                                  ...config.context,
+                                  secteur: e.target.value,
+                                },
+                              });
+                            }
+                          }}
                           className="shadow-soft mt-3 placeholder:text-foreground/20"
                         />
                       </div>
@@ -459,15 +521,25 @@ export function SimulationStepper() {
                           id="company"
                           placeholder="Ex: TechCorp, StartupXYZ..."
                           value={config.context.company}
-                          onChange={(e) =>
-                            setConfig({
+                          onChange={(e) => {
+                            const newConfig = {
                               ...config,
                               context: {
                                 ...config.context,
                                 company: e.target.value,
                               },
-                            })
-                          }
+                            };
+                            setConfig(newConfig);
+                            // Save to localStorage
+                            if (config.agent?.id) {
+                              saveConfig(config.agent.id, {
+                                context: {
+                                  ...config.context,
+                                  company: e.target.value,
+                                },
+                              });
+                            }
+                          }}
                           className="shadow-soft mt-3 placeholder:text-foreground/20"
                         />
                       </div>
@@ -478,16 +550,27 @@ export function SimulationStepper() {
                         <select
                           className="w-full p-2 border rounded-md shadow-soft mt-3"
                           value={config.context.historique_relation}
-                          onChange={(e) =>
-                            setConfig({
+                          onChange={(e) => {
+                            const newConfig = {
                               ...config,
                               context: {
                                 ...config.context,
                                 historique_relation: e.target
                                   .value as HistoriqueRelation,
                               },
-                            })
-                          }
+                            };
+                            setConfig(newConfig);
+                            // Save to localStorage
+                            if (config.agent?.id) {
+                              saveConfig(config.agent.id, {
+                                context: {
+                                  ...config.context,
+                                  historique_relation: e.target
+                                    .value as HistoriqueRelation,
+                                },
+                              });
+                            }
+                          }}
                         >
                           {historiqueOptions.map((option) => (
                             <option key={option} value={option}>
@@ -507,9 +590,19 @@ export function SimulationStepper() {
                           id="goal"
                           placeholder="Ex: Convaincre le prospect de l'intérêt de notre solution CRM et obtenir un rendez-vous de démonstration..."
                           value={config.goal}
-                          onChange={(e) =>
-                            setConfig({ ...config, goal: e.target.value })
-                          }
+                          onChange={(e) => {
+                            const newConfig = {
+                              ...config,
+                              goal: e.target.value,
+                            };
+                            setConfig(newConfig);
+                            // Save to localStorage
+                            if (config.agent?.id) {
+                              saveConfig(config.agent.id, {
+                                goal: e.target.value,
+                              });
+                            }
+                          }}
                           rows={6}
                           className="shadow-soft resize-none mt-3 placeholder:text-foreground/20 min-h-[10rem]"
                         />

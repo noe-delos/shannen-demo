@@ -56,6 +56,23 @@ export function AppSidebar() {
     loadConversations();
   }, []);
 
+  // Refresh conversations when navigating back to dashboard or key routes
+  useEffect(() => {
+    if (pathname === "/" || pathname.startsWith("/conversations")) {
+      loadConversations();
+    }
+  }, [pathname]);
+
+  // Also refresh on window focus (when user comes back to the app)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadConversations();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
+
   const loadConversations = async () => {
     try {
       const {

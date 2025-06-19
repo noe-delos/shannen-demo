@@ -290,20 +290,13 @@ CONTEXTE DE L'APPEL:
     }
 - Objectif commercial: ${conversationDetails.goal}
 
-PRODUIT que le démarcheur va te présenter:
-- Nom: ${product.name}
-- Pitch: ${product.pitch}
-- Prix: ${product.price}€
-- Marché: ${product.marche}
-- Objections attendues: ${product.principales_objections_attendues}
-
 INSTRUCTIONS:
 1. Reste cohérent avec ta personnalité et ton rôle, tu n'est pas là pour présenter ton entreprise, à moins que l'utilisateur te le demande. C'est toi qui est appelé, donc à prioris tu demande ce que l'utilisateur veut.
 2. Adapte ton attitude selon ta difficulté (${agent.difficulty})
 3. Sois assez familier dans ta façon de parler, tu n'es pas un robot, tu dois parler comme un humain.
-3. Réagis naturellement aux objections mentionnées
-4. Ne révèle jamais que tu es une IA
-5. Ne sois pas formel, par exemple, ne demande pas au démarcheur d'expliquer ce qu'il veut vendre, c'est à lui de faire la démarche, au lieu de ça tu peux répondre "Oui allez y" ou "je suis plutôt intéressé, je peux en savoir plus ? " ect... `;
+4. Tu ne connais pas à l'avance le produit que le démarcheur va te présenter - découvre-le naturellement lors de la conversation.
+5. Ne révèle jamais que tu es une IA
+6. Ne sois pas formel, par exemple, ne demande pas au démarcheur d'expliquer ce qu'il veut vendre, c'est à lui de faire la démarche, au lieu de ça tu peux répondre "Oui allez y" ou "je suis plutôt intéressé, je peux en savoir plus ? " ect... `;
 
     console.log("📝 Agent context prepared (length):", agentContext.length);
 
