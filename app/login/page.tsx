@@ -1,11 +1,35 @@
+"use client";
+
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 
+import { useState } from "react";
 import { login } from "./actions";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const [error, setError] = useState<string>("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+
+    // Block access to the specific platform account
+    if (email?.toLowerCase() === "platform@sforsales.academy") {
+      setError(
+        "L'accès à ce compte a été fermé pour des raisons de confidentialité des données. La création d'un nouveau compte est gratuite et aucune vérification par email n'est requise."
+      );
+      return;
+    }
+
+    // If email is not blocked, proceed with login
+    await login(formData);
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Hero Section */}
@@ -105,8 +129,21 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Icon
+                  icon="material-symbols:error"
+                  className="h-5 w-5 text-red-600"
+                />
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            </div>
+          )}
+
           {/* Form */}
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
                 <label
@@ -162,7 +199,7 @@ export default function LoginPage() {
             {/* Action Buttons */}
             <div className="space-y-4">
               <button
-                formAction={login}
+                type="submit"
                 className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
                 <Icon icon="material-symbols:login" className="w-5 h-5" />
