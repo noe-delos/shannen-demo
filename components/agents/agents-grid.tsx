@@ -51,6 +51,7 @@ const NON_MODIFIABLE_AGENTS = [
   "661f7ee3-eb58-4623-80ba-437de72734de",
   "66ee1b3c-2a09-4316-b726-bd33f430ac23",
   "c3c03256-2eb9-4498-ba5f-8d23490f3aa2",
+  "1bfc431d-62f8-4cbc-a666-6ae8a35ad0a4",
 ];
 
 // Voice IDs for gender
