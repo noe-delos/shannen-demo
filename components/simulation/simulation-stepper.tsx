@@ -156,14 +156,24 @@ export function SimulationStepper() {
 
   const loadData = async () => {
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Vous devez être connecté");
+        return;
+      }
+
       const [agentsResponse, productsResponse] = await Promise.all([
         supabase
           .from("agents")
           .select("*")
+          .or(`user_id.eq.${user.id},user_id.is.null`)
           .order("created_at", { ascending: false }),
         supabase
           .from("products")
           .select("*")
+          .or(`user_id.eq.${user.id},user_id.is.null`)
           .order("created_at", { ascending: false }),
       ]);
 

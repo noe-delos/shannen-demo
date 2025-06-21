@@ -46,6 +46,7 @@ export type Database = {
           price: number | null;
           marche: string | null;
           principales_objections_attendues: string | null;
+          user_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -56,6 +57,7 @@ export type Database = {
           price?: number | null;
           marche?: string | null;
           principales_objections_attendues?: string | null;
+          user_id: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -66,6 +68,7 @@ export type Database = {
           price?: number | null;
           marche?: string | null;
           principales_objections_attendues?: string | null;
+          user_id?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -88,6 +91,7 @@ export type Database = {
           name: string | null;
           firstname: string | null;
           lastname: string | null;
+          user_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -108,6 +112,7 @@ export type Database = {
           name?: string | null;
           firstname?: string | null;
           lastname?: string | null;
+          user_id: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -128,6 +133,7 @@ export type Database = {
           name?: string | null;
           firstname?: string | null;
           lastname?: string | null;
+          user_id?: string;
           created_at?: string;
           updated_at?: string;
         };

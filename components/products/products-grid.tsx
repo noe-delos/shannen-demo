@@ -112,9 +112,18 @@ export function ProductsGrid() {
 
   const loadProducts = async () => {
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Vous devez être connecté");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .or(`user_id.eq.${user.id},user_id.is.null`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -135,6 +144,15 @@ export function ProductsGrid() {
 
     try {
       setCreateLoading(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Vous devez être connecté");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("products")
         .insert({
@@ -144,6 +162,7 @@ export function ProductsGrid() {
           pitch: formData.pitch,
           principales_objections_attendues:
             formData.principales_objections_attendues,
+          user_id: user.id,
         })
         .select();
 

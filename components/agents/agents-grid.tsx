@@ -148,9 +148,18 @@ export function AgentsGrid() {
 
   const loadAgents = async () => {
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Vous devez être connecté");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("agents")
         .select("*")
+        .or(`user_id.eq.${user.id},user_id.is.null`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -196,13 +205,21 @@ export function AgentsGrid() {
     try {
       setCreateLoading(true);
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Vous devez être connecté");
+        return;
+      }
+
       let picture_url = null;
       if (createForm.picture_file) {
         picture_url = await uploadImage(createForm.picture_file);
         if (!picture_url) return;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("agents")
         .insert([
           {
@@ -213,6 +230,7 @@ export function AgentsGrid() {
             difficulty: createForm.difficulty,
             voice_id: VOICE_IDS[createForm.gender],
             picture_url,
+            user_id: user.id,
             personnality: {
               écoute: "réceptif",
               attitude: "passif",
