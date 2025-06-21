@@ -616,12 +616,12 @@ export function SimulationConversation({
           </CardHeader>
         </Card>
 
-        <div className="flex flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-0">
           {/* Left Context Cards */}
-          <div className="lg:col-span-1 space-y-3">
+          <div className="space-y-3 lg:flex-shrink-0">
             {/* Post-it Note Style Card */}
             <div
-              className={`relative w-[22rem] h-[22rem] p-8 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 ${playwriteIE.className}`}
+              className={`relative w-full max-w-[22rem] mx-auto lg:mx-0 h-[22rem] p-8 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 ${playwriteIE.className}`}
               style={{
                 backgroundColor: "#E9E27B",
                 boxShadow:
@@ -728,7 +728,7 @@ export function SimulationConversation({
           </div>
 
           {/* iPhone Interface */}
-          <div className="lg:col-span-3 flex justify-center">
+          <div className="flex justify-center lg:justify-start lg:pl-4">
             <div className="relative">
               {/* Side buttons positioned absolutely outside the iPhone */}
               {/* Volume buttons (left side) */}
