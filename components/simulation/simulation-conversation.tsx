@@ -20,6 +20,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useConversation } from "@elevenlabs/react";
+import { Playwrite_IE } from "next/font/google";
+
+const playwriteIE = Playwrite_IE({
+  weight: "400",
+});
 
 interface SimulationConversationProps {
   conversationId: string;
@@ -614,259 +619,344 @@ export function SimulationConversation({
         <div className="flex flex-row gap-6">
           {/* Left Context Cards */}
           <div className="lg:col-span-1 space-y-3">
-            {/* Agent Card */}
-            <Card className="shadow-soft w-[20rem]  h-fit py-0">
-              <CardContent className="p-3 h-fit px-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Agent:</span>
-                  <span className="font-medium text-sm">
-                    {conversationData.agents?.firstname &&
-                    conversationData.agents?.lastname
-                      ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
-                      : conversationData.agents?.name}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Post-it Note Style Card */}
+            <div
+              className={`relative w-[22rem] h-[22rem] p-8 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 ${playwriteIE.className}`}
+              style={{
+                backgroundColor: "#E9E27B",
+                boxShadow:
+                  "0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              {/* Post-it tape effect */}
+              <div
+                className="absolute -top-2 left-8 w-16 h-6 bg-white/40 rounded-sm transform rotate-[-15deg]"
+                style={{
+                  background:
+                    "linear-gradient(45deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
+                }}
+              />
 
-            {/* Job Title Card */}
-            <Card className="shadow-soft w-[20rem] ">
-              <CardContent className="p-3 h-fit px-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Poste:</span>
-                  <span className="font-medium text-sm">
-                    {conversationData.agents?.job_title}
-                  </span>
+              {/* Content */}
+              <div className="space-y-4 text-left h-full flex flex-col">
+                {/* Header */}
+                <div className="border-b-2 border-yellow-600/30 pb-3">
+                  <h3 className="text-lg font-bold text-zinc-900 opacity-60 mb-1">
+                    Briefing de Simulation
+                  </h3>
+                  <div className="text-sm text-zinc-800 opacity-50 font-medium">
+                    {getCallTypeLabel(conversationData.call_type)}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Objectif Card */}
-            <Card className="shadow-soft w-[20rem] ">
-              <CardContent className="p-3 h-fit px-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Objectif:
-                  </span>
-                  <span className="font-medium text-sm">
-                    {conversationData.goal}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                {/* Two Column Layout */}
+                <div className="flex-1 flex">
+                  {/* Left Column */}
+                  <div className="flex-1 space-y-3 pr-4">
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Commercial:
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                        {conversationData.agents?.firstname &&
+                        conversationData.agents?.lastname
+                          ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
+                          : conversationData.agents?.name}
+                      </div>
+                    </div>
 
-            {/* Secteur Card */}
-            <Card className="shadow-soft w-[20rem] ">
-              <CardContent className="p-3 h-fit px-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Secteur:
-                  </span>
-                  <span className="font-medium text-sm">
-                    {conversationData.context?.secteur || "Non spécifié"}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Poste:
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                        {conversationData.agents?.job_title}
+                      </div>
+                    </div>
 
-            {/* Entreprise Card */}
-            <Card className="shadow-soft w-[20rem] ">
-              <CardContent className="p-3 h-fit px-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Entreprise:
-                  </span>
-                  <span className="font-medium text-sm">
-                    {conversationData.context?.company || "Non spécifiée"}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Objectif:
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                        {conversationData.goal}
+                      </div>
+                    </div>
 
-            {/* Produit Card */}
-            <Card className="shadow-soft w-[20rem] ">
-              <CardContent className="p-3 h-fit px-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Produit:
-                  </span>
-                  <span className="font-medium text-sm">
-                    {conversationData.products?.name}
-                  </span>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Secteur:
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                        {conversationData.context?.secteur || "Non spécifié"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="flex-1 space-y-3 pl-4">
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Entreprise:
+                      </div>
+                      <div className="text-sm  text-gray-700 font-medium opacity-60">
+                        {conversationData.context?.company || "Non spécifiée"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Produit:
+                      </div>
+                      <div className="text-sm  text-gray-700 font-medium opacity-60">
+                        {conversationData.products?.name}
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-6">
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
+                        Simulation:
+                      </div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60">
+                        #{conversationId.slice(-6)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* iPhone Interface */}
           <div className="lg:col-span-3 flex justify-center">
-            <div
-              className="relative w-72 h-[600px] rounded-[3rem] bg-cover bg-center bg-no-repeat shadow-2xl border-8 border-gray-800"
-              style={{
-                backgroundImage:
-                  "url('https://wallpapers.com/images/hd/gradient-iphone-t8gspe8mzt77so74.jpg')",
-              }}
-            >
-              {/* iPhone Content */}
-              <div className="absolute inset-4 flex flex-col justify-between">
-                {/* Top area with agent */}
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  {conversationStatus === "waiting" && (
-                    <div className="text-center">
-                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <div className="w-28 h-28 rounded-full overflow-hidden">
-                          <img
-                            src={
-                              conversationData.agents?.picture_url ||
-                              "/default-avatar.png"
-                            }
-                            alt={conversationData.agents?.name}
-                            className="w-full h-full object-cover object-top"
-                          />
-                        </div>
-                      </div>
-                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
-                        {conversationData.agents?.firstname &&
-                        conversationData.agents?.lastname
-                          ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
-                          : conversationData.agents?.name}
-                      </h3>
-                    </div>
-                  )}
+            <div className="relative">
+              {/* Side buttons positioned absolutely outside the iPhone */}
+              {/* Volume buttons (left side) */}
+              <div className="absolute left-[-4px] top-[100px] w-1 h-10 bg-gradient-to-r from-black to-gray-900 rounded-l-md z-30" />
+              <div className="absolute left-[-4px] top-[150px] w-1 h-10 bg-gradient-to-r from-black to-gray-900 rounded-l-md z-30" />
 
-                  {conversationStatus === "connected" && (
-                    <div className="text-center">
-                      <motion.div
-                        className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center relative"
-                        animate={
-                          conversation.isSpeaking
-                            ? {
-                                scale: [1, 1.05, 1],
-                                boxShadow: [
-                                  "0 0 0 0 rgba(255, 255, 255, 0.4)",
-                                  "0 0 0 10px rgba(255, 255, 255, 0.1)",
-                                  "0 0 0 0 rgba(255, 255, 255, 0)",
-                                ],
+              {/* Power button (right side) */}
+              <div className="absolute right-[-4px] top-[120px] w-1 h-14 bg-gradient-to-l from-black to-gray-900 rounded-r-md z-30" />
+
+              {/* iPhone Body with realistic metal edges */}
+              <div
+                className="relative w-72 h-[600px] rounded-[3rem] shadow-2xl overflow-hidden"
+                style={{
+                  border: "6px solid #000000",
+                }}
+              >
+                {/* Background image with blur */}
+                <div
+                  className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+                  style={{
+                    backgroundImage:
+                      "url('https://i.pinimg.com/736x/d9/12/2f/d9122faa11f13d77fb39af1c81abe96c.jpg')",
+                    filter: "blur(5px)",
+                    transform: "scale(1.1)", // Slightly scale to hide blur edges
+                  }}
+                />
+
+                {/* Outer shine ring */}
+                <div
+                  className="absolute -inset-1 rounded-[3.2rem] -z-10"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #4a4a4a 0%, #000000 15%, #1a1a1a 30%, #000000 45%, #2a2a2a 60%, #000000 75%, #1a1a1a 90%, #000000 100%)",
+                    padding: "2px",
+                  }}
+                />
+
+                {/* Inner metal reflection */}
+                <div
+                  className="absolute -inset-0.5 rounded-[3.1rem] -z-5"
+                  style={{
+                    background:
+                      "linear-gradient(45deg, #333333 0%, #000000 25%, #666666 50%, #000000 75%, #333333 100%)",
+                    opacity: 0.3,
+                  }}
+                />
+
+                {/* Dynamic Island (iPhone 15 Pro camera) */}
+                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-black rounded-full z-10" />
+
+                {/* iPhone Content */}
+                <div className="absolute inset-4 flex flex-col justify-between">
+                  {/* Top area with agent */}
+                  <div className="flex-1 flex flex-col items-center justify-start mt-12">
+                    {conversationStatus === "waiting" && (
+                      <div className="text-center">
+                        <div className="size-20 mx-auto mb-4 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <div className="size-18 rounded-full overflow-hidden">
+                            <img
+                              src={
+                                conversationData.agents?.picture_url ||
+                                "/default-avatar.png"
                               }
-                            : {}
-                        }
-                        transition={{
-                          duration: 1.5,
-                          repeat: conversation.isSpeaking ? Infinity : 0,
-                          ease: "easeInOut",
-                        }}
-                      >
-                        <div className="w-28 h-28 rounded-full overflow-hidden">
-                          <img
-                            src={
-                              conversationData.agents?.picture_url ||
-                              "/default-avatar.png"
-                            }
-                            alt={conversationData.agents?.name}
-                            className="w-full h-full object-cover object-top"
+                              alt={conversationData.agents?.name}
+                              className="w-full h-full object-cover object-top"
+                            />
+                          </div>
+                        </div>
+                        <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                          {conversationData.agents?.firstname &&
+                          conversationData.agents?.lastname
+                            ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
+                            : conversationData.agents?.name}
+                        </h3>
+                      </div>
+                    )}
+
+                    {conversationStatus === "connected" && (
+                      <div className="text-center">
+                        {/* Timer above character circle */}
+                        <motion.p
+                          className="text-white text-lg font-semibold mb-6 drop-shadow-lg"
+                          animate={{
+                            color: conversation.isSpeaking
+                              ? "#ffffff"
+                              : "rgba(255, 255, 255, 0.9)",
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {formatTime(elapsedTime)}
+                        </motion.p>
+
+                        {/* Smaller character circle, moved higher */}
+                        <motion.div
+                          className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center relative"
+                          animate={
+                            conversation.isSpeaking
+                              ? {
+                                  scale: [1, 1.08, 1],
+                                  boxShadow: [
+                                    "0 0 0 0 rgba(255, 255, 255, 0.4)",
+                                    "0 0 0 8px rgba(255, 255, 255, 0.1)",
+                                    "0 0 0 0 rgba(255, 255, 255, 0)",
+                                  ],
+                                }
+                              : {}
+                          }
+                          transition={{
+                            duration: 1.5,
+                            repeat: conversation.isSpeaking ? Infinity : 0,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          <div className="w-12 h-12 rounded-full overflow-hidden">
+                            <img
+                              src={
+                                conversationData.agents?.picture_url ||
+                                "/default-avatar.png"
+                              }
+                              alt={conversationData.agents?.name}
+                              className="w-full h-full object-cover object-top"
+                            />
+                          </div>
+                        </motion.div>
+
+                        <h3 className="text-white text-lg font-semibold mb-2 drop-shadow-lg">
+                          {conversationData.agents?.firstname &&
+                          conversationData.agents?.lastname
+                            ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
+                            : conversationData.agents?.name}
+                        </h3>
+
+                        <motion.p
+                          className="text-white/80 text-sm drop-shadow-lg"
+                          animate={{
+                            opacity: conversation.isSpeaking ? 1 : 0.8,
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {conversation.isSpeaking
+                            ? "En train de parler..."
+                            : "En attente..."}
+                        </motion.p>
+                      </div>
+                    )}
+
+                    {conversationStatus === "analyzing" && (
+                      <div className="text-center">
+                        <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <Icon
+                            icon="svg-spinners:ring-resize"
+                            className="w-12 h-12 text-white"
                           />
                         </div>
-                      </motion.div>
-                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
-                        {conversationData.agents?.firstname &&
-                        conversationData.agents?.lastname
-                          ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
-                          : conversationData.agents?.name}
-                      </h3>
-                      <motion.p
-                        className="text-white/80 text-sm drop-shadow-lg"
-                        animate={{
-                          color: conversation.isSpeaking
-                            ? "#ffffff"
-                            : "rgba(255, 255, 255, 0.8)",
-                        }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {conversation.isSpeaking
-                          ? "En train de parler..."
-                          : `${formatTime(elapsedTime)}`}
-                      </motion.p>
-                    </div>
-                  )}
-
-                  {conversationStatus === "analyzing" && (
-                    <div className="text-center">
-                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Icon
-                          icon="svg-spinners:ring-resize"
-                          className="w-16 h-16 text-white"
-                        />
+                        <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                          Analyse en cours...
+                        </h3>
+                        <p className="text-white/80 text-sm drop-shadow-lg">
+                          Génération du feedback
+                        </p>
                       </div>
-                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
-                        Analyse en cours...
-                      </h3>
-                      <p className="text-white/80 text-sm drop-shadow-lg">
-                        Génération du feedback
-                      </p>
-                    </div>
-                  )}
+                    )}
 
-                  {conversationStatus === "ended" && feedback && (
-                    <div className="text-center">
-                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Icon
-                          icon="material-symbols:check-circle"
-                          className="w-16 h-16 text-green-400"
-                        />
+                    {conversationStatus === "ended" && feedback && (
+                      <div className="text-center">
+                        <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <Icon
+                            icon="material-symbols:check-circle"
+                            className="w-12 h-12 text-green-400"
+                          />
+                        </div>
+                        <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
+                          Appel terminé
+                        </h3>
+                        <p className="text-white/80 text-sm drop-shadow-lg">
+                          Score: {feedback.note}/100
+                        </p>
                       </div>
-                      <h3 className="text-white text-xl font-semibold mb-2 drop-shadow-lg">
-                        Appel terminé
-                      </h3>
-                      <p className="text-white/80 text-sm drop-shadow-lg">
-                        Score: {feedback.note}/100
-                      </p>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* Bottom button area */}
-                <div className="flex flex-col items-center pb-8 space-y-4">
-                  {conversationStatus === "waiting" && (
-                    <Button
-                      onClick={startConversation}
-                      size="lg"
-                      disabled={initializing || loadingSignedUrl}
-                      className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 border-0 shadow-lg"
-                    >
-                      {initializing || loadingSignedUrl ? (
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                      ) : (
-                        <Icon icon="ion:call" className="w-6 h-6" />
-                      )}
-                    </Button>
-                  )}
-
-                  {conversationStatus === "connected" && (
-                    <div className="flex flex-col items-center space-y-4">
+                  {/* Bottom button area - moved higher */}
+                  <div className="flex flex-col items-center pb-12 space-y-4">
+                    {conversationStatus === "waiting" && (
                       <Button
-                        variant="outline"
+                        onClick={startConversation}
                         size="lg"
-                        onClick={() => setIsMuted(!isMuted)}
-                        className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                        disabled={initializing || loadingSignedUrl}
+                        className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 border-0 shadow-lg"
                       >
-                        {isMuted ? (
-                          <VolumeX className="w-5 h-5" />
+                        {initializing || loadingSignedUrl ? (
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                         ) : (
-                          <Volume2 className="w-5 h-5" />
+                          <Icon icon="ion:call" className="w-6 h-6" />
                         )}
                       </Button>
-                      <Button
-                        onClick={stopConversation}
-                        size="lg"
-                        className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 border-0 shadow-lg"
-                      >
-                        <Icon
-                          icon="majesticons:phone-hangup"
-                          className="w-6 h-6"
-                        />
-                      </Button>
-                    </div>
-                  )}
+                    )}
+
+                    {conversationStatus === "connected" && (
+                      <div className="flex flex-col items-center space-y-4">
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={() => setIsMuted(!isMuted)}
+                          className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                        >
+                          {isMuted ? (
+                            <VolumeX className="w-5 h-5" />
+                          ) : (
+                            <Volume2 className="w-5 h-5" />
+                          )}
+                        </Button>
+                        <Button
+                          onClick={stopConversation}
+                          size="lg"
+                          className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 border-0 shadow-lg"
+                        >
+                          <Icon
+                            icon="majesticons:phone-hangup"
+                            className="w-6 h-6"
+                          />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Home indicator bar - smaller width */}
+                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-white/60 rounded-full" />
                 </div>
               </div>
             </div>
