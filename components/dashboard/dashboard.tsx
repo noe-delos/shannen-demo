@@ -15,12 +15,27 @@ import { Conversation, Agent, Product } from "@/lib/types/database";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Courgette } from "next/font/google";
+
+const courgette = Courgette({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export function Dashboard() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFeatureDialog, setShowFeatureDialog] = useState(false);
 
   const supabase = createClient();
   const router = useRouter();
@@ -72,6 +87,19 @@ export function Dashboard() {
 
     loadData();
   }, [supabase]);
+
+  useEffect(() => {
+    // Check if user has seen the feature announcement
+    const hasSeenFeature = localStorage.getItem("hasSeenPhoneFeature");
+    if (!hasSeenFeature) {
+      setShowFeatureDialog(true);
+    }
+  }, []);
+
+  const handleFeatureDialogClose = () => {
+    setShowFeatureDialog(false);
+    localStorage.setItem("hasSeenPhoneFeature", "true");
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -230,238 +258,303 @@ export function Dashboard() {
   }
 
   return (
-    <motion.div
-      className="space-y-8"
-      variants={container}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Conversations Section */}
-      <motion.section variants={item}>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div>
-              <h1 className="text-2xl font-bold">Vos conversations</h1>
-              <p className="text-muted-foreground">
-                Liste de vos conversations passées
-              </p>
-            </div>
-            <Badge variant="secondary" className="text-sm font-medium">
-              {conversations.length} conversation
-              {conversations.length !== 1 ? "s" : ""}
-            </Badge>
-          </div>
-        </div>
-
-        <div className="flex gap-6">
-          <div className="flex-1">
-            <div className="flex flex-col md:flex-row gap-4 w-fit">
-              {/* New Conversation CTA - Square with max width */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-shrink-0"
-              >
-                <Link href="/simulation/configure">
-                  <Card className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer size-[8rem] md:size-[10rem] flex items-center justify-center shadow-soft">
-                    <div className="flex flex-col items-center gap-2">
-                      <Icon
-                        icon="mdi:plus"
-                        className="h-6 w-6 text-muted-foreground"
-                      />
-                      <p className="text-sm font-medium text-muted-foreground text-center">
-                        Nouvel appel
-                      </p>
-                    </div>
-                  </Card>
-                </Link>
-              </motion.div>
-
-              {/* Recent Conversations Grid */}
-              {conversations.length > 0 && (
-                <div className="relative">
-                  <div className="flex flex-row gap-4 overflow-x-auto md:max-w-[40rem] scrollbar-hide pb-2 pr-20">
-                    {conversations.slice(0, 4).map((conversation: any) => (
-                      <motion.div key={conversation.id}>
-                        <Link href={`/conversations/${conversation.id}`}>
-                          <Card className="cursor-pointer hover:bg-foreground/5 hover:shadow-soft transition-all size-[8rem] md:size-[10rem] shadow-soft pt-0">
-                            <CardContent className="p-3 md:p-4 h-full flex flex-col">
-                              <div className="items-center gap-2 md:gap-3 h-full flex flex-col">
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
-                                  <img
-                                    src={
-                                      conversation.agents?.picture_url ||
-                                      "/default-avatar.png"
-                                    }
-                                    alt="Agent"
-                                    className="w-full h-full object-cover object-top"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0 text-center">
-                                  <p className="font-medium text-xs md:text-sm truncate">
-                                    {conversation.agents?.firstname &&
-                                    conversation.agents?.lastname
-                                      ? `${conversation.agents.firstname} ${conversation.agents.lastname}`
-                                      : conversation.agents?.name ||
-                                        "Agent inconnu"}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground max-w-28 truncate">
-                                    {conversation.agents?.job_title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {formatDate(conversation.created_at)}
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </div>
-                  {/* Fadeout gradient */}
-                  <div className="absolute top-0 right-0 h-full w-8 md:w-12 bg-gradient-to-l from-background to-transparent pointer-events-none"></div>
-                </div>
-              )}
+    <>
+      <motion.div
+        className="space-y-8"
+        variants={container}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Conversations Section */}
+        <motion.section variants={item}>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <div>
+                <h1 className="text-2xl font-bold">Vos conversations</h1>
+                <p className="text-muted-foreground">
+                  Liste de vos conversations passées
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-sm font-medium">
+                {conversations.length} conversation
+                {conversations.length !== 1 ? "s" : ""}
+              </Badge>
             </div>
           </div>
 
-          {/* CTA Square on the right - Bigger Height */}
-          <div className="hidden lg:block w-80">
-            <Card className="h-[15rem] shannen-gradient border-purple-200/50 flex items-center justify-center shadow-soft overflow-hidden">
-              <div className="text-center">
-                <img
-                  src={"/logo.png"}
-                  className="w-12 h-12 mx-auto mb-3 filter brightness-0 invert"
-                />
-                <p className="text-lg font-semibold text-white mb-1 drop-shadow-md">
-                  Vendez avec authenticité
-                </p>
-                <p className="text-sm text-white/90 mb-4 max-w-[15rem] drop-shadow-sm">
-                  Méthode Shannen • Sans forcer, sans travestir
-                </p>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105"
-                  onClick={() =>
-                    window.open(
-                      "https://sforsales.substack.com/subscribe",
-                      "_blank"
-                    )
-                  }
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row gap-4 w-fit">
+                {/* New Conversation CTA - Square with max width */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-shrink-0"
                 >
-                  Rejoindre la masterclass
+                  <Link href="/simulation/configure">
+                    <Card className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer size-[8rem] md:size-[10rem] flex items-center justify-center shadow-soft">
+                      <div className="flex flex-col items-center gap-2">
+                        <Icon
+                          icon="mdi:plus"
+                          className="h-6 w-6 text-muted-foreground"
+                        />
+                        <p className="text-sm font-medium text-muted-foreground text-center">
+                          Nouvel appel
+                        </p>
+                      </div>
+                    </Card>
+                  </Link>
+                </motion.div>
+
+                {/* Recent Conversations Grid */}
+                {conversations.length > 0 && (
+                  <div className="relative">
+                    <div className="flex flex-row gap-4 overflow-x-auto md:max-w-[40rem] scrollbar-hide pb-2 pr-20">
+                      {conversations.slice(0, 4).map((conversation: any) => (
+                        <motion.div key={conversation.id}>
+                          <Link href={`/conversations/${conversation.id}`}>
+                            <Card className="cursor-pointer hover:bg-foreground/5 hover:shadow-soft transition-all size-[8rem] md:size-[10rem] shadow-soft pt-0">
+                              <CardContent className="p-3 md:p-4 h-full flex flex-col">
+                                <div className="items-center gap-2 md:gap-3 h-full flex flex-col">
+                                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
+                                    <img
+                                      src={
+                                        conversation.agents?.picture_url ||
+                                        "/default-avatar.png"
+                                      }
+                                      alt="Agent"
+                                      className="w-full h-full object-cover object-top"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0 text-center">
+                                    <p className="font-medium text-xs md:text-sm truncate">
+                                      {conversation.agents?.firstname &&
+                                      conversation.agents?.lastname
+                                        ? `${conversation.agents.firstname} ${conversation.agents.lastname}`
+                                        : conversation.agents?.name ||
+                                          "Agent inconnu"}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground max-w-28 truncate">
+                                      {conversation.agents?.job_title}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {formatDate(conversation.created_at)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    {/* Fadeout gradient */}
+                    <div className="absolute top-0 right-0 h-full w-8 md:w-12 bg-gradient-to-l from-background to-transparent pointer-events-none"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* CTA Square on the right - Bigger Height */}
+            <div className="hidden lg:block w-80">
+              <Card className="h-[15rem] shannen-gradient border-purple-200/50 flex items-center justify-center shadow-soft overflow-hidden">
+                <div className="text-center">
+                  <img
+                    src={"/logo.png"}
+                    className="w-12 h-12 mx-auto mb-3 filter brightness-0 invert"
+                  />
+                  <p className="text-lg font-semibold text-white mb-1 drop-shadow-md">
+                    Vendez avec authenticité
+                  </p>
+                  <p className="text-sm text-white/90 mb-4 max-w-[15rem] drop-shadow-sm">
+                    Méthode Shannen • Sans forcer, sans travestir
+                  </p>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+                    onClick={() =>
+                      window.open(
+                        "https://sforsales.substack.com/subscribe",
+                        "_blank"
+                      )
+                    }
+                  >
+                    Rejoindre la masterclass
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Agents Section */}
+        <motion.section variants={item}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Agents disponibles</h2>
+            <Link href="/agents">
+              <Button variant="outline" size="sm">
+                <Icon icon="mdi:plus" className="h-4 w-4 mr-2" />
+                Créer un agent
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {agents.map((agent) => (
+              <motion.div key={agent.id} whileHover={{ scale: 1.02 }}>
+                <Card
+                  className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft"
+                  onClick={() => handleAgentClick(agent)}
+                >
+                  <CardContent className="p-4 py-0">
+                    <div className="flex items-start gap-3">
+                      <div className="relative">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
+                          <img
+                            src={agent.picture_url || "/default-avatar.png"}
+                            alt={agent.name || "Agent"}
+                            className="w-full h-full object-cover object-top"
+                          />
+                        </div>
+                        <span className="absolute -bottom-1 -right-1 text-lg">
+                          {getDifficultyEmoji(agent.difficulty || "")}
+                        </span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {agent.firstname && agent.lastname
+                            ? `${agent.firstname} ${agent.lastname}`
+                            : agent.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {agent.job_title}
+                        </p>
+                      </div>
+                      <Badge
+                        className={getDifficultyColor(agent.difficulty || "")}
+                      >
+                        {agent.difficulty}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Products Section */}
+        <motion.section variants={item}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Produits</h2>
+            <Link href="/products">
+              <Button variant="outline" size="sm">
+                <Icon icon="mdi:plus" className="h-4 w-4 mr-2" />
+                Ajouter un produit
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {products.map((product) => (
+              <motion.div key={product.id} whileHover={{ scale: 1.02 }}>
+                <Card
+                  className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft"
+                  onClick={() => handleProductClick(product)}
+                >
+                  <CardContent className="p-4 py-0">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg">
+                          {getMarcheEmoji(product.marche || "")}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {product.marche}
+                        </p>
+                      </div>
+                      {product.price && (
+                        <span className="text-xs font-semibold text-green-600">
+                          {product.price}€
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      </motion.div>
+
+      {/* Feature Announcement Dialog */}
+      <Dialog open={showFeatureDialog} onOpenChange={handleFeatureDialogClose}>
+        <DialogContent className="sm:max-w-[50rem] rounded-3xl p-0 overflow-hidden">
+          <div className="flex flex-col md:flex-row h-[500px]">
+            {/* Left side - Image */}
+            <div className="flex-shrink-0 md:w-1/2 flex items-center justify-center p-4">
+              <img
+                src="/phone.png"
+                alt="Téléphone"
+                className="w-full h-full max-w-none object-cover rounded-2xl"
+              />
+            </div>
+
+            {/* Right side - Text */}
+            <div className="flex-1 md:w-1/2 flex flex-col justify-center p-8">
+              <DialogHeader className="text-left">
+                <DialogTitle
+                  className={`text-4xl mb-6 text-purple-600 ${courgette.className}`}
+                >
+                  Allo ?
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-6">
+                <p className="text-xl font-semibold text-gray-900">
+                  Tu peux maintenant appeler l&apos;IA avec ton tel !
+                </p>
+
+                <p className="text-gray-600 leading-relaxed text-base">
+                  Tape le numéro et entraîne-toi à vendre sans te travestir !
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-gray-600">Appels plus naturels</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-gray-600">Pratique partout</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-gray-600">
+                      Résultats plus rapides
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Button
+                  onClick={handleFeatureDialogClose}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-2xl py-3 text-base font-medium"
+                >
+                  Cool, j&apos;ai pigé !
                 </Button>
               </div>
-            </Card>
+            </div>
           </div>
-        </div>
-      </motion.section>
-
-      {/* Agents Section */}
-      <motion.section variants={item}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Agents disponibles</h2>
-          <Link href="/agents">
-            <Button variant="outline" size="sm">
-              <Icon icon="mdi:plus" className="h-4 w-4 mr-2" />
-              Créer un agent
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {agents.map((agent) => (
-            <motion.div key={agent.id} whileHover={{ scale: 1.02 }}>
-              <Card
-                className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft"
-                onClick={() => handleAgentClick(agent)}
-              >
-                <CardContent className="p-4 py-0">
-                  <div className="flex items-start gap-3">
-                    <div className="relative">
-                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
-                        <img
-                          src={agent.picture_url || "/default-avatar.png"}
-                          alt={agent.name || "Agent"}
-                          className="w-full h-full object-cover object-top"
-                        />
-                      </div>
-                      <span className="absolute -bottom-1 -right-1 text-lg">
-                        {getDifficultyEmoji(agent.difficulty || "")}
-                      </span>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {agent.firstname && agent.lastname
-                          ? `${agent.firstname} ${agent.lastname}`
-                          : agent.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {agent.job_title}
-                      </p>
-                    </div>
-                    <Badge
-                      className={getDifficultyColor(agent.difficulty || "")}
-                    >
-                      {agent.difficulty}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* Products Section */}
-      <motion.section variants={item}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Produits</h2>
-          <Link href="/products">
-            <Button variant="outline" size="sm">
-              <Icon icon="mdi:plus" className="h-4 w-4 mr-2" />
-              Ajouter un produit
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {products.map((product) => (
-            <motion.div key={product.id} whileHover={{ scale: 1.02 }}>
-              <Card
-                className="cursor-pointer hover:shadow-soft transition-shadow shadow-soft"
-                onClick={() => handleProductClick(product)}
-              >
-                <CardContent className="p-4 py-0">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg">
-                        {getMarcheEmoji(product.marche || "")}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {product.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {product.marche}
-                      </p>
-                    </div>
-                    {product.price && (
-                      <span className="text-xs font-semibold text-green-600">
-                        {product.price}€
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-    </motion.div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
