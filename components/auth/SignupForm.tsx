@@ -60,7 +60,7 @@ export default function SignupForm() {
               name="email"
               type="email"
               required
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-soft placeholder-gray-400 transition-all duration-200"
               placeholder="votre@email.com"
             />
           </div>
@@ -88,7 +88,7 @@ export default function SignupForm() {
               minLength={6}
               value={password}
               onChange={handlePasswordChange}
-              className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl shadow-soft placeholder-gray-400 transition-all duration-200"
               placeholder="••••••••"
             />
             <button
@@ -131,10 +131,10 @@ export default function SignupForm() {
               minLength={6}
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
-              className={`block w-full pl-10 pr-12 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${
+              className={`block w-full pl-10 pr-12 py-3 border rounded-xl shadow-soft placeholder-gray-400 transition-all duration-200 ${
                 confirmPassword && !passwordsMatch
-                  ? "border-red-300 focus:ring-red-500 focus:border-transparent"
-                  : "border-gray-300 focus:ring-purple-500 focus:border-transparent"
+                  ? "border-red-300"
+                  : "border-gray-300"
               }`}
               placeholder="••••••••"
             />
@@ -169,7 +169,7 @@ export default function SignupForm() {
             name="terms"
             type="checkbox"
             required
-            className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+            className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded"
           />
         </div>
         <div className="ml-3 text-sm">
@@ -199,7 +199,7 @@ export default function SignupForm() {
           disabled={
             isSubmitting || (confirmPassword.length > 0 && !passwordsMatch)
           }
-          className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isSubmitting ? (
             <>
