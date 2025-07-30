@@ -269,8 +269,13 @@ export async function POST(request: NextRequest) {
       follow_up_call: "Appel de suivi",
     };
 
+    // Use firstname and lastname if available, fallback to name
+    const agentFullName = agent.firstname && agent.lastname 
+      ? `${agent.firstname} ${agent.lastname}` 
+      : agent.name;
+
     const agentContext = `
-Tu es ${agent.name}, ${agent.job_title}. 
+Tu es ${agentFullName}, ${agent.job_title}. 
 Si l'utilisateur te dis bonjour, TU DOIS PARLER EN FRANÇAIS !
 Personnalité: ${JSON.stringify(agent.personnality, null, 2)}
 Difficulté: ${agent.difficulty}
@@ -333,7 +338,7 @@ INSTRUCTIONS:
         male_young_energetic: "3Kfr7NbSVkpOWCWA4Zgu", // Homme - jeune - énergique
         // Female voices
         female_young_dynamic: "F1toM6PcP54s45kOOAyV", // Femme - assez jeune - dynamique
-        female_young_energetic: "Ka6yOFdNGhzFuCVW6VyO", // Femme - jeune - énergique
+        female_young_energetic: "F1toM6PcP54s45kOOAyV", // Femme - jeune - énergique
       };
 
       // Use custom voice_id if provided, otherwise select based on characteristics

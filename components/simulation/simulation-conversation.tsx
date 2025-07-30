@@ -19,8 +19,10 @@ import { Conversation, Agent, Product } from "@/lib/types/database";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useConversation } from "@elevenlabs/react";
 import { Playwrite_IE } from "next/font/google";
+import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 
 const playwriteIE = Playwrite_IE({
   weight: "400",
@@ -66,11 +68,19 @@ export function SimulationConversation({
   const [elevenlabsConversationId, setElevenlabsConversationId] = useState<
     string | null
   >(null);
+  const [isRecalling, setIsRecalling] = useState(false);
 
   const supabase = createClient();
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+
+  // Use the beforeunload hook for refresh/navigation protection - always active
+  useBeforeUnload(
+    true, // enabled
+    "La configuration actuelle de la simulation sera perdue. Voulez-vous continuer ?"
+  );
 
   // Add debug logging for state changes
   useEffect(() => {
@@ -171,6 +181,7 @@ export function SimulationConversation({
 
   useEffect(() => {
     console.log("🚀 Component mounted, conversationId:", conversationId);
+    
     loadConversation();
     initializeMedia();
     return () => {
@@ -181,13 +192,10 @@ export function SimulationConversation({
       if (timerInterval) {
         clearInterval(timerInterval);
       }
-      // Stop all media tracks
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-      }
+      // Media cleanup is handled by ElevenLabs SDK
     };
   }, [conversationId]);
+
 
   const loadConversation = async () => {
     console.log("📥 Loading conversation:", conversationId);
@@ -211,6 +219,27 @@ export function SimulationConversation({
       }
 
       console.log("✅ Conversation loaded:", data);
+      
+      // Check if conversation already has an ElevenLabs ID (already started)
+      if (data.elevenlabs_conversation_id) {
+        console.warn("⚠️ Conversation already has ElevenLabs ID:", data.elevenlabs_conversation_id);
+        toast.warning("Cette conversation a déjà été démarrée. Redirection vers la configuration...");
+        
+        // Clean up localStorage - remove all agent configurations
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('agent_config_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Redirect to stepper configuration
+        setTimeout(() => {
+          router.push('/simulation/configure');
+        }, 2000);
+        return;
+      }
+      
       setConversationData(data);
 
       // If conversation already has feedback, show it
@@ -237,29 +266,24 @@ export function SimulationConversation({
     }
   };
 
-  // Initialize media (camera and microphone)
+  // Initialize media (microphone only)
   const initializeMedia = async () => {
-    console.log("🎥 Initializing media devices...");
+    console.log("🎤 Initializing microphone...");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 },
-        },
         audio: true,
+        video: false, // No camera needed
       });
 
-      console.log("✅ Media stream obtained:", stream);
+      console.log("✅ Microphone stream obtained:", stream);
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        console.log("✅ Video element source set");
-      }
+      // We don't need to set video element since we're not using camera
+      // The ElevenLabs SDK will handle the audio stream
 
       return true;
     } catch (error) {
-      console.error("❌ Error accessing media devices:", error);
+      console.error("❌ Error accessing microphone:", error);
+      toast.error("Impossible d'accéder au microphone. Veuillez autoriser l'accès.");
       return false;
     }
   };
@@ -549,6 +573,70 @@ export function SimulationConversation({
     }
   };
 
+  const handleRecallProspect = async () => {
+    if (!conversationData || isRecalling) return;
+
+    console.log("🔄 Starting recall prospect process");
+    setIsRecalling(true);
+
+    try {
+      // Get the current agent configuration from localStorage
+      const agentId = conversationData.agent_id;
+      const savedConfigKey = `agent_config_${agentId}`;
+      const savedConfig = localStorage.getItem(savedConfigKey);
+
+      if (!savedConfig) {
+        console.warn("📭 No saved config found for agent", agentId);
+        toast.warning("Configuration introuvable. Redirection vers la configuration...");
+        setTimeout(() => {
+          router.push('/simulation/configure');
+        }, 1500);
+        return;
+      }
+
+      const parsedConfig = JSON.parse(savedConfig);
+      console.log("📂 Using saved config:", parsedConfig);
+
+      // Get authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast.error("Erreur d'authentification");
+        return;
+      }
+
+      // Create a new conversation with the same configuration
+      const { data: newConversation, error: conversationError } = await supabase
+        .from("conversations")
+        .insert({
+          user_id: user.id,
+          agent_id: conversationData.agent_id,
+          product_id: conversationData.product_id,
+          goal: conversationData.goal,
+          context: conversationData.context,
+          call_type: conversationData.call_type,
+        })
+        .select()
+        .single();
+
+      if (conversationError) {
+        console.error("❌ Error creating new conversation:", conversationError);
+        toast.error("Erreur lors de la création de la nouvelle conversation");
+        return;
+      }
+
+      console.log("✅ New conversation created:", newConversation.id);
+      toast.success("Nouvelle conversation créée !");
+
+      // Navigate to the new conversation
+      router.push(`/simulation/${newConversation.id}`);
+    } catch (error) {
+      console.error("❌ Error in recall prospect:", error);
+      toast.error("Erreur lors de la création de la nouvelle conversation");
+    } finally {
+      setIsRecalling(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -725,10 +813,18 @@ export function SimulationConversation({
                 </div>
               </div>
             </div>
+            
+            {/* Retour dashboard button below post-it */}
+            <div className="flex justify-center lg:justify-start mt-4">
+              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:underline underline-offset-4">
+                ← Retour au dashboard
+              </Link>
+            </div>
           </div>
 
-          {/* iPhone Interface */}
-          <div className="flex justify-center lg:justify-start lg:pl-4">
+          {/* iPhone Interface and Recall Button Container */}
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:justify-start gap-6 lg:pl-4">
+            {/* iPhone Interface */}
             <div className="relative">
               {/* Side buttons positioned absolutely outside the iPhone */}
               {/* Volume buttons (left side) */}
@@ -960,24 +1056,74 @@ export function SimulationConversation({
                 </div>
               </div>
             </div>
+            
+            {/* Rappeler ce prospect button - positioned right of iPhone on desktop, below on mobile */}
+            {(conversationStatus === "ended" || conversationStatus === "analyzing") && (
+              <div className="flex flex-col items-center justify-center lg:items-start lg:pt-20 lg:ml-12 gap-3">
+                {/* Title above button */}
+                <div className={`text-center ${playwriteIE.className}`}>
+                  <div className="text-lg font-semibold text-gray-800">
+                    Rappeler ce prospect ?
+                  </div>
+                </div>
+                
+                <motion.button
+                  onClick={handleRecallProspect}
+                  disabled={isRecalling}
+                  className={`
+                    relative
+                    bg-gradient-to-br from-yellow-200 to-yellow-300 
+                    hover:from-yellow-300 hover:to-yellow-400
+                    text-gray-800 font-medium
+                    px-6 py-4 rounded-lg
+                    shadow-lg hover:shadow-xl
+                    border-2 border-yellow-400/30
+                    ${isRecalling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                  `}
+                  style={{
+                    boxShadow: `
+                      0 0 20px rgba(255, 215, 0, 0.4),
+                      0 4px 12px rgba(0, 0, 0, 0.15),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.3)
+                    `,
+                  }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6, duration: 0.3 }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: `
+                      0 0 30px rgba(255, 215, 0, 0.6),
+                      0 6px 16px rgba(0, 0, 0, 0.2),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.4)
+                    `
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-gray-900">
+                      {isRecalling ? "Création..." : "C'est parti !"}
+                    </div>
+                  </div>
+
+                  {isRecalling && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Icon
+                        icon="svg-spinners:ring-resize"
+                        className="w-6 h-6 text-gray-700"
+                      />
+                    </div>
+                  )}
+                </motion.button>
+              </div>
+            )}
           </div>
         </div>
 
+
         {/* Actions below iPhone */}
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-6">
           <div className="flex gap-4">
-            <Link href="/simulation/configure">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Icon icon="material-symbols:refresh" className="w-4 h-4" />
-                Nouvelle simulation
-              </Button>
-            </Link>
-            <Link href="/">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Icon icon="material-symbols:home" className="w-4 h-4" />
-                Retour dashboard
-              </Button>
-            </Link>
             {feedback && (
               <Link href={`/conversations/${conversationId}`}>
                 <Button variant="outline" className="flex items-center gap-2">

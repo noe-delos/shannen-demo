@@ -114,6 +114,7 @@ export function SimulationStepper() {
       const savedConfig = localStorage.getItem(`agent_config_${agentId}`);
       if (savedConfig) {
         const parsedConfig = JSON.parse(savedConfig);
+        console.log(`📂 Loading saved config for agent ${agentId}:`, parsedConfig);
         setConfig((prevConfig) => ({
           ...prevConfig,
           goal: parsedConfig.goal || "",
@@ -124,7 +125,15 @@ export function SimulationStepper() {
             historique_relation:
               parsedConfig.context?.historique_relation || "Premier contact",
           },
+          // Also restore product and call type if saved
+          product: parsedConfig.product_id ? 
+            products.find(p => p.id === parsedConfig.product_id) || prevConfig.product : 
+            prevConfig.product,
+          callType: parsedConfig.call_type || prevConfig.callType,
         }));
+        console.log("✅ Configuration loaded successfully");
+      } else {
+        console.log(`📭 No saved config found for agent ${agentId}`);
       }
     } catch (error) {
       console.error("Error loading saved config:", error);
@@ -149,6 +158,7 @@ export function SimulationStepper() {
         `agent_config_${agentId}`,
         JSON.stringify(updatedConfig)
       );
+      console.log(`💾 Saved config for agent ${agentId}:`, updatedConfig);
     } catch (error) {
       console.error("Error saving config:", error);
     }
@@ -230,6 +240,27 @@ export function SimulationStepper() {
         toast.error("Vous devez être connecté");
         return;
       }
+
+      // Save the final complete configuration before starting
+      if (config.agent?.id) {
+        console.log("💾 Saving final configuration before starting simulation");
+        saveConfig(config.agent.id, {
+          goal: config.goal,
+          context: config.context,
+          // Also save product and call type for complete config
+          product_id: config.product?.id,
+          call_type: config.callType,
+        });
+      }
+
+      // Clean up any previous localStorage configurations to avoid conflicts (except current agent)
+      console.log("🧹 Cleaning up previous localStorage configurations");
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('agent_config_') && key !== `agent_config_${config.agent?.id}`) {
+          localStorage.removeItem(key);
+        }
+      });
 
       // Create conversation record
       const { data: conversation, error } = await supabase
