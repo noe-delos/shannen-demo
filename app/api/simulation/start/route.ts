@@ -332,13 +332,13 @@ INSTRUCTIONS:
       // Default voices from the provided list
       const voices = {
         // Male voices
-        male_young_dynamic: "T9VNN91AsQKnhGF6hTi8", // Homme - dynamique - assez jeune
-        male_young_realistic: "xlVRtVJbKuO2nwbbopa2", // Homme - Très réaliste - assez jeune
-        male_mature_deep: "BVBq6HVJVdnwOMJOqvy9", // Homme - Mature - deep - reposé - haut poste
-        male_young_energetic: "3Kfr7NbSVkpOWCWA4Zgu", // Homme - jeune - énergique
+        male_young_dynamic: "gs0tAILXbY5DNrJrsM6F", // Homme - dynamique - assez jeune
+        male_young_realistic: "qNc8cbRJLnPqGTjuVcKa", // Homme - Très réaliste - assez jeune
+        male_mature_deep: "UgBBYS2sOqTuMpoF3BR0", // Homme - Mature - deep - reposé - haut poste
+        male_young_energetic: "zT03pEAEi0VHKciJODfn", // Homme - jeune - énergique
         // Female voices
-        female_young_dynamic: "F1toM6PcP54s45kOOAyV", // Femme - assez jeune - dynamique
-        female_young_energetic: "F1toM6PcP54s45kOOAyV", // Femme - jeune - énergique
+        female_young_dynamic: "TojRWZatQyy9dujEdiQ1", // Femme - assez jeune - dynamique
+        female_young_energetic: "TojRWZatQyy9dujEdiQ1", // Femme - jeune - énergique
       };
 
       // Use custom voice_id if provided, otherwise select based on characteristics
