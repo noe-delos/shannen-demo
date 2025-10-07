@@ -12,6 +12,7 @@ export default function SignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -31,8 +32,12 @@ export default function SignupForm() {
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
+    setError("");
     try {
-      await signup(formData);
+      const result = await signup(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -40,6 +45,19 @@ export default function SignupForm() {
 
   return (
     <form className="space-y-6" action={handleSubmit}>
+      {/* Error Message */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Icon
+              icon="material-symbols:error"
+              className="h-5 w-5 text-red-600"
+            />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div>
           <label

@@ -10,10 +10,13 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const [error, setError] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -23,11 +26,19 @@ export default function LoginPage() {
       setError(
         "L'accès à ce compte a été fermé pour des raisons de confidentialité des données. La création d'un nouveau compte est gratuite et aucune vérification par email n'est requise."
       );
+      setIsSubmitting(false);
       return;
     }
 
     // If email is not blocked, proceed with login
-    await login(formData);
+    try {
+      const result = await login(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -187,11 +198,25 @@ export default function LoginPage() {
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors duration-200"
+                  >
+                    <Icon
+                      icon={
+                        showPassword
+                          ? "material-symbols:visibility-off"
+                          : "material-symbols:visibility"
+                      }
+                      className="h-5 w-5 text-gray-400 hover:text-blue-600"
+                    />
+                  </button>
                 </div>
               </div>
             </div>
@@ -200,10 +225,20 @@ export default function LoginPage() {
             <div className="space-y-4">
               <button
                 type="submit"
-                className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                disabled={isSubmitting}
+                className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                <Icon icon="material-symbols:login" className="w-5 h-5" />
-                Se connecter
+                {isSubmitting ? (
+                  <>
+                    <Icon icon="eos-icons:loading" className="w-5 h-5 animate-spin" />
+                    Connexion en cours...
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="material-symbols:login" className="w-5 h-5" />
+                    Se connecter
+                  </>
+                )}
               </button>
             </div>
           </form>

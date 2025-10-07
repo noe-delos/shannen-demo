@@ -16,21 +16,19 @@ export async function signup(formData: FormData) {
 
   // Basic validation
   if (!email || !password || !confirmPassword) {
-    redirect("/error?message=Tous les champs sont obligatoires");
+    return { error: "Tous les champs sont obligatoires" };
   }
 
   if (password !== confirmPassword) {
-    redirect("/error?message=Les mots de passe ne correspondent pas");
+    return { error: "Les mots de passe ne correspondent pas" };
   }
 
   if (password.length < 6) {
-    redirect(
-      "/error?message=Le mot de passe doit contenir au moins 6 caractères"
-    );
+    return { error: "Le mot de passe doit contenir au moins 6 caractères" };
   }
 
   if (!terms) {
-    redirect("/error?message=Vous devez accepter les conditions d'utilisation");
+    return { error: "Vous devez accepter les conditions d'utilisation" };
   }
 
   // Sign up the user without email confirmation
@@ -43,7 +41,7 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/error?message=${encodeURIComponent(error.message)}`);
+    return { error: error.message };
   }
 
   // If signup was successful, sign in the user immediately
@@ -54,11 +52,10 @@ export async function signup(formData: FormData) {
     });
 
     if (signInError) {
-      redirect(
-        `/error?message=${encodeURIComponent(
-          "Compte créé mais connexion automatique échouée. Veuillez vous connecter manuellement."
-        )}`
-      );
+      return {
+        error:
+          "Compte créé mais connexion automatique échouée. Veuillez vous connecter manuellement.",
+      };
     }
   }
 
