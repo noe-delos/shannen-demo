@@ -43,6 +43,12 @@ import { Agent } from "@/lib/types/database";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 // Non-modifiable agent IDs
 const NON_MODIFIABLE_AGENTS = [
@@ -408,7 +414,7 @@ export function AgentsGrid() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Agents</h1>
+          <h1 className={`text-4xl font-bold ${dancingScript.className}`}>Agents</h1>
           <p className="text-muted-foreground">
             Gérez vos agents conversationnels
           </p>

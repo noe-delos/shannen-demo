@@ -1,126 +1,97 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { Icon } from "@iconify/react";
 import Link from "next/link";
 import SignupForm from "@/components/auth/SignupForm";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-800 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
+    <div className="min-h-screen flex relative">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: "url(/background.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* Container with padding */}
+      <div className="relative z-10 w-full min-h-screen p-8 flex items-center justify-center">
+        {/* Main White Container */}
+        <div className="w-full max-w-7xl  bg-white rounded-3xl shadow-2xl overflow-hidden flex min-h-[700px] border-8 border-white">
+          {/* Left Side - Hero Section with blur */}
           <div
-            className="w-full h-full"
+            className="hidden lg:flex lg:w-[45%] relative overflow-hidden rounded-3xl border-2 border-white"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundRepeat: "repeat",
+              backgroundImage: "url(/background.jpg)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
             }}
-          ></div>
-        </div>
+          >
+            {/* Blurred overlay */}
+            <div className="absolute inset-0 backdrop-blur-lg bg-white/10 rounded-3xl" />
 
-        <div className="relative z-10 flex flex-col justify-center px-12 py-12 text-white">
-          <div className="max-w-md">
-            {/* Logo */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <img src="/logo.png" className="w-8 h-8" alt="Logo" />
-              </div>
-              <h1 className="text-3xl font-bold">SforSales</h1>
-            </div>
-
-            {/* Hero Content */}
-            <h2 className="text-4xl font-bold leading-tight mb-6">
-              Commencez votre
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
-                formation commerciale
-              </span>
-            </h2>
-
-            <p className="text-xl text-purple-100 mb-8 leading-relaxed">
-              Rejoignez des milliers de commerciaux qui améliorent leurs
-              performances grâce à nos simulations IA avancées.
-            </p>
-
-            {/* Features */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="material-symbols:check"
-                    className="w-5 h-5 text-green-300"
-                  />
-                </div>
-                <span className="text-purple-100">
-                  Accès instantané aux simulations
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="material-symbols:check"
-                    className="w-5 h-5 text-green-300"
-                  />
-                </div>
-                <span className="text-purple-100">
-                  Progression personnalisée
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="material-symbols:check"
-                    className="w-5 h-5 text-green-300"
-                  />
-                </div>
-                <span className="text-purple-100">Support client dédié</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Signup Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
-        <div className="w-full max-w-md space-y-8">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-                <img src="/logo.png" className="w-8 h-8" alt="Logo" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">SforSales</h1>
-            </div>
-          </div>
-
-          {/* Header */}
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Créez votre compte
-            </h2>
-            <p className="text-gray-600">
-              Rejoignez la communauté des experts en vente commerciale
-            </p>
-          </div>
-
-          {/* Form */}
-          <SignupForm />
-
-          {/* Login Link */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Vous avez déjà un compte ?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-purple-600 hover:text-purple-500 transition-colors duration-200"
+            <div className="relative z-10 flex flex-col justify-end p-12 pl-5 text-white rounded-xl">
+              <h1
+                className={`text-[9rem] opacity-80 font-bold leading-[0.95] ${dancingScript.className}`}
               >
-                Se connecter
-              </Link>
-            </p>
+                <span className="block">Hello</span>
+                <span className="block ml-16">Michel.</span>
+              </h1>
+              <p className="text-zinc-200 text-md max-w-xs pt-10">
+                Simulez vos appels commerciaux sans cramer vos leads !
+              </p>
+            </div>
+          </div>
+
+          {/* Right Side - Signup Form */}
+          <div className="flex-1 flex flex-col items-center justify-center p-12">
+            <div className="w-full max-w-md space-y-6">
+              {/* Logo at top */}
+              <div className="flex justify-center">
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb1aw2CCOIDAqxHBxh2BkdXcw9GKnuPock0w&s"
+                  alt="Hello Michel Logo"
+                  className="h-7 w-auto"
+                />
+              </div>
+
+              {/* Header */}
+              <div className="text-center">
+                <h2
+                  className={`text-6xl font-bold text-gray-900 mb-3 ${dancingScript.className}`}
+                >
+                  Bienvenue !
+                </h2>
+              </div>
+
+              {/* Form */}
+              <SignupForm />
+
+              {/* Login Link */}
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Vous avez déjà un compte ?{" "}
+                  <Link
+                    href="/login"
+                    className="font-medium text-black hover:text-gray-700 transition-colors duration-200 underline"
+                  >
+                    Se connecter
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </div>{" "}
     </div>
   );
 }

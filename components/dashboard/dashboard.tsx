@@ -15,6 +15,12 @@ import { Conversation, Agent, Product } from "@/lib/types/database";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export function Dashboard() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -241,7 +247,7 @@ export function Dashboard() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div>
-              <h1 className="text-2xl font-bold">Vos conversations</h1>
+              <h1 className={`text-4xl font-bold ${dancingScript.className}`}>Vos conversations</h1>
               <p className="text-muted-foreground">
                 Liste de vos conversations passées
               </p>

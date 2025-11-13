@@ -25,6 +25,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 // Menu items.
 const items = [
@@ -158,8 +164,12 @@ export function AppSidebar() {
       <SidebarContent className="scrollbar-hide">
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-bold mb-4 pt-4 flex items-center gap-2">
-            <img src={"/logo.png"} className="size-8" />
-            <p className="text-xl font-bold text-foreground">SforSales</p>
+            <img src={"/logo.png"} className="size-6" />
+            <p
+              className={`text-2xl font-extrabold text-foreground ${dancingScript.className}`}
+            >
+              Hello Michel.
+            </p>
           </SidebarGroupLabel>
           <SidebarGroupContent className="pt-4">
             <div className="mb-4">

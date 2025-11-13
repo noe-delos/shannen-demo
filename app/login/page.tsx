@@ -7,6 +7,12 @@ import { useState } from "react";
 import { login } from "./actions";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function LoginPage() {
   const [error, setError] = useState<string>("");
@@ -42,242 +48,209 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
+    <div className="min-h-screen flex relative">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: "url(/background.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* Container with padding */}
+      <div className="relative z-10 w-full min-h-screen p-8 flex items-center justify-center">
+        {/* Main White Container */}
+        <div className="w-full max-w-7xl  bg-white rounded-3xl shadow-2xl overflow-hidden flex min-h-[700px] border-8 border-white">
+          {/* Left Side - Hero Section with blur */}
           <div
-            className="w-full h-full"
+            className="hidden lg:flex lg:w-[45%] relative overflow-hidden rounded-3xl border-2 border-white"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundRepeat: "repeat",
+              backgroundImage: "url(/background.jpg)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
             }}
-          ></div>
-        </div>
+          >
+            {/* Blurred overlay */}
+            <div className="absolute inset-0 backdrop-blur-lg bg-white/10 rounded-3xl" />
 
-        <div className="relative z-10 flex flex-col justify-center px-12 py-12 text-white">
-          <div className="max-w-md">
-            {/* Logo */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <img src="/logo.png" className="w-8 h-8" alt="Logo" />
-              </div>
-              <h1 className="text-3xl font-bold">SforSales</h1>
-            </div>
-
-            {/* Hero Content */}
-            <h2 className="text-4xl font-bold leading-tight mb-6">
-              Maîtrisez l'art de la
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
-                vente commerciale
-              </span>
-            </h2>
-
-            <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-              Entraînez-vous avec des agents IA ultra-réalistes et recevez un
-              feedback personnalisé pour perfectionner vos techniques de vente.
-            </p>
-
-            {/* Features */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="material-symbols:check"
-                    className="w-5 h-5 text-green-300"
-                  />
-                </div>
-                <span className="text-blue-100">
-                  Conversations IA réalistes
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="material-symbols:check"
-                    className="w-5 h-5 text-green-300"
-                  />
-                </div>
-                <span className="text-blue-100">
-                  Feedback détaillé et personnalisé
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="material-symbols:check"
-                    className="w-5 h-5 text-green-300"
-                  />
-                </div>
-                <span className="text-blue-100">Scénarios métier variés</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
-        <div className="w-full max-w-md space-y-8">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <img src="/logo.png" className="w-8 h-8" alt="Logo" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">SforSales</h1>
+            <div className="relative z-10 flex flex-col justify-end p-12 pl-5 text-white rounded-xl">
+              <h1
+                className={`text-[9rem] opacity-80 font-bold leading-[0.95] ${dancingScript.className}`}
+              >
+                <span className="block">Hello</span>
+                <span className="block ml-16">Michel.</span>
+              </h1>
+              <p className="text-zinc-200 text-md max-w-xs pt-10">
+                Simulez vos appels commerciaux sans cramer vos leads !
+              </p>
             </div>
           </div>
 
-          {/* Header */}
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Bon retour parmi nous
-            </h2>
-            <p className="text-gray-600">
-              Connectez-vous pour accéder à vos simulations commerciales
-            </p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="material-symbols:error"
-                  className="h-5 w-5 text-red-600"
+          {/* Right Side - Login Form */}
+          <div className="flex-1 flex flex-col items-center justify-center p-12">
+            <div className="w-full max-w-md space-y-18">
+              {/* Logo at top */}
+              <div className="flex justify-center">
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb1aw2CCOIDAqxHBxh2BkdXcw9GKnuPock0w&s"
+                  alt="Hello Michel Logo"
+                  className="h-7 w-auto"
                 />
-                <p className="text-sm text-red-800">{error}</p>
               </div>
-            </div>
-          )}
 
-          {/* Form */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+              {/* Header */}
+              <div className="text-center">
+                <h2
+                  className={`text-6xl font-bold text-gray-900 mb-3 ${dancingScript.className}`}
                 >
-                  Adresse email
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  Bienvenue !
+                </h2>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2">
                     <Icon
-                      icon="material-symbols:mail"
-                      className="h-5 w-5 text-gray-400"
+                      icon="material-symbols:error"
+                      className="h-5 w-5 text-red-600"
                     />
+                    <p className="text-sm text-red-800">{error}</p>
                   </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="votre@email.com"
-                  />
                 </div>
-              </div>
+              )}
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icon
-                      icon="material-symbols:lock"
-                      className="h-5 w-5 text-gray-400"
-                    />
+              {/* Form */}
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Adresse email
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Icon
+                          icon="material-symbols:mail"
+                          className="h-5 w-5 text-gray-400"
+                        />
+                      </div>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        className="block w-full pl-10 pr-3 py-3 bg-blue-50 rounded-lg shadow-soft placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                        placeholder="votre@email.com"
+                      />
+                    </div>
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Mot de passe
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Icon
+                          icon="material-symbols:lock"
+                          className="h-5 w-5 text-gray-400"
+                        />
+                      </div>
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        className="block w-full pl-10 pr-12 py-3 bg-blue-50 rounded-lg shadow-soft placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                      >
+                        <Icon
+                          icon={
+                            showPassword
+                              ? "material-symbols:visibility-off"
+                              : "material-symbols:visibility"
+                          }
+                          className="h-5 w-5 text-gray-400 hover:text-blue-600"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Remember Me */}
+                <div className="flex items-center">
                   <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="••••••••"
+                    id="remember"
+                    name="remember"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors duration-200"
+                  <label
+                    htmlFor="remember"
+                    className="ml-2 block text-sm text-gray-700"
                   >
-                    <Icon
-                      icon={
-                        showPassword
-                          ? "material-symbols:visibility-off"
-                          : "material-symbols:visibility"
-                      }
-                      className="h-5 w-5 text-gray-400 hover:text-blue-600"
-                    />
+                    Se souvenir de moi
+                  </label>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Icon
+                          icon="eos-icons:loading"
+                          className="w-5 h-5 animate-spin"
+                        />
+                        Connexion en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Icon
+                          icon="material-symbols:login"
+                          className="w-5 h-5"
+                        />
+                        Se connecter
+                      </>
+                    )}
                   </button>
                 </div>
+              </form>
+
+              {/* Signup Link */}
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Vous n'avez pas encore de compte ?{" "}
+                  <Link
+                    href="/signup"
+                    className="font-medium text-black hover:text-gray-700 transition-colors duration-200 underline"
+                  >
+                    Créer un compte
+                  </Link>
+                </p>
               </div>
             </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Icon icon="eos-icons:loading" className="w-5 h-5 animate-spin" />
-                    Connexion en cours...
-                  </>
-                ) : (
-                  <>
-                    <Icon icon="material-symbols:login" className="w-5 h-5" />
-                    Se connecter
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Signup Link */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Vous n'avez pas encore de compte ?{" "}
-              <Link
-                href="/signup"
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
-              >
-                Créer un compte
-              </Link>
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-xs text-gray-500">
-              En vous connectant, vous acceptez nos{" "}
-              <a
-                href="#"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                conditions d'utilisation
-              </a>{" "}
-              et notre{" "}
-              <a
-                href="#"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                politique de confidentialité
-              </a>
-              .
-            </p>
           </div>
         </div>
-      </div>
+      </div>{" "}
     </div>
   );
 }

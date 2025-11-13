@@ -78,7 +78,7 @@ export default function SignupForm() {
               name="email"
               type="email"
               required
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              className="block w-full pl-10 pr-3 py-3 bg-blue-50 rounded-lg shadow-soft placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
               placeholder="votre@email.com"
             />
           </div>
@@ -106,13 +106,13 @@ export default function SignupForm() {
               minLength={6}
               value={password}
               onChange={handlePasswordChange}
-              className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              className="block w-full pl-10 pr-12 py-3 bg-blue-50 rounded-lg shadow-soft placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-purple-600 transition-colors duration-200"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-purple-600 transition-colors duration-200 cursor-pointer"
             >
               <Icon
                 icon={
@@ -124,7 +124,6 @@ export default function SignupForm() {
               />
             </button>
           </div>
-          <p className="mt-1 text-xs text-gray-500">Minimum 6 caractères</p>
         </div>
 
         <div>
@@ -149,17 +148,17 @@ export default function SignupForm() {
               minLength={6}
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
-              className={`block w-full pl-10 pr-12 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${
+              className={`block w-full pl-10 pr-12 py-3 rounded-lg shadow-soft placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${
                 confirmPassword && !passwordsMatch
-                  ? "border-red-300 focus:ring-red-500 focus:border-transparent"
-                  : "border-gray-300 focus:ring-purple-500 focus:border-transparent"
+                  ? "bg-red-50 focus:ring-red-500"
+                  : "bg-blue-50 focus:ring-purple-500"
               }`}
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-purple-600 transition-colors duration-200"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-purple-600 transition-colors duration-200 cursor-pointer"
             >
               <Icon
                 icon={
@@ -217,7 +216,7 @@ export default function SignupForm() {
           disabled={
             isSubmitting || (confirmPassword.length > 0 && !passwordsMatch)
           }
-          className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {isSubmitting ? (
             <>
