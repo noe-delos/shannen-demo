@@ -448,7 +448,106 @@ INSTRUCTIONS:
 
     console.log("📡 Update agent response status:", updateAgentResponse.status);
 
-    if (!updateAgentResponse.ok) {
+    // If agent not found (404), create a new one - this happens when switching ElevenLabs accounts
+    if (updateAgentResponse.status === 404) {
+      console.log("⚠️ Agent not found in ElevenLabs, creating a new one...");
+
+      const createAgentPayload = {
+        conversation_config: {
+          agent: {
+            prompt: {
+              prompt: agentContext,
+              llm: "claude-3-7-sonnet",
+              temperature: 0.3,
+              tools: [
+                {
+                  name: "language_detection",
+                  description: "",
+                  params: {
+                    system_tool_type: "language_detection",
+                  },
+                  type: "system",
+                },
+              ],
+            },
+            first_message: "Allô ?",
+            language: "fr",
+          },
+          language_presets: {
+            fr: {
+              overrides: {
+                agent: {
+                  language: "fr",
+                },
+              },
+            },
+          },
+          tts: {
+            agent_output_audio_format: "ulaw_8000",
+            model_id: "eleven_flash_v2_5",
+            voice_id: selectedVoiceId,
+            stability: 0.5,
+            similarity_boost: 0.8,
+            speed: 1.0,
+          },
+          asr: {
+            user_input_audio_format: "ulaw_8000",
+          },
+          conversation: {
+            client_events: [
+              "user_transcript",
+              "agent_response",
+              "audio",
+              "interruption",
+              "agent_response_correction",
+            ],
+            max_duration_seconds: 1800,
+          },
+        },
+        name: `${agent.name}_${conversationDetails.call_type}`,
+        tags: ["sales", conversationDetails.call_type, agent.difficulty],
+      };
+
+      const createAgentResponse = await fetch(
+        "https://api.elevenlabs.io/v1/convai/agents/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "xi-api-key": process.env.ELEVENLABS_API_KEY!,
+          },
+          body: JSON.stringify(createAgentPayload),
+        }
+      );
+
+      console.log("📡 Create new agent response status:", createAgentResponse.status);
+
+      if (!createAgentResponse.ok) {
+        const errorData = await createAgentResponse.text();
+        console.error("❌ ElevenLabs agent creation error:", errorData);
+        return NextResponse.json(
+          { error: "Erreur lors de la création de l'agent ElevenLabs" },
+          { status: 500 }
+        );
+      }
+
+      const newAgentData = await createAgentResponse.json();
+      console.log("✅ New agent created:", newAgentData);
+      agentId = newAgentData.agent_id;
+
+      // Update user profile with new agent ID
+      console.log("💾 Updating user profile with new agent ID...");
+      const { error: updateUserError } = await supabase
+        .from("users")
+        .update({ elevenlabs_agent_api_id: agentId })
+        .eq("id", user.id);
+
+      if (updateUserError) {
+        console.error("❌ Error updating user profile:", updateUserError);
+      } else {
+        console.log("✅ User profile updated with new agent ID");
+      }
+    } else if (!updateAgentResponse.ok) {
       const errorData = await updateAgentResponse.text();
       console.error("❌ ElevenLabs agent update error:", errorData);
       return NextResponse.json(
@@ -457,7 +556,10 @@ INSTRUCTIONS:
       );
     }
 
-    const updateResult = await updateAgentResponse.json();
+    let updateResult = null;
+    if (updateAgentResponse.ok) {
+      updateResult = await updateAgentResponse.json();
+    }
     console.log("✅ Agent updated successfully:", updateResult);
 
     // Update conversation with agent ID
