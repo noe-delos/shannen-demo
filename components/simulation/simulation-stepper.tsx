@@ -354,7 +354,7 @@ export function SimulationStepper() {
             {currentStep === 1 && "Choisissez votre prospect"}
             {currentStep === 2 && "Sélectionnez le produit"}
             {currentStep === 3 && "Type d'appel"}
-            {currentStep === 4 && "Contexte et objectif"}
+            {currentStep === 4 && "Contexte et situation"}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -623,14 +623,14 @@ export function SimulationStepper() {
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h3 className="font-semibold">Objectif personnel</h3>
+                      <h3 className="font-semibold">Contexte personnalis&eacute;</h3>
                       <div>
                         <Label htmlFor="goal">
-                          Décrivez votre objectif pour cet appel
+                          D&eacute;crivez la situation pour que le prospect comprenne le contexte de l&apos;appel
                         </Label>
                         <Textarea
                           id="goal"
-                          placeholder="Ex: Convaincre le prospect de l'intérêt de notre solution CRM et obtenir un rendez-vous de démonstration..."
+                          placeholder="Ex: Le prospect a déjà vu une démo la semaine dernière. Il hésite entre nous et un concurrent. Il a un budget de 50k et veut closer avant fin de mois. Il a des questions sur l'intégration technique..."
                           value={config.goal}
                           onChange={(e) => {
                             const newConfig = {

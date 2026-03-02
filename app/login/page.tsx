@@ -191,20 +191,28 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Remember Me */}
-                <div className="flex items-center">
-                  <input
-                    id="remember"
-                    name="remember"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="ml-2 block text-sm text-gray-700"
+                {/* Remember Me & Forgot Password */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember"
+                      name="remember"
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    />
+                    <label
+                      htmlFor="remember"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
+                      Se souvenir de moi
+                    </label>
+                  </div>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-gray-500 hover:text-black transition-colors duration-200"
                   >
-                    Se souvenir de moi
-                  </label>
+                    Mot de passe oubli&eacute; ?
+                  </Link>
                 </div>
 
                 {/* Action Buttons */}
