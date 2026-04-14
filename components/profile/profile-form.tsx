@@ -32,6 +32,9 @@ export function ProfileForm({ user, authEmail }: ProfileFormProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -257,33 +260,48 @@ export function ProfileForm({ user, authEmail }: ProfileFormProps) {
         <CardContent className="space-y-4">
           <div>
             <Label>Mot de passe actuel</Label>
-            <Input
-              className="mt-2 shadow-soft"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+            <div className="relative mt-2">
+              <Input
+                className="shadow-soft pr-10"
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                <Icon icon={showCurrentPassword ? "material-symbols:visibility-off" : "material-symbols:visibility"} className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <div>
             <Label>Nouveau mot de passe</Label>
-            <Input
-              className="mt-2 shadow-soft"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Minimum 6 caractères"
-            />
+            <div className="relative mt-2">
+              <Input
+                className="shadow-soft pr-10"
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimum 6 caractères"
+              />
+              <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                <Icon icon={showNewPassword ? "material-symbols:visibility-off" : "material-symbols:visibility"} className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <div>
             <Label>Confirmer le nouveau mot de passe</Label>
-            <Input
-              className={`mt-2 shadow-soft ${confirmPassword && newPassword !== confirmPassword ? "border-red-400" : ""}`}
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+            <div className={`relative mt-2`}>
+              <Input
+                className={`shadow-soft pr-10 ${confirmPassword && newPassword !== confirmPassword ? "border-red-400" : ""}`}
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                <Icon icon={showConfirmPassword ? "material-symbols:visibility-off" : "material-symbols:visibility"} className="w-5 h-5" />
+              </button>
+            </div>
             {confirmPassword && newPassword !== confirmPassword && (
               <p className="text-xs text-red-500 mt-1">Les mots de passe ne correspondent pas</p>
             )}
