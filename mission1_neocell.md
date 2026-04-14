@@ -331,11 +331,31 @@ BLOC 4 — Résistances & raccrochage    ← nouveau doc, conditionné par callT
 **Fichiers modifiés :**
 - `app/api/simulation/start/route.ts` — remplacement des instructions 1-11 + ajout tool `end_call`
 
-**À tester :** faire un cold call avec niveau difficile et vérifier que :
-- L'agent démarre bien en palier 1 (résistance froide)
-- Il progresse vers palier 2 si accroche générique
-- Il raccroche (end_call) après palier 3
-- Les patterns IA (`"Je vous écoute attentivement"`, etc.) ne sont plus utilisés
+**À tester (test humain obligatoire) :**
+
+Cold call — niveau difficile :
+- L'agent démarre en palier 1 (résistance froide : "Oui ?" ou "Allô." sans rien ajouter)
+- Si accroche générique → passage palier 2 ("Ça ressemble à tous les appels que je reçois.")
+- Si toujours mauvais → palier 3 + raccrochage via tool `end_call` natif ElevenLabs
+- Si accroche pertinente → l'agent s'ouvre progressivement et revient palier 1
+
+Cold call — niveau hardcore :
+- Accroche type "je vous dérange" ou pitch générique → raccrochage immédiat dès le 1er échange
+- Accroche pertinente → "Hmm. Continuez." / "J'ai 30 secondes."
+
+Follow-up call :
+- L'agent reconnaît la personne mais reste neutre/hésitant
+- Objections spécifiques relance (prix, concurrent, délai décision)
+- Raccroche poliment si vendeur ne répond pas aux points bloquants
+
+Discovery / Demo / Closing :
+- Vérifier qu'il n'y a PAS de raccrochage brutal (clôture polie uniquement)
+- Vérifier que l'agent pose des questions sur le contexte si le vendeur pitch trop tôt
+
+Tous niveaux :
+- Aucun pattern IA ("Je vous écoute attentivement", "C'est une excellente question", etc.)
+- Réponses en 1-2 phrases max
+- Langue française exclusivement
 
 ---
 
