@@ -288,6 +288,57 @@ ALTER TABLE users ADD COLUMN default_company TEXT NULL;
 
 ---
 
+### 8. Fusion prompt ElevenLabs — renforcement du persona prospect
+
+**Branche :** `fusion_prompt_elevenlabs`
+
+**Contexte :** le prompt actuel dans `start/route.ts` est trop simpliste (instructions 1-11 génériques). Le client a fourni un document de référence (`elo_michel_prompt_config.pdf`) avec une structure en 5 blocs plus réaliste.
+
+**Décision :** fusion des deux prompts avec priorité sur le nouveau document. Suppression du BLOC 5 scoring (géré par Anthropic côté feedback). Remplacement de `[raccroches]` par le system tool natif ElevenLabs `end_call`.
+
+---
+
+**Structure finale du prompt assemblé :**
+
+```
+BLOC 1 — Identité & contexte          ← dynamique (actuel, conservé)
+BLOC 2 — Comportement général         ← nouveau doc (remplace instructions 1-11)
+BLOC 3 — Texture des réponses/niveau  ← nouveau doc, calibré par agent.difficulty
+BLOC 4 — Résistances & raccrochage    ← nouveau doc, conditionné par callType
+```
+
+**Règle `end_call` tool :**
+- Ajout du system tool `end_call` dans le payload PATCH ElevenLabs
+- `end_call` actif uniquement pour `cold_call` et `follow_up_call`
+- Les autres types (`discovery_meeting`, `product_demo`, `closing_call`) utilisent une clôture polie sans raccrocher
+
+**Comportement par callType :**
+
+| callType | Résistance départ | Raccrochage | end_call tool |
+|---|---|---|---|
+| `cold_call` | Palier 1 (résistance froide) | Palier 3 ou hardcore | ✅ |
+| `follow_up_call` | Palier 1 mais moins hostile | Palier 3 uniquement | ✅ |
+| `discovery_meeting` | Pas de résistance froide (RDV accepté) | Non — clôture polie | ❌ |
+| `product_demo` | Ouvert (niveau facile par défaut) | Non — clôture polie | ❌ |
+| `closing_call` | Neutre/exigeant, objections précises | Non — "je reviens vers vous" | ❌ |
+
+**Niveau HARDCORE :**
+- Réservé aux élèves ayant validé les niveaux 1 à 3
+- Raccrochage dès le 1er ou 2ème échange
+- ⚠️ À implémenter : système de progression par niveau dans l'app (feature future)
+- Pour l'instant : niveau hardcore disponible comme option de difficulté dans la fiche agent
+
+**Fichiers modifiés :**
+- `app/api/simulation/start/route.ts` — remplacement des instructions 1-11 + ajout tool `end_call`
+
+**À tester :** faire un cold call avec niveau difficile et vérifier que :
+- L'agent démarre bien en palier 1 (résistance froide)
+- Il progresse vers palier 2 si accroche générique
+- Il raccroche (end_call) après palier 3
+- Les patterns IA (`"Je vous écoute attentivement"`, etc.) ne sont plus utilisés
+
+---
+
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
