@@ -237,6 +237,38 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 
 ---
 
+### 7. Page Profil utilisateur ✅ IMPLÉMENTÉ
+
+**Branche :** `profil_utilisateur`
+
+**Migrations Supabase exécutées :**
+```sql
+ALTER TABLE users ADD COLUMN default_secteur TEXT NULL;
+ALTER TABLE users ADD COLUMN default_company TEXT NULL;
+```
+
+**Bucket Supabase Storage créé :** `avatars` (public, 5MB max, jpg/png/webp/gif)
+- Policies RLS : lecture publique, upload/update/delete uniquement par le propriétaire (`auth.uid() = foldername[1]`)
+
+**Fichiers créés/modifiés :**
+- `app/(dashboard)/profile/page.tsx` — page profil (server component, auth guard)
+- `components/profile/profile-form.tsx` — formulaire profil avec 4 sections :
+  - Photo de profil (upload → Supabase Storage bucket `avatars`, path `{user_id}/avatar.{ext}`)
+  - Identité : prénom, nom (email désactivé, non modifiable)
+  - Contexte par défaut : `default_secteur` + `default_company` pré-remplis dans le wizard
+  - Changement de mot de passe : re-authentification + `supabase.auth.updateUser()`
+- `components/layout/app-sidebar.tsx` — footer remplacé par bloc avatar cliquable (photo + email, nom si renseigné) → `/profile` + bouton logout icône séparé. Email toujours affiché même si pas de nom/prénom.
+- `components/layout/header.tsx` — popover avatar : ajout lien "Mon profil" + "Se déconnecter" en rouge
+- `components/simulation/simulation-stepper.tsx` — `loadUserDefaults()` au montage ; si pas de localStorage pour l'agent, fallback sur `default_secteur` / `default_company` du profil
+- `lib/types/database.ts` — `default_secteur` + `default_company` ajoutés dans `users` Row/Insert/Update
+
+**À tester :**
+- Uploader une photo → vérifier qu'elle s'affiche dans la sidebar et le header
+- Sauvegarder secteur/entreprise par défaut → créer une nouvelle simulation avec un nouvel agent → vérifier que les champs sont pré-remplis à l'étape 4
+- Changer le mot de passe → se déconnecter → se reconnecter avec le nouveau mdp
+
+---
+
 ## Ordre d'implémentation recommandé
 
 | Priorité | Point | Effort | Impact |
