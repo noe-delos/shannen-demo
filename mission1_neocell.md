@@ -170,6 +170,11 @@ Fichier : `app/api/simulation/start/route.ts` ligne ~421
 
 Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH ElevenLabs (modèle du roleplay conversationnel).
 
+**Modèles utilisés :**
+- Feedback post-simulation : `claude-3-5-haiku-20241022` (maxTokens: 2000, temperature: 0.1)
+- Résumé inter-conversations : `claude-3-5-haiku-20241022` (maxTokens: 300, temperature: 0.1)
+- Roleplay ElevenLabs (conversationnel) : `claude-3-5-haiku` (via PATCH ElevenLabs)
+
 **Fichiers modifiés :**
 - `app/api/simulation/[id]/end/route.ts` — remplacement complet Bedrock → `anthropic.messages.create()` (feedback + summary)
 - `app/api/simulation/end/route.ts` — idem (route legacy)
