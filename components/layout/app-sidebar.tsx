@@ -19,6 +19,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -59,6 +60,9 @@ export function AppSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
+  const { setOpenMobile } = useSidebar();
+
+  const closeMobile = () => setOpenMobile(false);
 
   useEffect(() => {
     loadConversations();
@@ -201,7 +205,7 @@ export function AppSidebar() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
-                  <Link href="/simulation/configure">
+                  <Link href="/simulation/configure" onClick={closeMobile}>
                     <Button className="w-full shannen-gradient font-bold hover:brightness-105 py-5 border-purple-200/50 text-white transition-opacity">
                       <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
                       Démarrer !
@@ -228,6 +232,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       href={item.url}
+                      onClick={closeMobile}
                       className={`flex items-center gap-3 ${
                         isActiveRoute(item.url)
                           ? "bg-accent text-accent-foreground"
@@ -271,6 +276,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={`/conversations/${conversation.id}`}
+                        onClick={closeMobile}
                         className={`flex items-center gap-2 p-2 min-h-[2rem] ${
                           isActiveConversation(conversation.id)
                             ? "bg-accent text-accent-foreground"
@@ -311,6 +317,7 @@ export function AppSidebar() {
                   </p>
                   <Link
                     href="/simulation/configure"
+                    onClick={closeMobile}
                     className="text-sm text-[#781397] hover:text-[#79408a] block text-center mt-2"
                   >
                     Créer votre première
@@ -323,7 +330,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t pt-3">
         <div className="flex items-center gap-3 px-2 py-1">
-          <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+          <Link href="/profile" onClick={closeMobile} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
             <div className="relative h-8 w-8 shrink-0">
               {userProfile?.picture_url ? (
                 <img src={userProfile.picture_url} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
@@ -346,7 +353,7 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
-            onClick={handleLogout}
+            onClick={() => { closeMobile(); handleLogout(); }}
             title="Se déconnecter"
           >
             <Icon icon="mdi:logout" className="h-4 w-4" />
