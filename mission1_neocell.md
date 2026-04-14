@@ -181,9 +181,9 @@ Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH Ele
 - `app/api/simulation/start/route.ts` — modèle ElevenLabs `claude-3-7-sonnet` → `claude-3-5-haiku` (2 occurrences)
 - `package.json` — `@aws-sdk/client-bedrock-runtime` désinstallé, `@anthropic-ai/sdk` installé
 
-**⚠️ À faire manuellement :**
-- Ajouter `ANTHROPIC_API_KEY=sk-ant-...` dans les variables d'environnement Vercel
-- Supprimer `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` des variables Vercel (après avoir vérifié qu'elles ne sont utilisées nulle part ailleurs)
+**Variables d'environnement :**
+- ✅ `ANTHROPIC_API_KEY` ajouté dans Vercel et `.env` local
+- `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` peuvent être supprimés des variables Vercel (plus utilisés)
 
 **À tester :** faire une simulation complète et vérifier que le feedback est bien généré (plus d'erreur Bedrock dans les logs Vercel).
 
