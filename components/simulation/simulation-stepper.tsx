@@ -104,6 +104,7 @@ export function SimulationStepper() {
   const [loading, setLoading] = useState(true);
   const [startingSimulation, setStartingSimulation] = useState(false);
   const [previousConversations, setPreviousConversations] = useState<PreviousConversation[]>([]);
+  const [userDefaults, setUserDefaults] = useState<{ default_secteur: string | null; default_company: string | null }>({ default_secteur: null, default_company: null });
   const [config, setConfig] = useState<SimulationConfig>({
     agent: null,
     product: null,
@@ -125,7 +126,24 @@ export function SimulationStepper() {
 
   useEffect(() => {
     loadData();
+    loadUserDefaults();
   }, []);
+
+  const loadUserDefaults = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("users")
+          .select("default_secteur, default_company")
+          .eq("id", user.id)
+          .single();
+        if (data) setUserDefaults(data);
+      }
+    } catch (e) {
+      console.error("Error loading user defaults:", e);
+    }
+  };
 
   // Load saved config when agent is selected
   useEffect(() => {
@@ -187,7 +205,17 @@ export function SimulationStepper() {
         }));
         console.log("✅ Configuration loaded successfully");
       } else {
-        console.log(`📭 No saved config found for agent ${agentId}`);
+        console.log(`📭 No saved config found for agent ${agentId}, using profile defaults`);
+        if (userDefaults.default_secteur || userDefaults.default_company) {
+          setConfig((prevConfig) => ({
+            ...prevConfig,
+            context: {
+              ...prevConfig.context,
+              secteur: userDefaults.default_secteur || "",
+              company: userDefaults.default_company || "",
+            },
+          }));
+        }
       }
     } catch (error) {
       console.error("Error loading saved config:", error);

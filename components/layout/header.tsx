@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -106,22 +107,31 @@ export function Header({ breadcrumbs }: HeaderProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-4" align="end">
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-3">
+              <div className="space-y-1">
                 <p className="text-sm font-medium leading-none">
                   {user?.firstname} {user?.lastname}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {authUser?.email}
                 </p>
               </div>
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                className="w-full"
-              >
-                Disconnect
-              </Button>
+              <div className="space-y-1">
+                <Link href="/profile">
+                  <Button variant="ghost" className="w-full justify-start gap-2 h-9 px-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Mon profil
+                  </Button>
+                </Link>
+                <Button
+                  onClick={handleSignOut}
+                  variant="ghost"
+                  className="w-full justify-start gap-2 h-9 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Se déconnecter
+                </Button>
+              </div>
             </div>
           </PopoverContent>
         </Popover>

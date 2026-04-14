@@ -55,6 +55,7 @@ export function AppSidebar() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
@@ -90,7 +91,7 @@ export function AppSidebar() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const [conversationsResponse, dailyResponse] = await Promise.all([
+        const [conversationsResponse, dailyResponse, profileResponse] = await Promise.all([
           supabase
             .from("conversations")
             .select(`*, agents:agent_id (name, job_title), feedback:feedback_id (note)`)
@@ -102,10 +103,16 @@ export function AppSidebar() {
             .select("id", { count: "exact", head: true })
             .eq("user_id", user.id)
             .gte("created_at", today.toISOString()),
+          supabase
+            .from("users")
+            .select("firstname, lastname, picture_url, email")
+            .eq("id", user.id)
+            .single(),
         ]);
 
         setConversations(conversationsResponse.data || []);
         setDailyCount(dailyResponse.count ?? 0);
+        setUserProfile(profileResponse.data);
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -314,15 +321,35 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-          onClick={handleLogout}
-        >
-          <Icon icon="mdi:logout" className="mr-2 h-4 w-4" />
-          Se déconnecter
-        </Button>
+      <SidebarFooter className="border-t pt-3">
+        <div className="flex items-center gap-3 px-2 py-1">
+          <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+            <div className="relative h-8 w-8 shrink-0">
+              {userProfile?.picture_url ? (
+                <img src={userProfile.picture_url} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-[#9516C7]/10 flex items-center justify-center text-[#9516C7] text-xs font-semibold">
+                  {userProfile?.firstname?.[0]}{userProfile?.lastname?.[0]}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium truncate">
+                {userProfile?.firstname} {userProfile?.lastname}
+              </span>
+              <span className="text-xs text-muted-foreground truncate">{userProfile?.email}</span>
+            </div>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={handleLogout}
+            title="Se déconnecter"
+          >
+            <Icon icon="mdi:logout" className="h-4 w-4" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
