@@ -413,7 +413,7 @@ export function SimulationStepper() {
       </div>
 
       {/* Step Content */}
-      <Card className="min-h-[500px] shadow-soft">
+      <Card className="min-h-[500px] shadow-soft overflow-hidden">
         <CardHeader>
           <CardTitle>
             {currentStep === 1 && "Choisissez votre prospect"}
@@ -590,7 +590,7 @@ export function SimulationStepper() {
 
               {/* Step 4: Context and Goal */}
               {currentStep === 4 && (
-                <div className="space-y-6">
+                <div className="space-y-6 w-full max-w-full">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <h3 className="font-semibold">Contexte de l'appel</h3>
@@ -739,15 +739,15 @@ export function SimulationStepper() {
                   </div>
 
                   {/* Historique de la relation */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 pt-2">
                     <Label className="font-semibold text-base">Historique de la relation</Label>
-                    <div className="space-y-2 mt-3">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="historyMode" value="zero" checked={config.historyMode === "zero"} onChange={() => setConfig({ ...config, historyMode: "zero", historyContext: "", historyUntilId: null })} className="accent-[#9516C7]" />
+                    <div className="space-y-3 mt-1">
+                      <label className="flex items-center gap-3 cursor-pointer py-1">
+                        <input type="radio" name="historyMode" value="zero" checked={config.historyMode === "zero"} onChange={() => setConfig({ ...config, historyMode: "zero", historyContext: "", historyUntilId: null })} className="accent-[#9516C7] w-4 h-4 shrink-0" />
                         <span className="text-sm">Repartir de zéro</span>
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="historyMode" value="manual" checked={config.historyMode === "manual"} onChange={() => setConfig({ ...config, historyMode: "manual", historyUntilId: null })} className="accent-[#9516C7]" />
+                      <label className="flex items-center gap-3 cursor-pointer py-1">
+                        <input type="radio" name="historyMode" value="manual" checked={config.historyMode === "manual"} onChange={() => setConfig({ ...config, historyMode: "manual", historyUntilId: null })} className="accent-[#9516C7] w-4 h-4 shrink-0" />
                         <span className="text-sm">Saisir manuellement</span>
                       </label>
                       {config.historyMode === "manual" && (
@@ -755,16 +755,16 @@ export function SimulationStepper() {
                           placeholder="Décrivez le contexte de vos échanges précédents avec ce prospect..."
                           value={config.historyContext}
                           onChange={(e) => setConfig({ ...config, historyContext: e.target.value })}
-                          rows={3}
-                          className="shadow-soft resize-none placeholder:text-foreground/20 ml-6"
+                          rows={5}
+                          className="shadow-soft resize-none placeholder:text-foreground/20 ml-7 w-[calc(100%-1.75rem)] max-w-full min-h-[8rem]"
                         />
                       )}
-                      <label className={`flex items-center gap-2 ${previousConversations.length === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}>
-                        <input type="radio" name="historyMode" value="previous" checked={config.historyMode === "previous"} disabled={previousConversations.length === 0} onChange={() => setConfig({ ...config, historyMode: "previous", historyContext: "" })} className="accent-[#9516C7]" />
-                        <span className="text-sm">
-                          Reprendre l&apos;historique des appels
+                      <label className={`flex items-start gap-3 py-1 ${previousConversations.length === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}>
+                        <input type="radio" name="historyMode" value="previous" checked={config.historyMode === "previous"} disabled={previousConversations.length === 0} onChange={() => setConfig({ ...config, historyMode: "previous", historyContext: "" })} className="accent-[#9516C7] w-4 h-4 shrink-0 mt-0.5" />
+                        <span className="text-sm flex flex-col gap-0.5">
+                          <span>Reprendre l&apos;historique des appels</span>
                           {previousConversations.length === 0 && (
-                            <span className="text-xs text-muted-foreground ml-2">— Aucun appel précédent pour ce prospect + produit</span>
+                            <span className="text-xs text-muted-foreground">Aucun appel précédent pour ce prospect + produit</span>
                           )}
                         </span>
                       </label>
