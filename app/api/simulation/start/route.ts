@@ -251,6 +251,38 @@ export async function POST(request: NextRequest) {
     const agent = conversationDetails.agents;
     const product = conversationDetails.products;
 
+    // Build history block
+    let historyBlock = "";
+    if (conversationDetails.history_conversation_ids?.length > 0) {
+      const { data: historicConvs } = await supabase
+        .from("conversations")
+        .select("id, call_type, created_at, summary")
+        .in("id", conversationDetails.history_conversation_ids)
+        .order("created_at", { ascending: true });
+
+      if (historicConvs && historicConvs.length > 0) {
+        const callTypeLabels: Record<string, string> = {
+          cold_call: "Cold call",
+          discovery_meeting: "Réunion de découverte",
+          product_demo: "Démo produit",
+          closing_call: "Closing",
+          follow_up_call: "Relance",
+        };
+        historyBlock = `
+HISTORIQUE DE VOS ÉCHANGES PRÉCÉDENTS (tu te souviens de tout ça comme si c'était réel) :
+${historicConvs.map(c => {
+  const date = new Date(c.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  return `[${callTypeLabels[c.call_type] || c.call_type} — ${date}]\n${c.summary}`;
+}).join("\n\n")}
+`;
+      }
+    } else if (conversationDetails.history_context) {
+      historyBlock = `
+HISTORIQUE DE LA RELATION (contexte fourni par le commercial) :
+${conversationDetails.history_context}
+`;
+    }
+
     if (!agent) {
       console.error("❌ No agent found in conversation");
       return NextResponse.json({ error: "Agent introuvable" }, { status: 400 });
@@ -353,7 +385,7 @@ ${callTypeBehavior}
 ${conversationDetails.goal ? `
 CONTEXTE PERSONNALISÉ (TRÈS IMPORTANT - tu dois intégrer ces informations dans ton jeu de rôle):
 ${conversationDetails.goal}
-` : ""}
+` : ""}${historyBlock}
 
 INSTRUCTIONS:
 1. TU ES PASSIF - C'est l'autre personne qui t'appelle, tu réponds seulement à ses questions.

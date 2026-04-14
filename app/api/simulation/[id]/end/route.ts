@@ -331,6 +331,59 @@ Fournissez un feedback structuré avec:
         console.log("✅ Feedback linked successfully");
       }
 
+      // Generate summary for inter-conversation history
+      console.log("📝 Generating conversation summary...");
+      try {
+        const summaryPrompt = `Tu es un assistant qui résume des conversations commerciales de façon concise.
+
+Voici une conversation entre un commercial et un prospect.
+
+**CONTEXTE:**
+- Prospect: ${conversation.agents?.name} (${conversation.agents?.job_title})
+- Produit: ${conversation.products?.name}
+- Type d'appel: ${conversation.call_type}
+- Durée: ${finalDuration} secondes
+
+**TRANSCRIPT:**
+${transcript
+  .map(
+    (msg: any, i: number) =>
+      `${i + 1}. ${msg.role === "user" || msg.source === "user" ? "Commercial" : "Prospect"}: ${msg.content || msg.message || msg.text}`
+  )
+  .join("\n")}
+
+Génère un résumé factuel en 3-5 phrases maximum (150 mots max) qui capture :
+- Ce qui a été proposé par le commercial
+- Les réactions et objections du prospect
+- Le résultat de l'appel (accord, refus, suite prévue, pas de conclusion)
+
+Ce résumé sera utilisé pour contextualiser les prochains appels avec ce prospect. Réponds uniquement avec le résumé, sans introduction ni titre.`;
+
+        const summaryCommand = new ConverseCommand({
+          modelId: "eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
+          messages: [{ role: "user", content: [{ type: "text", text: summaryPrompt }] }] as any,
+          inferenceConfig: { maxTokens: 300, temperature: 0.1 },
+        });
+
+        const summaryResponse = await client.send(summaryCommand);
+        let summaryText = "";
+        if (summaryResponse.output?.message?.content) {
+          for (const block of summaryResponse.output.message.content) {
+            if ("text" in block) { summaryText = block.text || ""; break; }
+          }
+        }
+
+        if (summaryText) {
+          await supabase
+            .from("conversations")
+            .update({ summary: summaryText.trim() })
+            .eq("id", conversationId);
+          console.log("✅ Summary generated and saved");
+        }
+      } catch (summaryError) {
+        console.warn("⚠️ Failed to generate summary (non-blocking):", summaryError);
+      }
+
       console.log("🎉 Conversation analysis completed successfully!");
       return NextResponse.json({
         feedback,
