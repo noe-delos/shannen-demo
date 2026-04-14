@@ -359,6 +359,28 @@ Tous niveaux :
 
 ---
 
+## Ordre de merge des branches
+
+Merger dans cet ordre vers `mission1_neocell`, puis `mission1_neocell` → `main` en dernier.
+
+```
+1. duree_appel_configuration      → mission1_neocell
+2. limite_simulations_jour        → mission1_neocell
+3. historique_conversations       → mission1_neocell
+4. suppression_bedrock            → mission1_neocell
+5. fix_elevenlabs_conversation_id → mission1_neocell
+6. profil_utilisateur             → mission1_neocell
+7. fusion_prompt_elevenlabs       → mission1_neocell
+8. mission1_neocell               → main  ← déclenche le déploiement Vercel
+```
+
+**⚠️ Checklist avant de merger dans `main` :**
+- [ ] `ANTHROPIC_API_KEY` défini dans les variables Vercel ✅ (déjà fait)
+- [ ] `NEXT_PUBLIC_SITE_URL=https://shannen-demo.vercel.app` défini dans Vercel
+- [ ] Tester les points critiques de chaque branche (voir sections "À tester" ci-dessus)
+
+---
+
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
