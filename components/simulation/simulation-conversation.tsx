@@ -905,8 +905,8 @@ export function SimulationConversation({
                     {conversationStatus === "connected" && (
                       <div className="text-center">
                         {/* Timer above character circle */}
-                        <motion.p
-                          className="text-white text-lg font-semibold mb-6 drop-shadow-lg"
+                        <motion.div
+                          className="mb-6"
                           animate={{
                             color: conversation.isSpeaking
                               ? "#ffffff"
@@ -914,8 +914,29 @@ export function SimulationConversation({
                           }}
                           transition={{ duration: 0.3 }}
                         >
-                          {formatTime(elapsedTime)}
-                        </motion.p>
+                          <p className="text-white text-lg font-semibold drop-shadow-lg">
+                            {formatTime(elapsedTime)}
+                          </p>
+                          {(() => {
+                            const maxDuration = conversationData?.max_duration_seconds ?? 2700;
+                            const remaining = maxDuration - elapsedTime;
+                            const isWarning = remaining <= 300 && remaining > 0;
+                            const isDanger = remaining <= 60 && remaining > 0;
+                            return remaining > 0 ? (
+                              <p
+                                className={`text-xs font-medium drop-shadow-lg mt-0.5 ${
+                                  isDanger
+                                    ? "text-red-300"
+                                    : isWarning
+                                    ? "text-orange-300"
+                                    : "text-white/70"
+                                }`}
+                              >
+                                {formatTime(remaining)} restantes
+                              </p>
+                            ) : null;
+                          })()}
+                        </motion.div>
 
                         {/* Smaller character circle, moved higher */}
                         <motion.div
