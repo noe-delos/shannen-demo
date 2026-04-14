@@ -121,9 +121,11 @@ Afficher dans le dashboard ou dans le wizard le nombre d'appels restants pour la
 
 ---
 
-### 4. Suppression Amazon Bedrock → API directe
+### 4. Suppression Amazon Bedrock → API directe ✅ IMPLÉMENTÉ
 
-**Objectif :** remplacer le client AWS Bedrock par un appel direct à l'API Anthropic (ou OpenAI) dans la route de génération de feedback.
+**Branche :** `suppression_bedrock`
+
+**Objectif :** remplacer le client AWS Bedrock par un appel direct à l'API Anthropic dans la route de génération de feedback.
 
 **Variable d'environnement à ajouter :**
 ```
@@ -168,11 +170,17 @@ Fichier : `app/api/simulation/start/route.ts` ligne ~421
 
 Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH ElevenLabs (modèle du roleplay conversationnel).
 
-**Fichiers touchés :**
-- `app/api/simulation/[id]/end/route.ts` — remplacement complet du client
-- `app/api/simulation/end/route.ts` — idem ou suppression
-- `app/api/simulation/start/route.ts` — changement du modèle LLM
-- `package.json` — suppression dépendance AWS SDK
+**Fichiers modifiés :**
+- `app/api/simulation/[id]/end/route.ts` — remplacement complet Bedrock → `anthropic.messages.create()` (feedback + summary)
+- `app/api/simulation/end/route.ts` — idem (route legacy)
+- `app/api/simulation/start/route.ts` — modèle ElevenLabs `claude-3-7-sonnet` → `claude-3-5-haiku` (2 occurrences)
+- `package.json` — `@aws-sdk/client-bedrock-runtime` désinstallé, `@anthropic-ai/sdk` installé
+
+**⚠️ À faire manuellement :**
+- Ajouter `ANTHROPIC_API_KEY=sk-ant-...` dans les variables d'environnement Vercel
+- Supprimer `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` des variables Vercel (après avoir vérifié qu'elles ne sont utilisées nulle part ailleurs)
+
+**À tester :** faire une simulation complète et vérifier que le feedback est bien généré (plus d'erreur Bedrock dans les logs Vercel).
 
 ---
 
