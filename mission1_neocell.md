@@ -211,7 +211,9 @@ Points à vérifier et corriger :
 
 ---
 
-### 6. Correction erreur technique variables ElevenLabs
+### 6. Correction erreur technique variables ElevenLabs ✅ IMPLÉMENTÉ
+
+**Branche :** `fix_elevenlabs_conversation_id`
 
 **Problème identifié dans l'audit :** le champ `elevenlabs_conversation_id` dans la table `conversations` stocke en réalité l'`agent_id` ElevenLabs et non le `conversation_id`. Cela empêche de récupérer le transcript depuis l'API ElevenLabs (l'appel échoue toujours, c'est le fallback frontend qui sauve).
 
@@ -233,9 +235,11 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 
 `manage-agent/route.ts` utilise un payload minimal différent de `start/route.ts`. À aligner ou à supprimer si la route n'est plus utilisée — à vérifier.
 
-**Fichiers touchés :**
-- `components/simulation/simulation-conversation.tsx` — capture du vrai conversation ID
-- Route API à identifier ou créer pour le PATCH `conversations.elevenlabs_conversation_id`
+**Fichiers modifiés :**
+- `components/simulation/simulation-conversation.tsx` — dans `onConnect`, appel PATCH non-bloquant avec `conversation.getId()`
+- `app/api/simulation/[id]/elevenlabs-id/route.ts` — nouvelle route PATCH créée
+
+**À tester :** faire une simulation, vérifier dans Supabase que `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx` et non un `agent_xxx`.
 
 ---
 

@@ -119,8 +119,19 @@ export function SimulationConversation({
       setConversationStatus("connected");
       setInitializing(false);
       startTimer();
-      setElevenlabsConversationId(conversation.getId() as string);
-      console.log("🆔 Conversation ID:", conversation.getId());
+      const realElevenlabsId = conversation.getId() as string;
+      setElevenlabsConversationId(realElevenlabsId);
+      console.log("🆔 ElevenLabs Conversation ID:", realElevenlabsId);
+
+      // Sauvegarder le vrai conversation_id ElevenLabs en base (non-bloquant)
+      if (realElevenlabsId) {
+        fetch(`/api/simulation/${conversationId}/elevenlabs-id`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ elevenlabs_conversation_id: realElevenlabsId }),
+        }).catch((err) => console.warn("⚠️ Failed to save ElevenLabs ID:", err));
+      }
+
       console.log(
         "📊 State after onConnect - initializing:",
         false,
