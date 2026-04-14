@@ -651,42 +651,6 @@ export function SimulationStepper() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="historique">
-                          Historique de la relation
-                        </Label>
-                        <select
-                          className="w-full p-2 border rounded-md shadow-soft mt-3"
-                          value={config.context.historique_relation}
-                          onChange={(e) => {
-                            const newConfig = {
-                              ...config,
-                              context: {
-                                ...config.context,
-                                historique_relation: e.target
-                                  .value as HistoriqueRelation,
-                              },
-                            };
-                            setConfig(newConfig);
-                            // Save to localStorage
-                            if (config.agent?.id) {
-                              saveConfig(config.agent.id, {
-                                context: {
-                                  ...config.context,
-                                  historique_relation: e.target
-                                    .value as HistoriqueRelation,
-                                },
-                              });
-                            }
-                          }}
-                        >
-                          {historiqueOptions.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
                         <Label htmlFor="duration">Durée de l'appel</Label>
                         <select
                           id="duration"
@@ -702,6 +666,43 @@ export function SimulationStepper() {
                           {durationOptions.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="historique">
+                          Historique de la relation
+                        </Label>
+                        <select
+                          className="w-full p-2 border rounded-md shadow-soft mt-3"
+                          value={config.context.historique_relation}
+                          onChange={(e) => {
+                            const newHistorique = e.target.value as HistoriqueRelation;
+                            const newConfig = {
+                              ...config,
+                              context: {
+                                ...config.context,
+                                historique_relation: newHistorique,
+                              },
+                              // Quand on passe à un appel non-premier contact, forcer manual si on était sur zero
+                              historyMode: (newHistorique !== "Premier contact" && config.historyMode === "zero") ? "manual" as HistoryMode : config.historyMode,
+                            };
+                            setConfig(newConfig);
+                            // Save to localStorage
+                            if (config.agent?.id) {
+                              saveConfig(config.agent.id, {
+                                context: {
+                                  ...config.context,
+                                  historique_relation: newHistorique,
+                                },
+                              });
+                            }
+                          }}
+                        >
+                          {historiqueOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
                             </option>
                           ))}
                         </select>
@@ -739,13 +740,9 @@ export function SimulationStepper() {
                   </div>
 
                   {/* Historique de la relation */}
-                  <div className="space-y-3 pt-2">
+                  {config.context.historique_relation !== "Premier contact" && <div className="space-y-3 pt-2">
                     <Label className="font-semibold text-base">Historique de la relation</Label>
                     <div className="space-y-3 mt-1">
-                      <label className="flex items-center gap-3 cursor-pointer py-1">
-                        <input type="radio" name="historyMode" value="zero" checked={config.historyMode === "zero"} onChange={() => setConfig({ ...config, historyMode: "zero", historyContext: "", historyUntilId: null })} className="accent-[#9516C7] w-4 h-4 shrink-0" />
-                        <span className="text-sm">Repartir de zéro</span>
-                      </label>
                       <label className="flex items-center gap-3 cursor-pointer py-1">
                         <input type="radio" name="historyMode" value="manual" checked={config.historyMode === "manual"} onChange={() => setConfig({ ...config, historyMode: "manual", historyUntilId: null })} className="accent-[#9516C7] w-4 h-4 shrink-0" />
                         <span className="text-sm">Saisir manuellement</span>
@@ -791,7 +788,7 @@ export function SimulationStepper() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div>}
 
                   {/* Preview */}
                   <div className="border-t pt-6">
