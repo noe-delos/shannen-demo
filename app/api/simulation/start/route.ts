@@ -33,13 +33,14 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ User authenticated:", user.id);
 
-    // Check daily simulation limit
+    // Check daily simulation limit (exclure la conversation courante car créée avant /start)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const { count: dailyCount } = await supabase
       .from("conversations")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
+      .neq("id", conversation_id)
       .gte("created_at", today.toISOString());
 
     if ((dailyCount ?? 0) >= 3) {
