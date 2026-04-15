@@ -191,7 +191,7 @@ Fournissez un feedback structuré avec:
     try {
       console.log("📡 Sending request to Anthropic...");
       const response = await anthropic.messages.create({
-        model: "claude-3-5-haiku-20241022",
+        model: "claude-3-haiku-20240307",
         max_tokens: 2000,
         temperature: 0.1,
         messages: [{ role: "user", content: feedbackPrompt }],
@@ -231,7 +231,37 @@ Fournissez un feedback structuré avec:
           cleanedText.substring(0, 200) + "..."
         );
 
-        feedbackData = JSON.parse(cleanedText);
+        // Escape raw control characters (Claude sometimes emits real newlines
+        // inside string values, which breaks JSON.parse).
+        // Walk the string, tracking whether we're inside a quoted string,
+        // and escape control chars only inside strings.
+        let sanitized = "";
+        let inString = false;
+        let escapeNext = false;
+        for (const ch of cleanedText) {
+          if (escapeNext) {
+            sanitized += ch;
+            escapeNext = false;
+            continue;
+          }
+          if (ch === "\\" && inString) {
+            sanitized += ch;
+            escapeNext = true;
+            continue;
+          }
+          if (ch === '"') {
+            inString = !inString;
+            sanitized += ch;
+            continue;
+          }
+          if (inString && (ch === "\n" || ch === "\r" || ch === "\t")) {
+            sanitized += ch === "\n" ? "\\n" : ch === "\r" ? "\\r" : "\\t";
+            continue;
+          }
+          sanitized += ch;
+        }
+
+        feedbackData = JSON.parse(sanitized);
         console.log("✅ Successfully parsed Claude JSON feedback:", {
           note: feedbackData.note,
           pointsForts: feedbackData.points_forts?.length,
@@ -326,7 +356,7 @@ Génère un résumé factuel en 3-5 phrases maximum (150 mots max) qui capture :
 Ce résumé sera utilisé pour contextualiser les prochains appels avec ce prospect. Réponds uniquement avec le résumé, sans introduction ni titre.`;
 
         const summaryResponse = await anthropic.messages.create({
-          model: "claude-3-5-haiku-20241022",
+          model: "claude-3-haiku-20240307",
           max_tokens: 300,
           temperature: 0.1,
           messages: [{ role: "user", content: summaryPrompt }],
