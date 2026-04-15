@@ -31,12 +31,19 @@ interface SimulationConfig {
   product: Product | null;
   callType: CallType | null;
   goal: string;
+  maxDuration: number;
   context: {
     secteur: string;
     company: string;
     historique_relation: HistoriqueRelation;
   };
 }
+
+const durationOptions = [
+  { label: "30 min", value: 1800 },
+  { label: "45 min", value: 2700 },
+  { label: "60 min", value: 3600 },
+];
 
 const callTypes = [
   {
@@ -88,6 +95,7 @@ export function SimulationStepper() {
     product: null,
     callType: null,
     goal: "",
+    maxDuration: 2700,
     context: {
       secteur: "",
       company: "",
@@ -272,6 +280,7 @@ export function SimulationStepper() {
           goal: config.goal,
           context: config.context,
           call_type: config.callType,
+          max_duration_seconds: config.maxDuration,
         })
         .select()
         .single();
@@ -617,6 +626,26 @@ export function SimulationStepper() {
                           {historiqueOptions.map((option) => (
                             <option key={option} value={option}>
                               {option}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="duration">Durée de l'appel</Label>
+                        <select
+                          id="duration"
+                          className="w-full p-2 border rounded-md shadow-soft mt-3"
+                          value={config.maxDuration}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              maxDuration: Number(e.target.value),
+                            })
+                          }
+                        >
+                          {durationOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
                             </option>
                           ))}
                         </select>

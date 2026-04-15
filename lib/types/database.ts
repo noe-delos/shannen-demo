@@ -153,6 +153,7 @@ export type Database = {
           } | null;
           call_type: string | null;
           duration_seconds: number;
+          max_duration_seconds: number;
           elevenlabs_conversation_id: string | null;
           created_at: string;
           updated_at: string;
@@ -171,6 +172,7 @@ export type Database = {
           } | null;
           call_type?: string | null;
           duration_seconds?: number;
+          max_duration_seconds?: number;
           elevenlabs_conversation_id?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -189,6 +191,7 @@ export type Database = {
           } | null;
           call_type?: string | null;
           duration_seconds?: number;
+          max_duration_seconds?: number;
           elevenlabs_conversation_id?: string | null;
           created_at?: string;
           updated_at?: string;
