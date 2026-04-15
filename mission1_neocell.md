@@ -389,6 +389,7 @@ Tous niveaux :
 
 ## Mini-bugs à corriger
 
+- [ ] **Wizard étape 4 — "Historique de la relation" mal initialisé** : le dropdown semble sélectionner "2ème appel" par défaut au lieu de "Premier contact". Vérifier la valeur initiale du state dans `simulation-stepper.tsx` et s'assurer que la valeur par défaut est bien `"Premier contact"`.
 - [ ] **Agents disponibles — photo manquante pour Céline Laurent** : l'agent Céline Laurent n'a pas de photo. Vérifier en base si `picture_url` est null pour cet agent et uploader une photo.
 - [ ] **Page Conversations — date affichée incorrecte** : une conversation datant d'hier affiche "aujourd'hui". Vérifier la logique de formatage des dates (timezone ? comparaison `new Date()` sans normalisation de l'heure ?). Trouver le composant qui gère l'affichage relatif des dates et corriger.
 
