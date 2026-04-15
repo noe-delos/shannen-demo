@@ -146,9 +146,10 @@ export function Dashboard() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    // Comparer les dates calendaires (sans l'heure) pour éviter le bug "aujourd'hui" vs "hier"
+    const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffInDays = Math.round((nowDay.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffInDays === 0) return "Aujourd'hui";
     if (diffInDays === 1) return "Hier";

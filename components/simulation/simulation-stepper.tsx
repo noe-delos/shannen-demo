@@ -194,8 +194,7 @@ export function SimulationStepper() {
             ...prevConfig.context,
             secteur: parsedConfig.context?.secteur || "",
             company: parsedConfig.context?.company || "",
-            historique_relation:
-              parsedConfig.context?.historique_relation || "Premier contact",
+            historique_relation: "Premier contact", // Toujours réinitialiser à Premier contact
           },
           // Also restore product and call type if saved
           product: parsedConfig.product_id ? 
