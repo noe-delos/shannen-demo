@@ -242,13 +242,18 @@ export function Dashboard() {
       <motion.section variants={item}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
             <div>
               <h1 className={`text-4xl font-bold ${dancingScript.className}`}>Vos conversations</h1>
               <p className="text-muted-foreground">
                 Liste de vos conversations passées
               </p>
             </div>
+            {conversations.length > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-sm font-medium">
+                {conversations.length} conversation{conversations.length > 1 ? "s" : ""}
+              </span>
+            )}
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-200 bg-purple-50">
               <div className="flex gap-0.5">
