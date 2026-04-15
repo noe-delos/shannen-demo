@@ -220,7 +220,7 @@ export function ProfileForm({ user, authEmail }: ProfileFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Secteur d'activité</Label>
+            <Label>Secteur d&apos;activité</Label>
             <Input
               className="mt-2 shadow-soft"
               value={defaultSecteur}
@@ -229,7 +229,7 @@ export function ProfileForm({ user, authEmail }: ProfileFormProps) {
             />
           </div>
           <div>
-            <Label>Nom de l'entreprise</Label>
+            <Label>Nom de l&apos;entreprise</Label>
             <Input
               className="mt-2 shadow-soft"
               value={defaultCompany}
