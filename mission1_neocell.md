@@ -53,7 +53,6 @@ ALTER TABLE conversations ADD COLUMN history_conversation_ids UUID[] NULL;
 - ✅ Même prospect + produit différent → pas d'historique
 - Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
 - Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt
-- Vérifier que le mode "Repartir de zéro" n'injecte aucun historique
 
 > ✅ **Partiellement validé le 15/04/2026** — filtrage par agent+produit OK. Reste à vérifier l'injection dans le prompt ElevenLabs.
 
