@@ -573,6 +573,7 @@ ${resistanceBloc}`;
               }] : []),
             ],
           },
+          first_message: callType === "cold_call" ? "Allô ?" : "Oui, bonjour ?",
           language: "fr",
         },
         language_presets: {
@@ -614,6 +615,8 @@ ${resistanceBloc}`;
       name: updatePayload.name,
       tags: updatePayload.tags,
       voice_id: updatePayload.conversation_config.tts.voice_id,
+      llm: updatePayload.conversation_config.agent.prompt.llm,
+      first_message: updatePayload.conversation_config.agent.first_message,
       prompt_length:
         updatePayload.conversation_config.agent.prompt.prompt.length,
     });
