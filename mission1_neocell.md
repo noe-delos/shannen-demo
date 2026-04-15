@@ -254,6 +254,8 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 
 **À tester :** faire une simulation, vérifier dans Supabase que `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx` et non un `agent_xxx`.
 
+> ⚠️ **Bug confirmé le 15/04/2026** : `getId()` dans `onConnect` retournait l'`agent_id`. Fix appliqué : récupération de l'ID dans `onDisconnect` (disponible uniquement après déconnexion). **À re-tester après déploiement.**
+
 ---
 
 ### 7. Page Profil utilisateur ✅ IMPLÉMENTÉ
@@ -282,9 +284,11 @@ ALTER TABLE users ADD COLUMN default_company TEXT NULL;
 - `lib/types/database.ts` — `default_secteur` + `default_company` ajoutés dans `users` Row/Insert/Update
 
 **À tester :**
-- Uploader une photo → vérifier qu'elle s'affiche dans la sidebar et le header
-- Sauvegarder secteur/entreprise par défaut → créer une nouvelle simulation avec un nouvel agent → vérifier que les champs sont pré-remplis à l'étape 4
-- Changer le mot de passe → se déconnecter → se reconnecter avec le nouveau mdp
+- ✅ Uploader une photo → vérifier qu'elle s'affiche dans la sidebar et le header
+- ✅ Sauvegarder secteur/entreprise par défaut → créer une nouvelle simulation avec un nouvel agent → vérifier que les champs sont pré-remplis à l'étape 4
+- ✅ Changer le mot de passe → se déconnecter → se reconnecter avec le nouveau mdp
+
+> ✅ **Validé le 15/04/2026**
 
 ---
 
@@ -358,6 +362,8 @@ Cold call — niveau difficile :
 - Si toujours mauvais → palier 3 + raccrochage via tool `end_call` natif ElevenLabs
 - Si accroche pertinente → l'agent s'ouvre progressivement et revient palier 1
 
+> ⚠️ **Testé le 15/04/2026 (Pierre Moreau, niveau difficile)** : le comportement de résistance est présent mais le raccrochage automatique n'a pas fonctionné. À re-tester en jouant délibérément un mauvais vendeur jusqu'au bout pour forcer le `end_call`. Note : le tool `end_call` est déclenché par le **prospect** (l'IA), pas par le vendeur — dire "c'est terminé" côté vendeur ne suffit pas.
+
 Cold call — niveau hardcore :
 - Accroche type "je vous dérange" ou pitch générique → raccrochage immédiat dès le 1er échange
 - Accroche pertinente → "Hmm. Continuez." / "J'ai 30 secondes."
@@ -378,28 +384,6 @@ Tous niveaux :
 
 ---
 
-## Ordre de merge des branches
-
-Merger dans cet ordre vers `mission1_neocell`, puis `mission1_neocell` → `main` en dernier.
-
-```
-1. duree_appel_configuration      → mission1_neocell
-2. limite_simulations_jour        → mission1_neocell
-3. historique_conversations       → mission1_neocell
-4. suppression_bedrock            → mission1_neocell
-5. fix_elevenlabs_conversation_id → mission1_neocell
-6. profil_utilisateur             → mission1_neocell
-7. fusion_prompt_elevenlabs       → mission1_neocell
-8. mission1_neocell               → main  ← déclenche le déploiement Vercel
-```
-
-**⚠️ Checklist avant de merger dans `main` :**
-- [ ] `ANTHROPIC_API_KEY` défini dans les variables Vercel ✅ (déjà fait)
-- [ ] `NEXT_PUBLIC_SITE_URL=https://shannen-demo.vercel.app` défini dans Vercel
-- [ ] Tester les points critiques de chaque branche (voir sections "À tester" ci-dessus)
-
----
-
 ## Mini-bugs à corriger
 
 - [ ] **Agents disponibles — photo manquante pour Céline Laurent** : l'agent Céline Laurent n'a pas de photo. Vérifier en base si `picture_url` est null pour cet agent et uploader une photo.
@@ -410,15 +394,6 @@ Merger dans cet ordre vers `mission1_neocell`, puis `mission1_neocell` → `main
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
-
----
-
-## Questions à clarifier avec Shannen
-
-1. **Colonne `credits`** — quel était le but initial ? Le garder pour une future monétisation ou l'ignorer ?
-2. **Option "Repartir de zéro"** — doit-elle être activée par défaut ou désactivée ?
-3. **Dropdown durée** — 30/45/60 min suffit ou ajouter d'autres options ?
-4. **Modèle LLM pour le roleplay** — `claude-3-5-haiku` ou `gpt-4o-mini` ? (contrainte écosystème ?)
 
 ---
 
