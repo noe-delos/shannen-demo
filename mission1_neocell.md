@@ -400,6 +400,12 @@ Merger dans cet ordre vers `mission1_neocell`, puis `mission1_neocell` → `main
 
 ---
 
+## Mini-bugs à corriger
+
+- [ ] **Page Conversations — date affichée incorrecte** : une conversation datant d'hier affiche "aujourd'hui". Vérifier la logique de formatage des dates (timezone ? comparaison `new Date()` sans normalisation de l'heure ?). Trouver le composant qui gère l'affichage relatif des dates et corriger.
+
+---
+
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
