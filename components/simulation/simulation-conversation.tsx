@@ -73,6 +73,7 @@ export function SimulationConversation({
   const supabase = createClient();
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const elapsedTimeRef = useRef<number>(0); // ref pour éviter stale closure dans onDisconnect
   const router = useRouter();
 
 
@@ -151,8 +152,8 @@ export function SimulationConversation({
         }).catch((err) => console.warn("⚠️ Failed to save ElevenLabs ID:", err));
       }
 
-      if (elapsedTime >= 10) {
-        console.log("⏱️ Elapsed time >= 10 seconds, ending conversation");
+      if (elapsedTimeRef.current >= 10) {
+        console.log("⏱️ Elapsed time >= 10 seconds, ending conversation", elapsedTimeRef.current);
         endConversation();
       }
     },
@@ -520,8 +521,12 @@ export function SimulationConversation({
       clearInterval(timerInterval);
     }
     setElapsedTime(0);
+    elapsedTimeRef.current = 0;
     const interval = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
+      setElapsedTime((prev) => {
+        elapsedTimeRef.current = prev + 1;
+        return prev + 1;
+      });
     }, 1000);
     setTimerInterval(interval);
   };
