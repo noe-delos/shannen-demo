@@ -185,6 +185,12 @@ Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH Ele
 - ✅ `ANTHROPIC_API_KEY` ajouté dans Vercel et `.env` local
 - `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` peuvent être supprimés des variables Vercel (plus utilisés)
 
+**⚠️ Nettoyage AWS à faire (post-merge) :**
+- [ ] Supprimer les variables `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` dans les settings Vercel
+- [ ] Supprimer les clés d'accès IAM associées dans la console AWS
+- [ ] Vérifier qu'aucun autre service du projet n'utilise encore AWS (recherche `aws-sdk` dans le code)
+- [ ] Désactiver / supprimer le compte AWS si Bedrock était le seul service utilisé
+
 **À tester :** faire une simulation complète et vérifier que le feedback est bien généré (plus d'erreur Bedrock dans les logs Vercel).
 
 ---
