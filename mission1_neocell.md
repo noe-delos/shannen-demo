@@ -178,28 +178,22 @@ Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH Ele
 
 ### 5. Correction bugs login
 
-#### 5a. Redirection post-login / post-inscription
+#### 5a. Redirection post-login / post-inscription ✅ PAS DE BUG
 
-**Problème :** `login/page.tsx` et `signup/page.tsx` sont en `"use client"`. Ils appellent les server actions dans un bloc `try/finally`. Le `redirect()` côté serveur lance une exception `NEXT_REDIRECT` qui est interceptée silencieusement par le `catch` → pas de navigation.
+**Vérification :** `login/page.tsx` et `SignupForm.tsx` utilisent `try { ... } finally { ... }` **sans `catch`** — le `NEXT_REDIRECT` lancé par `redirect()` côté serveur se propage correctement et la redirection fonctionne. Rien à corriger.
 
-**Fix :**
+#### 5b. Reset password
 
-Fichiers : `app/login/page.tsx`, `app/signup/page.tsx`
+**Code vérifié** — le flow est complet et correct (`PASSWORD_RECOVERY` event → `updateUser` → redirect `/login`).
 
-Dans le handler `onSubmit`, ne pas wrapper l'appel à la server action dans un `try/catch` qui attrape tout. Laisser l'exception `NEXT_REDIRECT` se propager, ou utiliser le pattern recommandé Next.js :
-- Soit faire le redirect côté server action sans `try/catch` côté client
-- Soit utiliser `router.push("/")` côté client après que la server action retourne un succès (retourner `{ success: true }` au lieu de faire `redirect()` côté serveur)
+**Seul bug identifié :** `NEXT_PUBLIC_SITE_URL` non défini sur Vercel → les liens de reset pointent sur `localhost:3000`.
 
-Option retenue : **retourner `{ success: true }` depuis la server action et faire `router.push("/")` côté client** — plus robuste et évite le problème NEXT_REDIRECT.
+**Fix :** ajouter dans Vercel → Settings → Environment Variables :
+```
+NEXT_PUBLIC_SITE_URL = https://shannen-demo.vercel.app
+```
 
-#### 5b. Reset password — vérification du flow complet
-
-Fichiers : `app/forgot-password/actions.ts`, `app/reset-password/page.tsx`
-
-Points à vérifier et corriger :
-1. S'assurer que `NEXT_PUBLIC_SITE_URL` est défini en production (Vercel env vars) — sinon le lien de reset pointe sur localhost
-2. Vérifier que le flow `PASSWORD_RECOVERY` event → `updateUser` → redirect fonctionne de bout en bout
-3. Ajouter un message de confirmation visible après envoi de l'email de reset (actuellement aucun retour UI ?)
+Aucun changement de code nécessaire.
 
 **Fichiers touchés :**
 - `app/login/page.tsx` — fix redirect
@@ -211,7 +205,9 @@ Points à vérifier et corriger :
 
 ---
 
-### 6. Correction erreur technique variables ElevenLabs
+### 6. Correction erreur technique variables ElevenLabs ✅ IMPLÉMENTÉ
+
+**Branche :** `fix_elevenlabs_conversation_id`
 
 **Problème identifié dans l'audit :** le champ `elevenlabs_conversation_id` dans la table `conversations` stocke en réalité l'`agent_id` ElevenLabs et non le `conversation_id`. Cela empêche de récupérer le transcript depuis l'API ElevenLabs (l'appel échoue toujours, c'est le fallback frontend qui sauve).
 
@@ -233,9 +229,11 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 
 `manage-agent/route.ts` utilise un payload minimal différent de `start/route.ts`. À aligner ou à supprimer si la route n'est plus utilisée — à vérifier.
 
-**Fichiers touchés :**
-- `components/simulation/simulation-conversation.tsx` — capture du vrai conversation ID
-- Route API à identifier ou créer pour le PATCH `conversations.elevenlabs_conversation_id`
+**Fichiers modifiés :**
+- `components/simulation/simulation-conversation.tsx` — dans `onConnect`, appel PATCH non-bloquant avec `conversation.getId()`
+- `app/api/simulation/[id]/elevenlabs-id/route.ts` — nouvelle route PATCH créée
+
+**À tester :** faire une simulation, vérifier dans Supabase que `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx` et non un `agent_xxx`.
 
 ---
 
