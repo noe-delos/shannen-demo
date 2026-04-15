@@ -119,18 +119,9 @@ export function SimulationConversation({
       setConversationStatus("connected");
       setInitializing(false);
       startTimer();
-      const realElevenlabsId = conversation.getId() as string;
-      setElevenlabsConversationId(realElevenlabsId);
-      console.log("🆔 ElevenLabs Conversation ID:", realElevenlabsId);
-
-      // Sauvegarder le vrai conversation_id ElevenLabs en base (non-bloquant)
-      if (realElevenlabsId) {
-        fetch(`/api/simulation/${conversationId}/elevenlabs-id`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ elevenlabs_conversation_id: realElevenlabsId }),
-        }).catch((err) => console.warn("⚠️ Failed to save ElevenLabs ID:", err));
-      }
+      // getId() retourne encore l'agent_id au moment du onConnect
+      // On log pour debug mais on sauvegarde dans onDisconnect
+      console.log("🆔 ElevenLabs getId() at onConnect (may be agent_id):", conversation.getId());
 
       console.log(
         "📊 State after onConnect - initializing:",
@@ -141,16 +132,24 @@ export function SimulationConversation({
       toast.success("Conversation connectée !");
     },
     onDisconnect: () => {
-      console.log(
-        "❌ Disconnected from ElevenLabs conversation with id:",
-        conversation.getId()
-      );
+      const realElevenlabsId = conversation.getId() as string;
+      console.log("❌ Disconnected from ElevenLabs conversation with id:", realElevenlabsId);
       console.log(
         "📊 Current state before onDisconnect - conversationStatus:",
         conversationStatus
       );
       setConversationStatus("ended");
       stopTimer();
+
+      // Sauvegarder le vrai conversation_id ElevenLabs en base (disponible au disconnect)
+      if (realElevenlabsId && realElevenlabsId.startsWith("conv_")) {
+        setElevenlabsConversationId(realElevenlabsId);
+        fetch(`/api/simulation/${conversationId}/elevenlabs-id`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ elevenlabs_conversation_id: realElevenlabsId }),
+        }).catch((err) => console.warn("⚠️ Failed to save ElevenLabs ID:", err));
+      }
 
       if (elapsedTime >= 10) {
         console.log("⏱️ Elapsed time >= 10 seconds, ending conversation");
