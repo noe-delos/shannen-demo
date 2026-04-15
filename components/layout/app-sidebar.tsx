@@ -53,6 +53,7 @@ const items = [
 
 export function AppSidebar() {
   const [conversations, setConversations] = useState<any[]>([]);
+  const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -86,20 +87,25 @@ export function AppSidebar() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        const { data: conversationsData } = await supabase
-          .from("conversations")
-          .select(
-            `
-            *,
-            agents:agent_id (name, job_title),
-            feedback:feedback_id (note)
-          `
-          )
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        setConversations(conversationsData || []);
+        const [conversationsResponse, dailyResponse] = await Promise.all([
+          supabase
+            .from("conversations")
+            .select(`*, agents:agent_id (name, job_title), feedback:feedback_id (note)`)
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(10),
+          supabase
+            .from("conversations")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .gte("created_at", today.toISOString()),
+        ]);
+
+        setConversations(conversationsResponse.data || []);
+        setDailyCount(dailyResponse.count ?? 0);
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -173,12 +179,41 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="pt-4">
             <div className="mb-4">
-              <Link href="/simulation/configure">
-                <Button className="w-[60%] shannen-gradient font-bold hover:brightness-105 py-5 border-purple-200/50 text-white transition-opacity">
-                  <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
-                  Démarrer !
-                </Button>
-              </Link>
+              {dailyCount >= 3 ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Button
+                    className="w-full shannen-gradient font-bold py-5 border-purple-200/50 text-white opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
+                    Démarrer !
+                  </Button>
+                  <p className="text-xs text-red-500 font-medium text-center">
+                    Limite atteinte · Revenez demain
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <Link href="/simulation/configure">
+                    <Button className="w-full shannen-gradient font-bold hover:brightness-105 py-5 border-purple-200/50 text-white transition-opacity">
+                      <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
+                      Démarrer !
+                    </Button>
+                  </Link>
+                  <div className="w-full">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-muted-foreground">Simulations aujourd&apos;hui</span>
+                      <span className="text-xs font-semibold text-[#9516C7]">{dailyCount}/3</span>
+                    </div>
+                    <div className="h-1 w-full bg-purple-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#9516C7] rounded-full transition-all duration-300"
+                        style={{ width: `${(dailyCount / 3) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <SidebarMenu>
               {items.map((item) => (

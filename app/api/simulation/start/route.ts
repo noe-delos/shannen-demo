@@ -33,6 +33,23 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ User authenticated:", user.id);
 
+    // Check daily simulation limit
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { count: dailyCount } = await supabase
+      .from("conversations")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", today.toISOString());
+
+    if ((dailyCount ?? 0) >= 3) {
+      console.warn("⚠️ Daily simulation limit reached for user:", user.id);
+      return NextResponse.json(
+        { error: "Limite de 3 simulations par jour atteinte. Revenez demain !" },
+        { status: 429 }
+      );
+    }
+
     // Get existing conversation
     console.log("📥 Fetching conversation from database...");
     const { data: conversation, error: conversationError } = await supabase

@@ -95,11 +95,20 @@ ALTER TABLE conversations ADD COLUMN max_duration_seconds INTEGER DEFAULT 2700;
 
 ---
 
-### 3. Limite de consommation — 3 appels/jour par utilisateur
+### 3. Limite de consommation — 3 appels/jour par utilisateur ✅ IMPLÉMENTÉ
 
-**Objectif :** bloquer le lancement d'une 4ème simulation si l'élève a déjà fait 3 appels dans la journée (minuit → minuit).
+**Branche :** `limite_simulations_jour`
 
-**Pas de migration SQL nécessaire** — on compte les conversations existantes.
+**Pas de migration SQL** — comptage direct sur la table `conversations` existante.
+
+**Fichiers modifiés :**
+- `app/api/simulation/start/route.ts` — vérification serveur : COUNT conversations du jour avant création, retourne 429 si >= 3
+- `components/layout/app-sidebar.tsx` — `dailyCount` state, chargé en parallèle avec les conversations via `Promise.all`. Affiche une barre de progression violette sous le bouton "Démarrer !". Si limite atteinte : bouton désactivé + message "Limite atteinte · Revenez demain"
+- `components/dashboard/dashboard.tsx` — `dailyCount` state, chargé en parallèle. Affiche une pill "X/3 aujourd'hui" avec 3 points violets alignée à droite du titre
+
+**Tests :**
+- ✅ Test automatique (Claude) concluant — 2 conversations fictives insérées en base pour atteindre la limite, bouton désactivé côté sidebar + message "Limite atteinte · Revenez demain", pill "Limite atteinte" côté dashboard, données de test supprimées après vérification
+- ⚠️ Test humain à faire — vérifier le flow complet : faire 3 vraies simulations et confirmer que la 4ème est bloquée (UI + erreur 429 retournée par la route)
 
 **Étape 1 — Vérification au démarrage**
 
