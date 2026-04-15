@@ -12,6 +12,8 @@ export type Database = {
           elevenlabs_agent_api_id: string | null;
           picture_url: string | null;
           credits: number;
+          default_secteur: string | null;
+          default_company: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +25,8 @@ export type Database = {
           elevenlabs_agent_api_id?: string | null;
           picture_url?: string | null;
           credits?: number;
+          default_secteur?: string | null;
+          default_company?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +38,8 @@ export type Database = {
           elevenlabs_agent_api_id?: string | null;
           picture_url?: string | null;
           credits?: number;
+          default_secteur?: string | null;
+          default_company?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -153,7 +159,11 @@ export type Database = {
           } | null;
           call_type: string | null;
           duration_seconds: number;
+          max_duration_seconds: number;
           elevenlabs_conversation_id: string | null;
+          summary: string | null;
+          history_context: string | null;
+          history_conversation_ids: string[] | null;
           created_at: string;
           updated_at: string;
         };
@@ -171,7 +181,11 @@ export type Database = {
           } | null;
           call_type?: string | null;
           duration_seconds?: number;
+          max_duration_seconds?: number;
           elevenlabs_conversation_id?: string | null;
+          summary?: string | null;
+          history_context?: string | null;
+          history_conversation_ids?: string[] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -189,7 +203,11 @@ export type Database = {
           } | null;
           call_type?: string | null;
           duration_seconds?: number;
+          max_duration_seconds?: number;
           elevenlabs_conversation_id?: string | null;
+          summary?: string | null;
+          history_context?: string | null;
+          history_conversation_ids?: string[] | null;
           created_at?: string;
           updated_at?: string;
         };

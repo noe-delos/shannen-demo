@@ -19,6 +19,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -53,10 +54,15 @@ const items = [
 
 export function AppSidebar() {
   const [conversations, setConversations] = useState<any[]>([]);
+  const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
+  const { setOpenMobile } = useSidebar();
+
+  const closeMobile = () => setOpenMobile(false);
 
   useEffect(() => {
     loadConversations();
@@ -86,20 +92,31 @@ export function AppSidebar() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        const { data: conversationsData } = await supabase
-          .from("conversations")
-          .select(
-            `
-            *,
-            agents:agent_id (name, job_title),
-            feedback:feedback_id (note)
-          `
-          )
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        setConversations(conversationsData || []);
+        const [conversationsResponse, dailyResponse, profileResponse] = await Promise.all([
+          supabase
+            .from("conversations")
+            .select(`*, agents:agent_id (name, job_title), feedback:feedback_id (note)`)
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(10),
+          supabase
+            .from("conversations")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .gte("created_at", today.toISOString()),
+          supabase
+            .from("users")
+            .select("firstname, lastname, picture_url, email")
+            .eq("id", user.id)
+            .single(),
+        ]);
+
+        setConversations(conversationsResponse.data || []);
+        setDailyCount(dailyResponse.count ?? 0);
+        setUserProfile(profileResponse.data);
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -116,9 +133,9 @@ export function AppSidebar() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffInDays = Math.round((nowDay.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffInDays === 0) return "Aujourd'hui";
     if (diffInDays === 1) return "Hier";
@@ -173,12 +190,41 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="pt-4">
             <div className="mb-4">
-              <Link href="/simulation/configure">
-                <Button className="w-[60%] shannen-gradient font-bold hover:brightness-105 py-5 border-purple-200/50 text-white transition-opacity">
-                  <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
-                  Démarrer !
-                </Button>
-              </Link>
+              {dailyCount >= 3 ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Button
+                    className="w-full shannen-gradient font-bold py-5 border-purple-200/50 text-white opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
+                    Démarrer !
+                  </Button>
+                  <p className="text-xs text-red-500 font-medium text-center">
+                    Limite atteinte · Revenez demain
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <Link href="/simulation/configure" onClick={closeMobile}>
+                    <Button className="w-full shannen-gradient font-bold hover:brightness-105 py-5 border-purple-200/50 text-white transition-opacity">
+                      <Icon icon="mdi:phone" className="mr-1 h-4 w-4" />
+                      Démarrer !
+                    </Button>
+                  </Link>
+                  <div className="w-full">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-muted-foreground">Simulations aujourd&apos;hui</span>
+                      <span className="text-xs font-semibold text-[#9516C7]">{dailyCount}/3</span>
+                    </div>
+                    <div className="h-1 w-full bg-purple-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#9516C7] rounded-full transition-all duration-300"
+                        style={{ width: `${(dailyCount / 3) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <SidebarMenu>
               {items.map((item) => (
@@ -186,6 +232,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       href={item.url}
+                      onClick={closeMobile}
                       className={`flex items-center gap-3 ${
                         isActiveRoute(item.url)
                           ? "bg-accent text-accent-foreground"
@@ -229,6 +276,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={`/conversations/${conversation.id}`}
+                        onClick={closeMobile}
                         className={`flex items-center gap-2 p-2 min-h-[2rem] ${
                           isActiveConversation(conversation.id)
                             ? "bg-accent text-accent-foreground"
@@ -269,6 +317,7 @@ export function AppSidebar() {
                   </p>
                   <Link
                     href="/simulation/configure"
+                    onClick={closeMobile}
                     className="text-sm text-[#781397] hover:text-[#79408a] block text-center mt-2"
                   >
                     Créer votre première
@@ -279,15 +328,37 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-          onClick={handleLogout}
-        >
-          <Icon icon="mdi:logout" className="mr-2 h-4 w-4" />
-          Se déconnecter
-        </Button>
+      <SidebarFooter className="border-t pt-3">
+        <div className="flex items-center gap-3 px-2 py-1">
+          <Link href="/profile" onClick={closeMobile} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+            <div className="relative h-8 w-8 shrink-0">
+              {userProfile?.picture_url ? (
+                <img src={userProfile.picture_url} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-[#9516C7]/10 flex items-center justify-center text-[#9516C7] text-xs font-semibold">
+                  {userProfile?.firstname?.[0]}{userProfile?.lastname?.[0]}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col min-w-0">
+              {(userProfile?.firstname || userProfile?.lastname) && (
+                <span className="text-sm font-medium truncate">
+                  {userProfile?.firstname} {userProfile?.lastname}
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground truncate">{userProfile?.email}</span>
+            </div>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => { closeMobile(); handleLogout(); }}
+            title="Se déconnecter"
+          >
+            <Icon icon="mdi:logout" className="h-4 w-4" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

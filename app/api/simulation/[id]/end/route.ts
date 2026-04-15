@@ -2,10 +2,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import {
-  BedrockRuntimeClient,
-  ConverseCommand,
-} from "@aws-sdk/client-bedrock-runtime";
+import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(
   request: NextRequest,
@@ -186,57 +185,24 @@ Fournissez un feedback structuré avec:
   "analyse_complete": "Analyse détaillée en 2-3 paragraphes..."
 }`;
 
-    console.log("📤 Sending request to Claude via AWS Bedrock...");
+    console.log("📤 Sending request to Claude via Anthropic API...");
     console.log("🤖 Prompt length:", feedbackPrompt.length);
 
     try {
-      // Create Bedrock client
-      console.log("🔧 Creating AWS Bedrock client...");
-      const client = new BedrockRuntimeClient({
-        region: process.env.AWS_REGION as string,
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
-        },
+      console.log("📡 Sending request to Anthropic...");
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-haiku-20241022",
+        max_tokens: 2000,
+        temperature: 0.1,
+        messages: [{ role: "user", content: feedbackPrompt }],
       });
-
-      // Format messages for Bedrock
-      const messages = [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: feedbackPrompt,
-            },
-          ],
-        },
-      ];
-
-      console.log("📋 Preparing ConverseCommand...");
-      const command = new ConverseCommand({
-        modelId: "eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
-        messages: messages as any,
-        inferenceConfig: {
-          maxTokens: 2000,
-          temperature: 0.1,
-        },
-      });
-
-      console.log("📡 Sending command to AWS Bedrock...");
-      const response = await client.send(command);
-      console.log("✅ Response received from AWS Bedrock");
+      console.log("✅ Response received from Anthropic");
 
       // Extract content from response
       let feedbackText = "";
-      if (response.output?.message?.content) {
-        console.log("📄 Extracting content from response...");
-        for (const block of response.output.message.content) {
-          if ("text" in block) {
-            feedbackText = block.text || "";
-            break;
-          }
-        }
+      const firstBlock = response.content[0];
+      if (firstBlock?.type === "text") {
+        feedbackText = firstBlock.text;
       }
 
       console.log("✅ Claude response received, length:", feedbackText.length);
@@ -329,6 +295,57 @@ Fournissez un feedback structuré avec:
         console.error("❌ Error linking feedback:", linkError);
       } else {
         console.log("✅ Feedback linked successfully");
+      }
+
+      // Generate summary for inter-conversation history
+      console.log("📝 Generating conversation summary...");
+      try {
+        const summaryPrompt = `Tu es un assistant qui résume des conversations commerciales de façon concise.
+
+Voici une conversation entre un commercial et un prospect.
+
+**CONTEXTE:**
+- Prospect: ${conversation.agents?.name} (${conversation.agents?.job_title})
+- Produit: ${conversation.products?.name}
+- Type d'appel: ${conversation.call_type}
+- Durée: ${finalDuration} secondes
+
+**TRANSCRIPT:**
+${transcript
+  .map(
+    (msg: any, i: number) =>
+      `${i + 1}. ${msg.role === "user" || msg.source === "user" ? "Commercial" : "Prospect"}: ${msg.content || msg.message || msg.text}`
+  )
+  .join("\n")}
+
+Génère un résumé factuel en 3-5 phrases maximum (150 mots max) qui capture :
+- Ce qui a été proposé par le commercial
+- Les réactions et objections du prospect
+- Le résultat de l'appel (accord, refus, suite prévue, pas de conclusion)
+
+Ce résumé sera utilisé pour contextualiser les prochains appels avec ce prospect. Réponds uniquement avec le résumé, sans introduction ni titre.`;
+
+        const summaryResponse = await anthropic.messages.create({
+          model: "claude-3-5-haiku-20241022",
+          max_tokens: 300,
+          temperature: 0.1,
+          messages: [{ role: "user", content: summaryPrompt }],
+        });
+        let summaryText = "";
+        const summaryBlock = summaryResponse.content[0];
+        if (summaryBlock?.type === "text") {
+          summaryText = summaryBlock.text;
+        }
+
+        if (summaryText) {
+          await supabase
+            .from("conversations")
+            .update({ summary: summaryText.trim() })
+            .eq("id", conversationId);
+          console.log("✅ Summary generated and saved");
+        }
+      } catch (summaryError) {
+        console.warn("⚠️ Failed to generate summary (non-blocking):", summaryError);
       }
 
       console.log("🎉 Conversation analysis completed successfully!");

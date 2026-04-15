@@ -73,6 +73,7 @@ export function SimulationConversation({
   const supabase = createClient();
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const elapsedTimeRef = useRef<number>(0); // ref pour éviter stale closure dans onDisconnect
   const router = useRouter();
 
 
@@ -119,8 +120,10 @@ export function SimulationConversation({
       setConversationStatus("connected");
       setInitializing(false);
       startTimer();
-      setElevenlabsConversationId(conversation.getId() as string);
-      console.log("🆔 Conversation ID:", conversation.getId());
+      // getId() retourne encore l'agent_id au moment du onConnect
+      // On log pour debug mais on sauvegarde dans onDisconnect
+      console.log("🆔 ElevenLabs getId() at onConnect (may be agent_id):", conversation.getId());
+
       console.log(
         "📊 State after onConnect - initializing:",
         false,
@@ -130,10 +133,8 @@ export function SimulationConversation({
       toast.success("Conversation connectée !");
     },
     onDisconnect: () => {
-      console.log(
-        "❌ Disconnected from ElevenLabs conversation with id:",
-        conversation.getId()
-      );
+      const realElevenlabsId = conversation.getId() as string;
+      console.log("❌ Disconnected from ElevenLabs conversation with id:", realElevenlabsId);
       console.log(
         "📊 Current state before onDisconnect - conversationStatus:",
         conversationStatus
@@ -141,8 +142,18 @@ export function SimulationConversation({
       setConversationStatus("ended");
       stopTimer();
 
-      if (elapsedTime >= 10) {
-        console.log("⏱️ Elapsed time >= 10 seconds, ending conversation");
+      // Sauvegarder le vrai conversation_id ElevenLabs en base (disponible au disconnect)
+      if (realElevenlabsId && realElevenlabsId.startsWith("conv_")) {
+        setElevenlabsConversationId(realElevenlabsId);
+        fetch(`/api/simulation/${conversationId}/elevenlabs-id`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ elevenlabs_conversation_id: realElevenlabsId }),
+        }).catch((err) => console.warn("⚠️ Failed to save ElevenLabs ID:", err));
+      }
+
+      if (elapsedTimeRef.current >= 10) {
+        console.log("⏱️ Elapsed time >= 10 seconds, ending conversation", elapsedTimeRef.current);
         endConversation();
       }
     },
@@ -510,8 +521,12 @@ export function SimulationConversation({
       clearInterval(timerInterval);
     }
     setElapsedTime(0);
+    elapsedTimeRef.current = 0;
     const interval = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
+      setElapsedTime((prev) => {
+        elapsedTimeRef.current = prev + 1;
+        return prev + 1;
+      });
     }, 1000);
     setTimerInterval(interval);
   };
@@ -905,8 +920,8 @@ export function SimulationConversation({
                     {conversationStatus === "connected" && (
                       <div className="text-center">
                         {/* Timer above character circle */}
-                        <motion.p
-                          className="text-white text-lg font-semibold mb-6 drop-shadow-lg"
+                        <motion.div
+                          className="mb-6"
                           animate={{
                             color: conversation.isSpeaking
                               ? "#ffffff"
@@ -914,8 +929,29 @@ export function SimulationConversation({
                           }}
                           transition={{ duration: 0.3 }}
                         >
-                          {formatTime(elapsedTime)}
-                        </motion.p>
+                          <p className="text-white text-lg font-semibold drop-shadow-lg">
+                            {formatTime(elapsedTime)}
+                          </p>
+                          {(() => {
+                            const maxDuration = conversationData?.max_duration_seconds ?? 2700;
+                            const remaining = maxDuration - elapsedTime;
+                            const isWarning = remaining <= 300 && remaining > 0;
+                            const isDanger = remaining <= 60 && remaining > 0;
+                            return remaining > 0 ? (
+                              <p
+                                className={`text-xs font-medium drop-shadow-lg mt-0.5 ${
+                                  isDanger
+                                    ? "text-red-300"
+                                    : isWarning
+                                    ? "text-orange-300"
+                                    : "text-white/70"
+                                }`}
+                              >
+                                {formatTime(remaining)} restantes
+                              </p>
+                            ) : null;
+                          })()}
+                        </motion.div>
 
                         {/* Smaller character circle, moved higher */}
                         <motion.div

@@ -26,6 +26,7 @@ export function Dashboard() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
@@ -39,35 +40,29 @@ export function Dashboard() {
         } = await supabase.auth.getUser();
 
         if (user) {
-          // Load conversations
-          const { data: conversationsData } = await supabase
-            .from("conversations")
-            .select(
-              `
-              *,
-              agents:agent_id (name, job_title, picture_url, firstname, lastname),
-              feedback:feedback_id (note)
-            `
-            )
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(5);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
 
-          // Load agents
-          const { data: agentsData } = await supabase
-            .from("agents")
-            .select("*")
-            .limit(4);
+          const [conversationsResponse, agentsResponse, productsResponse, dailyResponse] = await Promise.all([
+            supabase
+              .from("conversations")
+              .select(`*, agents:agent_id (name, job_title, picture_url, firstname, lastname), feedback:feedback_id (note)`)
+              .eq("user_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(5),
+            supabase.from("agents").select("*").limit(4),
+            supabase.from("products").select("*").limit(4),
+            supabase
+              .from("conversations")
+              .select("id", { count: "exact", head: true })
+              .eq("user_id", user.id)
+              .gte("created_at", today.toISOString()),
+          ]);
 
-          // Load products
-          const { data: productsData } = await supabase
-            .from("products")
-            .select("*")
-            .limit(4);
-
-          setConversations(conversationsData || []);
-          setAgents(agentsData || []);
-          setProducts(productsData || []);
+          setConversations(conversationsResponse.data || []);
+          setAgents(agentsResponse.data || []);
+          setProducts(productsResponse.data || []);
+          setDailyCount(dailyResponse.count ?? 0);
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -151,9 +146,10 @@ export function Dashboard() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    // Comparer les dates calendaires (sans l'heure) pour éviter le bug "aujourd'hui" vs "hier"
+    const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffInDays = Math.round((nowDay.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffInDays === 0) return "Aujourd'hui";
     if (diffInDays === 1) return "Hier";
@@ -245,17 +241,35 @@ export function Dashboard() {
       {/* Conversations Section */}
       <motion.section variants={item}>
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
             <div>
               <h1 className={`text-4xl font-bold ${dancingScript.className}`}>Vos conversations</h1>
               <p className="text-muted-foreground">
                 Liste de vos conversations passées
               </p>
             </div>
-            <Badge variant="secondary" className="text-sm font-medium">
-              {conversations.length} conversation
-              {conversations.length !== 1 ? "s" : ""}
-            </Badge>
+            {conversations.length > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-sm font-medium">
+                {conversations.length} conversation{conversations.length > 1 ? "s" : ""}
+              </span>
+            )}
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-200 bg-purple-50">
+              <div className="flex gap-0.5">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      i < dailyCount ? "bg-[#9516C7]" : "bg-purple-200"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className={`text-xs font-semibold ${dailyCount >= 3 ? "text-red-600" : "text-[#9516C7]"}`}>
+                {dailyCount >= 3 ? "Limite atteinte" : `${dailyCount}/3 aujourd'hui`}
+              </span>
+            </div>
           </div>
         </div>
 
