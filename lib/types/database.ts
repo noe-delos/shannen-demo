@@ -12,6 +12,8 @@ export type Database = {
           elevenlabs_agent_api_id: string | null;
           picture_url: string | null;
           credits: number;
+          default_secteur: string | null;
+          default_company: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +25,8 @@ export type Database = {
           elevenlabs_agent_api_id?: string | null;
           picture_url?: string | null;
           credits?: number;
+          default_secteur?: string | null;
+          default_company?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +38,8 @@ export type Database = {
           elevenlabs_agent_api_id?: string | null;
           picture_url?: string | null;
           credits?: number;
+          default_secteur?: string | null;
+          default_company?: string | null;
           created_at?: string;
           updated_at?: string;
         };

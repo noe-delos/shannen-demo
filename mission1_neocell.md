@@ -237,6 +237,38 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 
 ---
 
+### 7. Page Profil utilisateur ✅ IMPLÉMENTÉ
+
+**Branche :** `profil_utilisateur`
+
+**Migrations Supabase exécutées :**
+```sql
+ALTER TABLE users ADD COLUMN default_secteur TEXT NULL;
+ALTER TABLE users ADD COLUMN default_company TEXT NULL;
+```
+
+**Bucket Supabase Storage créé :** `avatars` (public, 5MB max, jpg/png/webp/gif)
+- Policies RLS : lecture publique, upload/update/delete uniquement par le propriétaire (`auth.uid() = foldername[1]`)
+
+**Fichiers créés/modifiés :**
+- `app/(dashboard)/profile/page.tsx` — page profil (server component, auth guard)
+- `components/profile/profile-form.tsx` — formulaire profil avec 4 sections :
+  - Photo de profil (upload → Supabase Storage bucket `avatars`, path `{user_id}/avatar.{ext}`)
+  - Identité : prénom, nom (email désactivé, non modifiable)
+  - Contexte par défaut : `default_secteur` + `default_company` pré-remplis dans le wizard
+  - Changement de mot de passe : re-authentification + `supabase.auth.updateUser()`
+- `components/layout/app-sidebar.tsx` — footer remplacé par bloc avatar cliquable (photo + email, nom si renseigné) → `/profile` + bouton logout icône séparé. Email toujours affiché même si pas de nom/prénom.
+- `components/layout/header.tsx` — popover avatar : ajout lien "Mon profil" + "Se déconnecter" en rouge
+- `components/simulation/simulation-stepper.tsx` — `loadUserDefaults()` au montage ; si pas de localStorage pour l'agent, fallback sur `default_secteur` / `default_company` du profil
+- `lib/types/database.ts` — `default_secteur` + `default_company` ajoutés dans `users` Row/Insert/Update
+
+**À tester :**
+- Uploader une photo → vérifier qu'elle s'affiche dans la sidebar et le header
+- Sauvegarder secteur/entreprise par défaut → créer une nouvelle simulation avec un nouvel agent → vérifier que les champs sont pré-remplis à l'étape 4
+- Changer le mot de passe → se déconnecter → se reconnecter avec le nouveau mdp
+
+---
+
 ## Ordre d'implémentation recommandé
 
 | Priorité | Point | Effort | Impact |
@@ -253,6 +285,99 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 ## Remarques
 
 - **localStorage dans le wizard** — l'étape 4 du wizard (secteur, entreprise, contexte personnalisé) est pré-remplie automatiquement avec la dernière config sauvegardée pour chaque agent. C'est le comportement voulu via `loadSavedConfig` / `saveConfig` dans `simulation-stepper.tsx`. Ce comportement est identique en local et en prod — chaque utilisateur a ses propres données stockées dans le `localStorage` de son navigateur.
+
+---
+
+### 8. Fusion prompt ElevenLabs — renforcement du persona prospect
+
+**Branche :** `fusion_prompt_elevenlabs`
+
+**Contexte :** le prompt actuel dans `start/route.ts` est trop simpliste (instructions 1-11 génériques). Le client a fourni un document de référence (`elo_michel_prompt_config.pdf`) avec une structure en 5 blocs plus réaliste.
+
+**Décision :** fusion des deux prompts avec priorité sur le nouveau document. Suppression du BLOC 5 scoring (géré par Anthropic côté feedback). Remplacement de `[raccroches]` par le system tool natif ElevenLabs `end_call`.
+
+---
+
+**Structure finale du prompt assemblé :**
+
+```
+BLOC 1 — Identité & contexte          ← dynamique (actuel, conservé)
+BLOC 2 — Comportement général         ← nouveau doc (remplace instructions 1-11)
+BLOC 3 — Texture des réponses/niveau  ← nouveau doc, calibré par agent.difficulty
+BLOC 4 — Résistances & raccrochage    ← nouveau doc, conditionné par callType
+```
+
+**Règle `end_call` tool :**
+- Ajout du system tool `end_call` dans le payload PATCH ElevenLabs
+- `end_call` actif uniquement pour `cold_call` et `follow_up_call`
+- Les autres types (`discovery_meeting`, `product_demo`, `closing_call`) utilisent une clôture polie sans raccrocher
+
+**Comportement par callType :**
+
+| callType | Résistance départ | Raccrochage | end_call tool |
+|---|---|---|---|
+| `cold_call` | Palier 1 (résistance froide) | Palier 3 ou hardcore | ✅ |
+| `follow_up_call` | Palier 1 mais moins hostile | Palier 3 uniquement | ✅ |
+| `discovery_meeting` | Pas de résistance froide (RDV accepté) | Non — clôture polie | ❌ |
+| `product_demo` | Ouvert (niveau facile par défaut) | Non — clôture polie | ❌ |
+| `closing_call` | Neutre/exigeant, objections précises | Non — "je reviens vers vous" | ❌ |
+
+**Niveau HARDCORE :**
+- Réservé aux élèves ayant validé les niveaux 1 à 3
+- Raccrochage dès le 1er ou 2ème échange
+- ⚠️ À implémenter : système de progression par niveau dans l'app (feature future)
+- Pour l'instant : niveau hardcore disponible comme option de difficulté dans la fiche agent
+
+**Fichiers modifiés :**
+- `app/api/simulation/start/route.ts` — remplacement des instructions 1-11 + ajout tool `end_call`
+
+**À tester (test humain obligatoire) :**
+
+Cold call — niveau difficile :
+- L'agent démarre en palier 1 (résistance froide : "Oui ?" ou "Allô." sans rien ajouter)
+- Si accroche générique → passage palier 2 ("Ça ressemble à tous les appels que je reçois.")
+- Si toujours mauvais → palier 3 + raccrochage via tool `end_call` natif ElevenLabs
+- Si accroche pertinente → l'agent s'ouvre progressivement et revient palier 1
+
+Cold call — niveau hardcore :
+- Accroche type "je vous dérange" ou pitch générique → raccrochage immédiat dès le 1er échange
+- Accroche pertinente → "Hmm. Continuez." / "J'ai 30 secondes."
+
+Follow-up call :
+- L'agent reconnaît la personne mais reste neutre/hésitant
+- Objections spécifiques relance (prix, concurrent, délai décision)
+- Raccroche poliment si vendeur ne répond pas aux points bloquants
+
+Discovery / Demo / Closing :
+- Vérifier qu'il n'y a PAS de raccrochage brutal (clôture polie uniquement)
+- Vérifier que l'agent pose des questions sur le contexte si le vendeur pitch trop tôt
+
+Tous niveaux :
+- Aucun pattern IA ("Je vous écoute attentivement", "C'est une excellente question", etc.)
+- Réponses en 1-2 phrases max
+- Langue française exclusivement
+
+---
+
+## Ordre de merge des branches
+
+Merger dans cet ordre vers `mission1_neocell`, puis `mission1_neocell` → `main` en dernier.
+
+```
+1. duree_appel_configuration      → mission1_neocell
+2. limite_simulations_jour        → mission1_neocell
+3. historique_conversations       → mission1_neocell
+4. suppression_bedrock            → mission1_neocell
+5. fix_elevenlabs_conversation_id → mission1_neocell
+6. profil_utilisateur             → mission1_neocell
+7. fusion_prompt_elevenlabs       → mission1_neocell
+8. mission1_neocell               → main  ← déclenche le déploiement Vercel
+```
+
+**⚠️ Checklist avant de merger dans `main` :**
+- [ ] `ANTHROPIC_API_KEY` défini dans les variables Vercel ✅ (déjà fait)
+- [ ] `NEXT_PUBLIC_SITE_URL=https://shannen-demo.vercel.app` défini dans Vercel
+- [ ] Tester les points critiques de chaque branche (voir sections "À tester" ci-dessus)
 
 ---
 
