@@ -196,6 +196,8 @@ Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH Ele
 
 **À tester :** faire une simulation complète et vérifier que le feedback est bien généré (plus d'erreur Bedrock dans les logs Vercel).
 
+> ✅ **Validé le 15/04/2026** — vérifié en base Supabase : plusieurs conversations ont un `feedback_id` et un `summary` correctement générés par Anthropic (`claude-3-5-haiku`).
+
 ---
 
 ### 5. Correction bugs login
