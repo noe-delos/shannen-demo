@@ -399,6 +399,8 @@ Tous niveaux :
 - ✅ **Wizard étape 4 — "Historique de la relation" mal initialisé** : le localStorage restaurait l'ancienne valeur. Fix : `historique_relation` toujours réinitialisé à `"Premier contact"` au chargement, indépendamment du localStorage. (`simulation-stepper.tsx`)
 - ✅ **Agents disponibles — photo manquante pour Céline Laurent** : `picture_url` était null en base. Fix : avatar généré via `ui-avatars.com` (initiales violet #9516C7) mis à jour directement en Supabase.
 - ✅ **Date affichée incorrecte ("aujourd'hui" au lieu de "hier")** : comparaison basée sur les millisecondes — une conversation de la veille à 23h59 affichait "aujourd'hui". Fix : comparaison calendaire (date normalisée sans heure) dans `dashboard.tsx` et `app-sidebar.tsx`.
+- ✅ **Feedback toujours en fallback ("Conversation complétée")** : le modèle `claude-3-5-haiku-20241022` retournait `404 not_found_error` sur l'org Anthropic → catch block déclenché systématiquement. Fix : switch vers `claude-3-7-sonnet-20250219` pour feedback + summary dans `app/api/simulation/[id]/end/route.ts` (`debugs4_mission1_neocell`). **À re-tester.**
+- ⏳ **Post-it "Briefing de Simulation" trop court** : lors de la simulation en cours, le post-it affiché à gauche tronque le texte (champs "Objectif", "Secteur", etc. coupés). À corriger : hauteur auto / `overflow-visible` / taille de police / layout. (`debugs5_mission1_neocell`)
 
 ---
 
