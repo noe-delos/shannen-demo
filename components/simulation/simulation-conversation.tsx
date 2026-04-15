@@ -74,6 +74,8 @@ export function SimulationConversation({
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
   const elapsedTimeRef = useRef<number>(0); // ref pour éviter stale closure dans onDisconnect
+  const endConversationRef = useRef<() => Promise<void>>(async () => {}); // ref pour éviter stale closure
+  const messagesRef = useRef<ConversationMessage[]>([]); // ref pour éviter stale closure
   const router = useRouter();
 
 
@@ -154,7 +156,7 @@ export function SimulationConversation({
 
       if (elapsedTimeRef.current >= 10) {
         console.log("⏱️ Elapsed time >= 10 seconds, ending conversation", elapsedTimeRef.current);
-        endConversation();
+        endConversationRef.current();
       }
     },
     onMessage: (message) => {
@@ -168,7 +170,11 @@ export function SimulationConversation({
         source: message.source,
       };
 
-      setMessages((prev) => [...prev, newMessage]);
+      setMessages((prev) => {
+        const updated = [...prev, newMessage];
+        messagesRef.current = updated;
+        return updated;
+      });
     },
     onError: (error) => {
       console.error("❌ ElevenLabs Error:", error);
@@ -445,8 +451,8 @@ export function SimulationConversation({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: messages,
-          duration: elapsedTime,
+          messages: messagesRef.current,
+          duration: elapsedTimeRef.current,
         }),
       });
 
@@ -511,6 +517,9 @@ export function SimulationConversation({
       toast.error("Erreur lors de la fin de conversation");
     }
   };
+
+  // Synchroniser le ref à chaque re-création de endConversation
+  endConversationRef.current = endConversation;
 
   const stopConversation = useCallback(async () => {
     await endConversation();
