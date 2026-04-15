@@ -3,10 +3,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import {
-  BedrockRuntimeClient,
-  ConverseCommand,
-} from "@aws-sdk/client-bedrock-runtime";
+import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(request: NextRequest) {
   console.log("🚀 Starting conversation end process");
@@ -112,39 +111,21 @@ Donne une analyse structurée avec:
 
 Réponds en français et sois constructif.`;
 
-      console.log("📤 Sending request to Claude via AWS Bedrock...");
+      console.log("📤 Sending request to Claude via Anthropic API...");
       console.log("🤖 Prompt length:", prompt.length);
 
-      const client = new BedrockRuntimeClient({
-        region: process.env.AWS_REGION || "us-east-1",
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        },
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-haiku-20241022",
+        max_tokens: 1000,
+        temperature: 0.7,
+        messages: [{ role: "user", content: prompt }],
       });
-
-      const command = new ConverseCommand({
-        modelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
-        messages: [
-          {
-            role: "user",
-            content: [{ text: prompt }],
-          },
-        ],
-        inferenceConfig: {
-          maxTokens: 1000,
-          temperature: 0.7,
-        },
-      });
-
-      console.log("📡 Sending command to AWS Bedrock...");
-      const response = await client.send(command);
-      console.log("✅ Response received from AWS Bedrock");
+      console.log("✅ Response received from Anthropic");
 
       // Extract content from response
-      const content = response.output?.message?.content?.[0];
-      if (content && 'text' in content) {
-        const analysisText = content.text;
+      const firstBlock = response.content[0];
+      if (firstBlock?.type === "text") {
+        const analysisText = firstBlock.text;
 
         // Parse the structured response
         const lines = analysisText!.split('\n').filter(line => line.trim());

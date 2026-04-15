@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@11labs/react": "^0.1.4",
-    "@aws-sdk/client-bedrock-runtime": "^3.821.0",
+    "@anthropic-ai/sdk": "^0.88.0",
     "@elevenlabs/react": "^0.1.6",
     "@iconify/react": "^6.0.0",
     "@radix-ui/react-alert-dialog": "^1.1.14",
