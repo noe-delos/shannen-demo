@@ -15,61 +15,44 @@
 
 ---
 
-### 1. Historique inter-conversations (R1→R2)
+### 1. Historique inter-conversations (R1→R2) ✅ IMPLÉMENTÉ
 
-**Objectif :** au lancement d'une simulation, injecter un résumé des conversations précédentes avec le même persona dans le prompt ElevenLabs.
+**Branche :** `historique_conversations`
 
-**Migration Supabase :**
+**Migrations Supabase exécutées :**
 ```sql
 ALTER TABLE conversations ADD COLUMN summary TEXT NULL;
+ALTER TABLE conversations ADD COLUMN history_context TEXT NULL;
+ALTER TABLE conversations ADD COLUMN history_conversation_ids UUID[] NULL;
 ```
 
-**Étape 1 — Générer le résumé post-simulation**
+**3 modes d'historique disponibles dans le wizard (étape 4) :**
+- **Repartir de zéro** — aucun historique injecté dans le prompt (défaut)
+- **Saisir manuellement** — champ texte libre, stocké dans `history_context`
+- **Reprendre l'historique des appels** — dropdown avec sélection "jusqu'à quel appel" (Option B cascade : sélectionner le 3ème appel inclut automatiquement les 1er et 2ème), stocké dans `history_conversation_ids[]`
 
-Fichier : `app/api/simulation/[id]/end/route.ts`
+**Condition d'affichage du sélecteur :** uniquement les conversations avec `summary IS NOT NULL`, même `agent_id` (même prospect) ET même `product_id` (même produit), triées par ordre chronologique ASC.
+- Si l'appel concernait un produit différent → n'apparaît pas (injecter un historique sur un produit différent n'aurait pas de sens)
+- Si l'appel concernait un autre prospect avec le même produit → n'apparaît pas non plus (Jean Verdi ne peut pas se souvenir d'une conversation qu'il n'a pas eue)
 
-Après la génération du feedback existant, ajouter un second appel IA qui génère un résumé condensé (~200 mots) de l'appel à partir du transcript. Le résumé doit capturer :
-- L'objectif de l'appel et s'il a été atteint
-- Les points clés abordés
-- Le comportement du prospect (objections, réactions)
-- Le résultat final
+**Fichiers modifiés :**
+- `lib/types/database.ts` — 3 nouvelles colonnes dans Row/Insert/Update
+- `components/simulation/simulation-stepper.tsx` — `historyMode`, `historyContext`, `historyUntilId` dans l'interface + `loadPreviousConversations()` chargé quand agent+produit sont sélectionnés + section UI étape 4 + calcul `history_conversation_ids` dans `startSimulation()`
+- `app/api/simulation/[id]/end/route.ts` — génération du résumé post-simulation via Bedrock (second appel IA après le feedback, non-bloquant), stocké dans `conversations.summary`
+- `app/api/simulation/start/route.ts` — injection de l'historique dans le prompt ElevenLabs si `history_conversation_ids` ou `history_context` renseigné
 
-Stocker ce résumé dans `conversations.summary`.
+**Conditions importantes :**
+- Le résumé est généré uniquement à partir de cette implémentation → les conversations passées (852 sans résumé) ne sont **pas** visibles dans le sélecteur tant qu'elles n'ont pas de `summary`
+- Le sélecteur est grisé avec "Aucun appel précédent pour ce produit" si aucune conversation disponible
+- La cohérence est assurée par l'Option B (cascade) : impossible de sélectionner un appel sans inclure ceux qui le précèdent
 
-**Étape 2 — Récupérer l'historique au démarrage**
-
-Fichier : `app/api/simulation/start/route.ts`
-
-Avant de construire le prompt, requêter les conversations précédentes :
-```sql
-SELECT summary, call_type, created_at
-FROM conversations
-WHERE user_id = $userId
-  AND agent_id = $agentId
-  AND summary IS NOT NULL
-  AND id != $currentConversationId
-ORDER BY created_at DESC
-LIMIT 5
-```
-
-Si des résumés existent → les injecter dans le prompt sous forme de bloc "Historique de vos échanges précédents".
-
-Si l'élève a coché "Repartir de zéro" → ne pas injecter l'historique (flag à passer dans le payload de démarrage et stocker dans `conversations`).
-
-**Étape 3 — Option "Repartir de zéro"**
-
-Migration :
-```sql
-ALTER TABLE conversations ADD COLUMN reset_history BOOLEAN DEFAULT FALSE;
-```
-
-Ajouter un toggle dans l'étape 4 du wizard de configuration (contexte & objectif). Valeur envoyée à `simulation/start` et sauvegardée en base.
-
-**Fichiers touchés :**
-- `app/api/simulation/[id]/end/route.ts` — génération du résumé
-- `app/api/simulation/start/route.ts` — récupération + injection historique
-- `components/simulation/setup/` — ajout du toggle "Repartir de zéro"
-- Migration SQL
+**À tester (test humain obligatoire) :**
+- Faire 2 simulations avec le même agent + même produit
+- Vérifier que la 2ème simulation affiche la 1ère dans le sélecteur "Reprendre l'historique des appels"
+- Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
+- Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt
+- Vérifier que le mode "Repartir de zéro" n'injecte aucun historique
+- Vérifier que si agent ou produit différent, les conversations précédentes n'apparaissent pas dans le sélecteur
 
 ---
 
@@ -266,6 +249,18 @@ Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont
 | 🟠 4 | Configuration durée d'appel | Moyen | Économie crédits + UX |
 | 🟡 5 | Fix variables ElevenLabs (conversation ID) | Faible | Qualité technique |
 | 🟡 6 | Historique inter-conversations | Élevé | Feature principale |
+
+---
+
+## Remarques
+
+- **localStorage dans le wizard** — l'étape 4 du wizard (secteur, entreprise, contexte personnalisé) est pré-remplie automatiquement avec la dernière config sauvegardée pour chaque agent. C'est le comportement voulu via `loadSavedConfig` / `saveConfig` dans `simulation-stepper.tsx`. Ce comportement est identique en local et en prod — chaque utilisateur a ses propres données stockées dans le `localStorage` de son navigateur.
+
+---
+
+## À demander à Shannen
+
+- **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
 
 ---
 

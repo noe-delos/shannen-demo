@@ -26,12 +26,25 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Skeleton } from "../ui/skeleton";
 
+type HistoryMode = "zero" | "manual" | "previous";
+
+interface PreviousConversation {
+  id: string;
+  call_type: string;
+  created_at: string;
+  summary: string;
+  feedback?: { note: number } | null;
+}
+
 interface SimulationConfig {
   agent: Agent | null;
   product: Product | null;
   callType: CallType | null;
   goal: string;
   maxDuration: number;
+  historyMode: HistoryMode;
+  historyContext: string;
+  historyUntilId: string | null;
   context: {
     secteur: string;
     company: string;
@@ -90,12 +103,16 @@ export function SimulationStepper() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [startingSimulation, setStartingSimulation] = useState(false);
+  const [previousConversations, setPreviousConversations] = useState<PreviousConversation[]>([]);
   const [config, setConfig] = useState<SimulationConfig>({
     agent: null,
     product: null,
     callType: null,
     goal: "",
     maxDuration: 2700,
+    historyMode: "zero",
+    historyContext: "",
+    historyUntilId: null,
     context: {
       secteur: "",
       company: "",
@@ -116,6 +133,35 @@ export function SimulationStepper() {
       loadSavedConfig(config.agent.id);
     }
   }, [config.agent?.id]);
+
+  // Load previous conversations when agent + product are selected
+  useEffect(() => {
+    if (config.agent?.id && config.product?.id) {
+      loadPreviousConversations(config.agent.id, config.product.id);
+    } else {
+      setPreviousConversations([]);
+    }
+  }, [config.agent?.id, config.product?.id]);
+
+  const loadPreviousConversations = async (agentId: string, productId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("conversations")
+        .select("id, call_type, created_at, summary, feedback:feedback_id(note)")
+        .eq("user_id", user.id)
+        .eq("agent_id", agentId)
+        .eq("product_id", productId)
+        .not("summary", "is", null)
+        .order("created_at", { ascending: true });
+
+      setPreviousConversations((data as any) || []);
+    } catch (error) {
+      console.error("Error loading previous conversations:", error);
+    }
+  };
 
   const loadSavedConfig = (agentId: string) => {
     try {
@@ -270,6 +316,14 @@ export function SimulationStepper() {
         }
       });
 
+      // Build history fields
+      const historyConversationIds =
+        config.historyMode === "previous" && config.historyUntilId
+          ? previousConversations
+              .slice(0, previousConversations.findIndex(c => c.id === config.historyUntilId) + 1)
+              .map(c => c.id)
+          : null;
+
       // Create conversation record
       const { data: conversation, error } = await supabase
         .from("conversations")
@@ -281,6 +335,8 @@ export function SimulationStepper() {
           context: config.context,
           call_type: config.callType,
           max_duration_seconds: config.maxDuration,
+          history_context: config.historyMode === "manual" ? config.historyContext : null,
+          history_conversation_ids: historyConversationIds,
         })
         .select()
         .single();
@@ -357,7 +413,7 @@ export function SimulationStepper() {
       </div>
 
       {/* Step Content */}
-      <Card className="min-h-[500px] shadow-soft">
+      <Card className="min-h-[500px] shadow-soft overflow-hidden">
         <CardHeader>
           <CardTitle>
             {currentStep === 1 && "Choisissez votre prospect"}
@@ -534,7 +590,7 @@ export function SimulationStepper() {
 
               {/* Step 4: Context and Goal */}
               {currentStep === 4 && (
-                <div className="space-y-6">
+                <div className="space-y-6 w-full max-w-full">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <h3 className="font-semibold">Contexte de l'appel</h3>
@@ -595,42 +651,6 @@ export function SimulationStepper() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="historique">
-                          Historique de la relation
-                        </Label>
-                        <select
-                          className="w-full p-2 border rounded-md shadow-soft mt-3"
-                          value={config.context.historique_relation}
-                          onChange={(e) => {
-                            const newConfig = {
-                              ...config,
-                              context: {
-                                ...config.context,
-                                historique_relation: e.target
-                                  .value as HistoriqueRelation,
-                              },
-                            };
-                            setConfig(newConfig);
-                            // Save to localStorage
-                            if (config.agent?.id) {
-                              saveConfig(config.agent.id, {
-                                context: {
-                                  ...config.context,
-                                  historique_relation: e.target
-                                    .value as HistoriqueRelation,
-                                },
-                              });
-                            }
-                          }}
-                        >
-                          {historiqueOptions.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
                         <Label htmlFor="duration">Durée de l'appel</Label>
                         <select
                           id="duration"
@@ -650,6 +670,44 @@ export function SimulationStepper() {
                           ))}
                         </select>
                       </div>
+                      <div>
+                        <Label htmlFor="historique">
+                          Historique de la relation
+                        </Label>
+                        <select
+                          className="w-full p-2 border rounded-md shadow-soft mt-3"
+                          value={config.context.historique_relation}
+                          onChange={(e) => {
+                            const newHistorique = e.target.value as HistoriqueRelation;
+                            const newConfig = {
+                              ...config,
+                              context: {
+                                ...config.context,
+                                historique_relation: newHistorique,
+                              },
+                              // Quand on passe à un appel non-premier contact, forcer manual si on était sur zero
+                              historyMode: (newHistorique !== "Premier contact" && config.historyMode === "zero") ? "manual" as HistoryMode : config.historyMode,
+                            };
+                            setConfig(newConfig);
+                            // Save to localStorage
+                            if (config.agent?.id) {
+                              saveConfig(config.agent.id, {
+                                context: {
+                                  ...config.context,
+                                  historique_relation: newHistorique,
+                                },
+                              });
+                            }
+                          }}
+                        >
+                          {historiqueOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
                     </div>
                     <div className="space-y-4">
                       <h3 className="font-semibold">Contexte personnalis&eacute;</h3>
@@ -680,6 +738,57 @@ export function SimulationStepper() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Historique de la relation */}
+                  {config.context.historique_relation !== "Premier contact" && <div className="space-y-3 pt-2">
+                    <Label className="font-semibold text-base">Historique de la relation</Label>
+                    <div className="space-y-3 mt-1">
+                      <label className="flex items-center gap-3 cursor-pointer py-1">
+                        <input type="radio" name="historyMode" value="manual" checked={config.historyMode === "manual"} onChange={() => setConfig({ ...config, historyMode: "manual", historyUntilId: null })} className="accent-[#9516C7] w-4 h-4 shrink-0" />
+                        <span className="text-sm">Saisir manuellement</span>
+                      </label>
+                      {config.historyMode === "manual" && (
+                        <Textarea
+                          placeholder="Décrivez le contexte de vos échanges précédents avec ce prospect..."
+                          value={config.historyContext}
+                          onChange={(e) => setConfig({ ...config, historyContext: e.target.value })}
+                          rows={5}
+                          className="shadow-soft resize-none placeholder:text-foreground/20 ml-7 w-[calc(100%-1.75rem)] max-w-full min-h-[8rem]"
+                        />
+                      )}
+                      <label className={`flex items-start gap-3 py-1 ${previousConversations.length === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}>
+                        <input type="radio" name="historyMode" value="previous" checked={config.historyMode === "previous"} disabled={previousConversations.length === 0} onChange={() => setConfig({ ...config, historyMode: "previous", historyContext: "" })} className="accent-[#9516C7] w-4 h-4 shrink-0 mt-0.5" />
+                        <span className="text-sm flex flex-col gap-0.5">
+                          <span>Reprendre l&apos;historique des appels</span>
+                          {previousConversations.length === 0 && (
+                            <span className="text-xs text-muted-foreground">Aucun appel précédent pour ce prospect + produit</span>
+                          )}
+                        </span>
+                      </label>
+                      {config.historyMode === "previous" && previousConversations.length > 0 && (
+                        <div className="ml-6">
+                          <Label className="text-xs text-muted-foreground mb-2 block">Reprendre l&apos;historique jusqu&apos;à :</Label>
+                          <select
+                            className="w-full p-2 border rounded-md shadow-soft text-sm"
+                            value={config.historyUntilId ?? ""}
+                            onChange={(e) => setConfig({ ...config, historyUntilId: e.target.value || null })}
+                          >
+                            <option value="">-- Choisir un appel --</option>
+                            {previousConversations.map((conv, index) => {
+                              const callTypeLabels: Record<string, string> = { cold_call: "Cold call", discovery_meeting: "Découverte", product_demo: "Démo produit", closing_call: "Closing", follow_up_call: "Relance" };
+                              const date = new Date(conv.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+                              const label = `${callTypeLabels[conv.call_type] || conv.call_type} — ${date}${(conv.feedback as any)?.note ? ` — ${(conv.feedback as any).note}/100` : ""}`;
+                              return (
+                                <option key={conv.id} value={conv.id}>
+                                  {label} {index > 0 ? `(inclut ${index + 1} appels)` : ""}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  </div>}
 
                   {/* Preview */}
                   <div className="border-t pt-6">
