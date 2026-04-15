@@ -47,12 +47,15 @@ ALTER TABLE conversations ADD COLUMN history_conversation_ids UUID[] NULL;
 - La cohérence est assurée par l'Option B (cascade) : impossible de sélectionner un appel sans inclure ceux qui le précèdent
 
 **À tester (test humain obligatoire) :**
-- Faire 2 simulations avec le même agent + même produit
-- Vérifier que la 2ème simulation affiche la 1ère dans le sélecteur "Reprendre l'historique des appels"
+- ✅ Faire 2 simulations avec le même agent + même produit → historique présent
+- ✅ Vérifier que la 2ème simulation affiche la 1ère dans le sélecteur "Reprendre l'historique des appels"
+- ✅ Prospect différent + même produit → pas d'historique
+- ✅ Même prospect + produit différent → pas d'historique
 - Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
 - Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt
 - Vérifier que le mode "Repartir de zéro" n'injecte aucun historique
-- Vérifier que si agent ou produit différent, les conversations précédentes n'apparaissent pas dans le sélecteur
+
+> ✅ **Partiellement validé le 15/04/2026** — filtrage par agent+produit OK. Reste à vérifier l'injection dans le prompt ElevenLabs.
 
 ---
 
