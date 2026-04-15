@@ -719,12 +719,19 @@ export function SimulationConversation({
           </CardHeader>
         </Card>
 
+        {/* Retour dashboard button - tout en haut */}
+        <div className="flex justify-start">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:underline underline-offset-4">
+            ← Retour au dashboard
+          </Link>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-0">
           {/* Left Context Cards */}
           <div className="space-y-3 lg:flex-shrink-0">
             {/* Post-it Note Style Card */}
             <div
-              className={`relative w-full max-w-[22rem] mx-auto lg:mx-0 h-[22rem] p-8 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 ${playwriteIE.className}`}
+              className={`relative w-full max-w-[22rem] mx-auto lg:mx-0 p-6 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 overflow-hidden ${playwriteIE.className}`}
               style={{
                 backgroundColor: "#E9E27B",
                 boxShadow:
@@ -743,83 +750,63 @@ export function SimulationConversation({
               {/* Content */}
               <div className="space-y-4 text-left h-full flex flex-col">
                 {/* Header */}
-                <div className="border-b-2 border-yellow-600/30 pb-3">
-                  <h3 className="text-lg font-bold text-zinc-900 opacity-60 mb-1">
+                <div className="border-b-2 border-yellow-600/30 pb-2">
+                  <h3 className="text-base font-bold text-zinc-900 opacity-60 mb-0.5">
                     Briefing de Simulation
                   </h3>
-                  <div className="text-sm text-zinc-800 opacity-50 font-medium">
+                  <div className="text-xs text-zinc-800 opacity-50 font-medium">
                     {getCallTypeLabel(conversationData.call_type)}
                   </div>
                 </div>
 
                 {/* Two Column Layout */}
-                <div className="flex-1 flex">
+                <div className="flex">
                   {/* Left Column */}
-                  <div className="flex-1 space-y-3 pr-4">
+                  <div className="flex-1 space-y-2 pr-3">
                     <div>
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Commercial:
-                      </div>
-                      <div className="text-sm text-gray-700 font-medium opacity-60">
-                        {conversationData.agents?.firstname &&
-                        conversationData.agents?.lastname
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Commercial:</div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-2">
+                        {conversationData.agents?.firstname && conversationData.agents?.lastname
                           ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
                           : conversationData.agents?.name}
                       </div>
                     </div>
-
                     <div>
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Poste:
-                      </div>
-                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Poste:</div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-2">
                         {conversationData.agents?.job_title}
                       </div>
                     </div>
-
                     <div>
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Objectif:
-                      </div>
-                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Objectif:</div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-3">
                         {conversationData.goal}
                       </div>
                     </div>
-
                     <div>
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Secteur:
-                      </div>
-                      <div className="text-sm text-gray-700 font-medium opacity-60">
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Secteur:</div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-1">
                         {conversationData.context?.secteur || "Non spécifié"}
                       </div>
                     </div>
                   </div>
 
                   {/* Right Column */}
-                  <div className="flex-1 space-y-3 pl-4">
+                  <div className="flex-1 space-y-2 pl-3">
                     <div>
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Entreprise:
-                      </div>
-                      <div className="text-sm  text-gray-700 font-medium opacity-60">
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Entreprise:</div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-1">
                         {conversationData.context?.company || "Non spécifiée"}
                       </div>
                     </div>
-
                     <div>
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Produit:
-                      </div>
-                      <div className="text-sm  text-gray-700 font-medium opacity-60">
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Produit:</div>
+                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-2">
                         {conversationData.products?.name}
                       </div>
                     </div>
-
-                    <div className="mt-auto pt-6">
-                      <div className="text-xs font-semibold text-zinc-900 opacity-60">
-                        Simulation:
-                      </div>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-900 opacity-60">Simulation:</div>
                       <div className="text-xs text-gray-700 font-medium opacity-60">
                         #{conversationId.slice(-6)}
                       </div>
@@ -829,12 +816,6 @@ export function SimulationConversation({
               </div>
             </div>
             
-            {/* Retour dashboard button below post-it */}
-            <div className="flex justify-center lg:justify-start mt-4">
-              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:underline underline-offset-4">
-                ← Retour au dashboard
-              </Link>
-            </div>
           </div>
 
           {/* iPhone Interface and Recall Button Container */}
