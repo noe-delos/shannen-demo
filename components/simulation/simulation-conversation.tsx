@@ -740,7 +740,7 @@ export function SimulationConversation({
           <div className="space-y-3 lg:flex-shrink-0">
             {/* Post-it Note Style Card */}
             <div
-              className={`relative w-full max-w-[22rem] mx-auto lg:mx-0 p-6 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 overflow-hidden ${playwriteIE.className}`}
+              className={`relative w-full max-w-[22rem] mx-auto lg:mx-0 p-6 rounded-lg shadow-lg transform rotate-[-1deg] hover:rotate-0 transition-transform duration-300 ${playwriteIE.className}`}
               style={{
                 backgroundColor: "#E9E27B",
                 boxShadow:
@@ -774,7 +774,7 @@ export function SimulationConversation({
                   <div className="flex-1 space-y-2 pr-3">
                     <div>
                       <div className="text-xs font-semibold text-zinc-900 opacity-60">Commercial:</div>
-                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-2">
+                      <div className="text-xs text-gray-700 font-medium opacity-60 break-words">
                         {conversationData.agents?.firstname && conversationData.agents?.lastname
                           ? `${conversationData.agents.firstname} ${conversationData.agents.lastname}`
                           : conversationData.agents?.name}
@@ -782,19 +782,19 @@ export function SimulationConversation({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-zinc-900 opacity-60">Poste:</div>
-                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-2">
+                      <div className="text-xs text-gray-700 font-medium opacity-60 break-words">
                         {conversationData.agents?.job_title}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-zinc-900 opacity-60">Objectif:</div>
-                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-3">
+                      <div className="text-xs text-gray-700 font-medium opacity-60 break-words">
                         {conversationData.goal}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-zinc-900 opacity-60">Secteur:</div>
-                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-1">
+                      <div className="text-xs text-gray-700 font-medium opacity-60 break-words">
                         {conversationData.context?.secteur || "Non spécifié"}
                       </div>
                     </div>
@@ -804,13 +804,13 @@ export function SimulationConversation({
                   <div className="flex-1 space-y-2 pl-3">
                     <div>
                       <div className="text-xs font-semibold text-zinc-900 opacity-60">Entreprise:</div>
-                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-1">
+                      <div className="text-xs text-gray-700 font-medium opacity-60 break-words">
                         {conversationData.context?.company || "Non spécifiée"}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-zinc-900 opacity-60">Produit:</div>
-                      <div className="text-xs text-gray-700 font-medium opacity-60 line-clamp-2">
+                      <div className="text-xs text-gray-700 font-medium opacity-60 break-words">
                         {conversationData.products?.name}
                       </div>
                     </div>
