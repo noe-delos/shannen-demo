@@ -419,3 +419,9 @@ Merger dans cet ordre vers `mission1_neocell`, puis `mission1_neocell` → `main
 2. **Option "Repartir de zéro"** — doit-elle être activée par défaut ou désactivée ?
 3. **Dropdown durée** — 30/45/60 min suffit ou ajouter d'autres options ?
 4. **Modèle LLM pour le roleplay** — `claude-3-5-haiku` ou `gpt-4o-mini` ? (contrainte écosystème ?)
+
+---
+
+## Suggestions UX / futures améliorations
+
+- [ ] **Création de simulation — raccourcis étape 1 & 2** : sur létape 1 (choix du prospect), ajouter un bouton "Créer un prospect" inline pour aller directement à la création sans quitter le wizard. Idem sur létape 2 (choix du produit), ajouter un bouton "Créer un produit". Objectif : réduire le nombre de clics et éviter de perdre la progression du wizard.
