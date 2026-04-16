@@ -789,7 +789,7 @@ export function ConversationDetails({
                       <img
                         src={
                           conversation.agents?.picture_url ||
-                          "/default-avatar.png"
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent((conversation.agents?.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`
                         }
                         alt="Agent"
                         className="w-full h-full object-cover object-top"

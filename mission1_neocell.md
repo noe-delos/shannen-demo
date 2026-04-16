@@ -408,6 +408,7 @@ Tous niveaux :
 ## Corrections / améliorations mineures
 
 - ✅ **Avatar par défaut à la création d'agent** : quand aucune photo n'est uploadée, un avatar est auto-généré via `ui-avatars.com` (initiales + fond violet #9516C7). (`components/agents/agents-grid.tsx`, `debugs7_mission1_neocell`)
+- ✅ **Avatar par défaut partout** : le fallback `/default-avatar.png` (fichier inexistant) a été remplacé par `ui-avatars.com` dans tous les composants qui affichent une photo d'agent — dashboard (cards conversations + section agents), conversation-details, simulation-stepper, simulation-conversation. (`mission1_neocell`)
 
 ---
 
