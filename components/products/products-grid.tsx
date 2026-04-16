@@ -620,18 +620,20 @@ export function ProductsGrid() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer le produit</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Êtes-vous sûr de vouloir supprimer le produit "
-                {deletingProduct?.name}" ?
-              </p>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-                <p className="text-sm text-orange-800 font-medium">
-                  ⚠️ Attention ! Si vous supprimez ce produit, les conversations
-                  et feedbacks liés seront également supprimés.
-                </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <span className="block">
+                  Êtes-vous sûr de vouloir supprimer le produit "
+                  {deletingProduct?.name}" ?
+                </span>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                  <span className="block text-sm text-orange-800 font-medium">
+                    ⚠️ Attention ! Si vous supprimez ce produit, les conversations
+                    et feedbacks liés seront également supprimés.
+                  </span>
+                </div>
+                <span className="block text-sm">Cette action est irréversible.</span>
               </div>
-              <p className="text-sm">Cette action est irréversible.</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -627,7 +627,7 @@ export function AgentsGrid() {
                   <div className="relative">
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
                       <img
-                        src={agent.picture_url || "/default-avatar.png"}
+                        src={agent.picture_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((agent.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`}
                         alt={agent.name || "Agent"}
                         className="w-full h-full object-cover object-top"
                       />
@@ -1017,18 +1017,20 @@ export function AgentsGrid() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer l'agent</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Êtes-vous sûr de vouloir supprimer l'agent "
-                {deletingAgent?.name}" ?
-              </p>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-                <p className="text-sm text-orange-800 font-medium">
-                  ⚠️ Attention ! Si vous supprimez cet agent, les conversations
-                  et feedbacks liés seront également supprimés.
-                </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <span className="block">
+                  Êtes-vous sûr de vouloir supprimer l'agent "
+                  {deletingAgent?.name}" ?
+                </span>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                  <span className="block text-sm text-orange-800 font-medium">
+                    ⚠️ Attention ! Si vous supprimez cet agent, les conversations
+                    et feedbacks liés seront également supprimés.
+                  </span>
+                </div>
+                <span className="block text-sm">Cette action est irréversible.</span>
               </div>
-              <p className="text-sm">Cette action est irréversible.</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

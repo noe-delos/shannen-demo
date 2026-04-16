@@ -405,6 +405,12 @@ Tous niveaux :
 
 ---
 
+## Corrections / améliorations mineures
+
+- ✅ **Avatar par défaut à la création d'agent** : quand aucune photo n'est uploadée, un avatar est auto-généré via `ui-avatars.com` (initiales + fond violet #9516C7). (`components/agents/agents-grid.tsx`, `debugs7_mission1_neocell`)
+
+---
+
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
@@ -419,3 +425,5 @@ Tous niveaux :
 ## Suggestions UX / futures améliorations
 
 - [ ] **Création de simulation — raccourcis étape 1 & 2** : sur létape 1 (choix du prospect), ajouter un bouton "Créer un prospect" inline pour aller directement à la création sans quitter le wizard. Idem sur létape 2 (choix du produit), ajouter un bouton "Créer un produit". Objectif : réduire le nombre de clics et éviter de perdre la progression du wizard.
+
+- [ ] **Création de prospect — description enrichie + génération IA** : lors de la création d'un agent/prospect, il est crucial que l'utilisateur renseigne bien le champ "Objectif / contexte" (goal) car c'est ce texte qui est injecté dans le system prompt ElevenLabs. Sans description détaillée, l'agent répète les mêmes répliques scriptées génériques (ex: "Vous êtes la 3e personne ce mois-ci à m'appeler pour ça."). **Suggestion : ajouter un bouton "Générer avec l'IA"** qui, à partir du nom, du job title et de la difficulté choisie, génère automatiquement une description de personnalité riche et cohérente (traits de caractère, objections typiques, contexte d'entreprise, comportement face aux vendeurs). Cela améliorerait significativement la qualité des simulations.
