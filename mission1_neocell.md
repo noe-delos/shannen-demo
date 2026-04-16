@@ -23,7 +23,7 @@
 | 4 | Suppression Bedrock → API Anthropic | ✅ Implémenté — validé le 15/04/2026 |
 | 5a | Redirection post-login | ✅ Pas de bug (code OK) |
 | 5b | Reset password | ⏳ À tester en prod |
-| 6 | Fix variables ElevenLabs (conversation ID) | ✅ Implémenté — à re-tester |
+| 6 | Fix variables ElevenLabs (conversation ID) | ✅ Implémenté — validé le 16/04/2026 |
 | 7 | Page Profil utilisateur | ✅ Implémenté — validé le 15/04/2026 |
 | 8 | Fusion prompt ElevenLabs | ✅ Implémenté — validé le 16/04/2026 |
 
