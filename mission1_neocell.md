@@ -408,7 +408,11 @@ Tous niveaux :
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
-- **Nouvelle clé API Anthropic** — la clé actuelle (`ANTHROPIC_API_KEY` dans Vercel) n'a pas accès aux modèles récents (`claude-3-5-haiku`, `claude-3-7-sonnet`, `claude-sonnet-4-5`). Seul `claude-3-haiku-20240307` fonctionne. Demander à Shannen une clé API avec accès à `claude-3-7-sonnet-20250219` pour le feedback et le summary (branche `set_ai_model_3-7_sonnet` prête à merger une fois la clé mise à jour).
+- **Nouvelle clé API Anthropic** — la clé actuelle (`ANTHROPIC_API_KEY` dans Vercel) n'a pas accès aux modèles récents. Seul `claude-3-haiku-20240307` fonctionne. Demander à Shannen une clé API avec accès à des modèles plus récents (ex: `claude-sonnet-4-5-20250514`) pour améliorer la qualité du feedback et du summary.
+  - ❌ `claude-3-5-haiku-20241022` : 404 (testé le 15/04/2026)
+  - ❌ `claude-3-7-sonnet-20250219` : deprecated + 404 (testé le 16/04/2026 — end-of-life février 2026)
+  - ❌ `claude-sonnet-4-5-20250929` : 404 (testé le 15/04/2026)
+  - ✅ `claude-3-haiku-20240307` : fonctionne (modèle actuel en prod)
 
 ---
 

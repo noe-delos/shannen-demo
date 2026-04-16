@@ -553,7 +553,7 @@ ${resistanceBloc}`;
         agent: {
           prompt: {
             prompt: agentContext,
-            llm: "claude-3-7-sonnet",
+            llm: "claude-haiku-4-5",
             temperature: 0.3,
             tools: [
               {
@@ -647,7 +647,7 @@ ${resistanceBloc}`;
           agent: {
             prompt: {
               prompt: agentContext,
-              llm: "claude-3-7-sonnet",
+              llm: "claude-haiku-4-5",
               temperature: 0.3,
               tools: [
                 {

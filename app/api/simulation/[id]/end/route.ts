@@ -191,7 +191,7 @@ Fournissez un feedback structuré avec:
     try {
       console.log("📡 Sending request to Anthropic...");
       const response = await anthropic.messages.create({
-        model: "claude-3-7-sonnet-20250219",
+        model: "claude-3-haiku-20240307",
         max_tokens: 2000,
         temperature: 0.1,
         messages: [{ role: "user", content: feedbackPrompt }],
@@ -356,7 +356,7 @@ Génère un résumé factuel en 3-5 phrases maximum (150 mots max) qui capture :
 Ce résumé sera utilisé pour contextualiser les prochains appels avec ce prospect. Réponds uniquement avec le résumé, sans introduction ni titre.`;
 
         const summaryResponse = await anthropic.messages.create({
-          model: "claude-3-7-sonnet-20250219",
+          model: "claude-3-haiku-20240307",
           max_tokens: 300,
           temperature: 0.1,
           messages: [{ role: "user", content: summaryPrompt }],
