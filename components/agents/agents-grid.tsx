@@ -224,6 +224,10 @@ export function AgentsGrid() {
       if (createForm.picture_file) {
         picture_url = await uploadImage(createForm.picture_file);
         if (!picture_url) return;
+      } else {
+        // Generate default avatar from initials
+        const initials = `${(createForm.firstname || "")[0] || ""}${(createForm.lastname || "")[0] || ""}`.toUpperCase() || "?";
+        picture_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=9516C7&color=fff&size=128&bold=true`;
       }
 
       const { error } = await supabase
