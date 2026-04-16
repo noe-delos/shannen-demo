@@ -68,10 +68,10 @@ ALTER TABLE conversations ADD COLUMN history_conversation_ids UUID[] NULL;
 - ✅ Vérifier que la 2ème simulation affiche la 1ère dans le sélecteur "Reprendre l'historique des appels"
 - ✅ Prospect différent + même produit → pas d'historique
 - ✅ Même prospect + produit différent → pas d'historique
-- ⏳ Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
-- ⏳ Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt
+- ✅ Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
+- ✅ Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt — **validé le 16/04/2026** : history_context bien enregistré en base + agent jouait le contexte de relance post-devis
 
-> ✅ **Partiellement validé le 15/04/2026** — filtrage par agent+produit OK. Reste à vérifier l'injection dans le prompt ElevenLabs.
+> ✅ **Validé le 16/04/2026** — filtrage par agent+produit OK + injection "Saisir manuellement" confirmée en prod (history_context enregistré + agent jouait le contexte de relance post-devis).
 
 ---
 
