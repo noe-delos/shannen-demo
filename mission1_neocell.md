@@ -2,14 +2,16 @@
 
 ## Scope
 
-1. **Historique inter-conversations (R1→R2)** — l'agent récupère l'antériorité entre les simulations, avec le contexte saisi par l'élève
+1. **Historique inter-conversations (R1→R2)** :
+  - l'agent récupère l'antériorité entre les simulations,
+  - l'agent récupère l'historique saisi par l'élève
 2. **Configuration durée d'appel** — dropdown 30 / 45 / 60 min, défaut à 45 min
 3. **Limite de consommation** — 3 appels par jour par utilisateur
 4. **Suppression Amazon Bedrock** — migration vers clé API directe (Anthropic)
 5. **Correction bugs login** — reset password + redirection post-inscription
 6. **Correction erreur technique variables ElevenLabs**
-7. **Page Profil utilisateur**
-8. **Fusion prompt ElevenLabs — renforcement du persona prospect**
+7. **Page Profil utilisateur** : context par défaut + changer le mot de passe
+8. **Mise à jour du prompt ElevenLabs — renforcement du persona prospect**
 
 ---
 
@@ -17,7 +19,7 @@
 
 | # | Fonctionnalité | Statut |
 |---|----------------|--------|
-| 1 | Historique inter-conversations | ✅ Implémenté — partiellement validé |
+| 1 | Historique inter-conversations | ✅ Implémenté — validé le 16/04/2026 |
 | 2 | Configuration durée d'appel | ✅ Implémenté |
 | 3 | Limite 3 appels/jour | ✅ Implémenté — validé le 16/04/2026 |
 | 4 | Suppression Bedrock → API Anthropic | ✅ Implémenté — validé le 15/04/2026 |
@@ -25,7 +27,7 @@
 | 5b | Reset password | ⏳ À tester en prod |
 | 6 | Fix variables ElevenLabs (conversation ID) | ✅ Implémenté — validé le 16/04/2026 |
 | 7 | Page Profil utilisateur | ✅ Implémenté — validé le 15/04/2026 |
-| 8 | Fusion prompt ElevenLabs | ✅ Implémenté — validé le 16/04/2026 |
+| 8 | Mise à jour du prompt ElevenLabs | ✅ Implémenté — validé le 16/04/2026 |
 
 ---
 
