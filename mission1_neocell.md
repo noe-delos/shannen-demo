@@ -236,8 +236,8 @@ BLOC 4 — Résistances & raccrochage    ← conditionné par callType
 **Tests :**
 - ✅ Comportement de résistance présent (validé le 15/04/2026)
 - ✅ Raccrochage automatique via `end_call` — validé le 16/04/2026
-- ⏳ Vérifier l'absence de patterns IA ("Je vous écoute attentivement", etc.)
-- ⏳ Vérifier réponses en 1-2 phrases max, langue française uniquement
+- ✅ Vérifier l'absence de patterns IA — validé le 16/04/2026
+- ✅ Vérifier réponses en 1-2 phrases max, langue française uniquement — validé le 16/04/2026
 
 ---
 
