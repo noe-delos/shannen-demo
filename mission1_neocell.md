@@ -25,7 +25,7 @@
 | 5b | Reset password | ⏳ À tester en prod |
 | 6 | Fix variables ElevenLabs (conversation ID) | ✅ Implémenté — à re-tester |
 | 7 | Page Profil utilisateur | ✅ Implémenté — validé le 15/04/2026 |
-| 8 | Fusion prompt ElevenLabs | ✅ Implémenté — end_call à re-tester |
+| 8 | Fusion prompt ElevenLabs | ✅ Implémenté — validé le 16/04/2026 |
 
 ---
 
@@ -177,7 +177,7 @@ Aucun changement de code nécessaire.
 - `components/simulation/simulation-conversation.tsx` — récupération du vrai `conversation_id` dans `onDisconnect`
 - `app/api/simulation/[id]/elevenlabs-id/route.ts` — nouvelle route PATCH créée
 
-> ⚠️ **À re-tester** : vérifier que `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx` et non `agent_xxx`.
+> ✅ **Validé le 16/04/2026** : `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx`.
 
 ---
 
@@ -235,7 +235,7 @@ BLOC 4 — Résistances & raccrochage    ← conditionné par callType
 
 **Tests :**
 - ✅ Comportement de résistance présent (validé le 15/04/2026)
-- ⚠️ Raccrochage automatique via `end_call` non déclenché lors du test — à re-tester en jouant délibérément un mauvais vendeur jusqu'au bout
+- ✅ Raccrochage automatique via `end_call` — validé le 16/04/2026
 - ⏳ Vérifier l'absence de patterns IA ("Je vous écoute attentivement", etc.)
 - ⏳ Vérifier réponses en 1-2 phrases max, langue française uniquement
 
