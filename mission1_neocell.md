@@ -93,7 +93,7 @@ ALTER TABLE conversations ADD COLUMN max_duration_seconds INTEGER DEFAULT 2700;
 
 **Tests :**
 - ✅ Test automatique (Claude) concluant — 2 conversations fictives insérées en base pour atteindre la limite, bouton désactivé côté sidebar + message "Limite atteinte · Revenez demain", pill "Limite atteinte" côté dashboard, données de test supprimées après vérification
-- ⚠️ Bug confirmé le 15/04/2026 : la 3ème simulation était bloquée au lieu de la 4ème. Cause : la conversation est créée en base avant `/start`, donc déjà comptée. Fix : `.neq("id", conversation_id)` pour exclure la conversation courante du comptage. À re-tester après déploiement.
+- ✅ Bug confirmé le 15/04/2026 : la 3ème simulation était bloquée au lieu de la 4ème. Cause : la conversation est créée en base avant `/start`, donc déjà comptée. Fix : `.neq("id", conversation_id)`. **Validé le 16/04/2026.**
 
 **Étape 1 — Vérification au démarrage**
 
@@ -394,19 +394,21 @@ Tous niveaux :
 
 - ✅ **Modèle ElevenLabs `claude-3-5-haiku` invalide** → remplacé par `claude-haiku-4-5` (`app/api/simulation/start/route.ts`)
 - ✅ **`first_message` manquant dans le PATCH ElevenLabs** : l'agent gardait "Bonjour" → comportement vendeur. Fix : "Allô ?" pour cold_call, "Oui, bonjour ?" pour les autres.
-- ⚠️ **Feedback non généré quand ElevenLabs raccroche** : stale closure `elapsedTime = 0` dans `onDisconnect` → `endConversation()` jamais appelé. Fix `elapsedTimeRef` sur `debugs2_mission1_neocell`. **À re-tester.**
-- ⚠️ **Limite 3 simulations/jour bloquait à la 3ème** : conversation créée avant `/start` donc déjà comptée. Fix `.neq("id", conversation_id)` sur `debugs2_mission1_neocell`. **À re-tester.**
+- ✅ **Feedback non généré quand ElevenLabs raccroche** : stale closure `elapsedTime = 0` dans `onDisconnect` → `endConversation()` jamais appelé. Fix `elapsedTimeRef` sur `debugs2_mission1_neocell`. **Validé le 16/04/2026.**
+- ✅ **Limite 3 simulations/jour bloquait à la 3ème** : conversation créée avant `/start` donc déjà comptée. Fix `.neq("id", conversation_id)` sur `debugs2_mission1_neocell`. **Validé le 16/04/2026.**
 - ✅ **Wizard étape 4 — "Historique de la relation" mal initialisé** : le localStorage restaurait l'ancienne valeur. Fix : `historique_relation` toujours réinitialisé à `"Premier contact"` au chargement, indépendamment du localStorage. (`simulation-stepper.tsx`)
 - ✅ **Agents disponibles — photo manquante pour Céline Laurent** : `picture_url` était null en base. Fix : avatar généré via `ui-avatars.com` (initiales violet #9516C7) mis à jour directement en Supabase.
 - ✅ **Date affichée incorrecte ("aujourd'hui" au lieu de "hier")** : comparaison basée sur les millisecondes — une conversation de la veille à 23h59 affichait "aujourd'hui". Fix : comparaison calendaire (date normalisée sans heure) dans `dashboard.tsx` et `app-sidebar.tsx`.
-- ✅ **Feedback toujours en fallback ("Conversation complétée")** : le modèle `claude-3-5-haiku-20241022` retournait `404 not_found_error` sur l'org Anthropic → catch block déclenché systématiquement. Fix : switch vers `claude-3-7-sonnet-20250219` pour feedback + summary dans `app/api/simulation/[id]/end/route.ts` (`debugs4_mission1_neocell`). **À re-tester.**
-- ⏳ **Post-it "Briefing de Simulation" trop court** : lors de la simulation en cours, le post-it affiché à gauche tronque le texte (champs "Objectif", "Secteur", etc. coupés). À corriger : hauteur auto / `overflow-visible` / taille de police / layout. (`debugs5_mission1_neocell`)
+- ✅ **Feedback toujours en fallback ("Conversation complétée")** : le modèle `claude-3-5-haiku-20241022` retournait `404 not_found_error` sur l'org Anthropic → catch block déclenché systématiquement. Fix : switch vers `claude-3-haiku-20240307` pour feedback + summary dans `app/api/simulation/[id]/end/route.ts` (`debugs4_mission1_neocell`). **Validé le 16/04/2026.**
+- ✅ **Post-it "Briefing de Simulation" trop court** : lors de la simulation en cours, le post-it affiché à gauche tronquait le texte. Fix : `overflow-hidden` retiré, `line-clamp` → `break-words` sur tous les champs (`debugs5_mission1_neocell`). **Validé le 16/04/2026.**
+- ⏳ **Tester le reset password** : vérifier le flow complet "mot de passe oublié" → email reçu → lien de réinitialisation → nouveau mot de passe → reconnexion avec le nouveau mdp.
 
 ---
 
 ## À demander à Shannen
 
 - **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
+- **Nouvelle clé API Anthropic** — la clé actuelle (`ANTHROPIC_API_KEY` dans Vercel) n'a pas accès aux modèles récents (`claude-3-5-haiku`, `claude-3-7-sonnet`, `claude-sonnet-4-5`). Seul `claude-3-haiku-20240307` fonctionne. Demander à Shannen une clé API avec accès à `claude-3-7-sonnet-20250219` pour le feedback et le summary (branche `set_ai_model_3-7_sonnet` prête à merger une fois la clé mise à jour).
 
 ---
 
