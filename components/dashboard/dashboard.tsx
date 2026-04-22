@@ -426,7 +426,7 @@ export function Dashboard() {
                     <Badge
                       className={getDifficultyColor(agent.difficulty || "")}
                     >
-                      {agent.difficulty}
+                      {agent.difficulty === "tres_difficile" ? "très difficile" : agent.difficulty}
                     </Badge>
                   </div>
                 </CardContent>

@@ -821,7 +821,7 @@ export function ConversationDetails({
                         conversation.agents.difficulty
                       )}
                     >
-                      {conversation.agents.difficulty}
+                      {conversation.agents.difficulty === "tres_difficile" ? "très difficile" : conversation.agents.difficulty}
                     </Badge>
                   </div>
 

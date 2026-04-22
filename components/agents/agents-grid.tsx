@@ -358,8 +358,10 @@ export function AgentsGrid() {
         return "bg-green-100 text-green-800";
       case "moyen":
         return "bg-yellow-100 text-yellow-800";
-      case "hardcore":
-        return "bg-red-900 text-white";
+      case "difficile":
+        return "bg-red-700 text-white";
+      case "tres_difficile":
+        return "bg-red-950 text-white";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -371,8 +373,10 @@ export function AgentsGrid() {
         return "😊";
       case "moyen":
         return "😐";
-      case "hardcore":
+      case "difficile":
         return "💀";
+      case "tres_difficile":
+        return "☠️";
       default:
         return "🤖";
     }
@@ -660,7 +664,7 @@ export function AgentsGrid() {
                       <Badge
                         className={getDifficultyColor(agent.difficulty || "")}
                       >
-                        {agent.difficulty === "hardcore" ? "difficile" : agent.difficulty}
+                        {agent.difficulty === "tres_difficile" ? "très difficile" : agent.difficulty}
                       </Badge>
                       {agent.voice_id && (
                         <Icon

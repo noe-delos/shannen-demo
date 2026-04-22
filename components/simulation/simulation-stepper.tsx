@@ -505,7 +505,7 @@ export function SimulationStepper() {
                                   {agent.job_title}
                                 </p>
                                 <Badge variant="outline" className="mt-1">
-                                  {agent.difficulty}
+                                  {agent.difficulty === "tres_difficile" ? "très difficile" : agent.difficulty}
                                 </Badge>
                               </div>
                             </div>
