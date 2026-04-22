@@ -271,7 +271,7 @@ export type CallType =
   | "closing_call"
   | "follow_up_call";
 
-export type Difficulty = "facile" | "moyen" | "difficile";
+export type Difficulty = "facile" | "moyen" | "hardcore";
 
 export type HistoriqueRelation =
   | "Premier contact"
