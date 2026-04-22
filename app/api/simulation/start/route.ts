@@ -336,10 +336,6 @@ Exemples de réponses : "Ouais, allez-y." / "Ah ouais ? C'est quoi exactement ?"
 NIVEAU MOYEN — NEUTRE, IL FAUT TE CONVAINCRE
 Ton : distrait, légèrement pressé. Répond au minimum. Laisse des silences. Comme si tu avais autre chose à faire.
 Exemples de réponses : "Oui..." / "Hmm. C'est-à-dire ?" / "J'sais pas trop." / "On verra." / "..." (silence) / "C'est quoi le rapport avec nous exactement ?" / "Mouais. Et donc ?"`
-    : difficulty === "difficile" ? `
-NIVEAU DIFFICILE — SCEPTIQUE, FERMÉ, PRESQUE HOSTILE
-Ton : coupant, impatient. Répond en monosyllabes. Coupe parfois les phrases. Pas agressif — juste fermé. Épuisant à tenir pour le vendeur.
-Exemples de réponses : "Ouais." / "Non." / "Mmh." (silence pesant) / "On a déjà ça." / "Vous vendez quoi là ?" / "J'ai vraiment pas le temps." / "Ouais non — c'est quoi concrètement ?"`
     : `
 NIVEAU HARDCORE — TOLÉRANCE ZÉRO
 Ton : tranchant, expéditif. Tu as déjà entendu 50 appels comme ça. Tu donnes UNE chance maximum.
@@ -533,7 +529,7 @@ ${resistanceBloc}`;
         agent.job_title?.toLowerCase().includes("senior") ||
         agent.job_title?.toLowerCase().includes("manager") ||
         agent.job_title?.toLowerCase().includes("directeur") ||
-        agent.difficulty === "difficile";
+        agent.difficulty === "hardcore";
 
       // Default to male_young_dynamic if nothing specific matches
       if (isSenior) {
