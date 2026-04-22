@@ -508,6 +508,7 @@ export function AgentsGrid() {
                       <SelectItem value="facile">Facile</SelectItem>
                       <SelectItem value="moyen">Moyen</SelectItem>
                       <SelectItem value="difficile">Difficile</SelectItem>
+                      <SelectItem value="tres_difficile">Très difficile</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -779,6 +780,7 @@ export function AgentsGrid() {
                     <SelectItem value="facile">Facile</SelectItem>
                     <SelectItem value="moyen">Moyen</SelectItem>
                     <SelectItem value="difficile">Difficile</SelectItem>
+                    <SelectItem value="tres_difficile">Très difficile</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
