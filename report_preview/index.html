@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Hello, Michel ! — S for Sales x NeoCell</title>
+<style>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Georgia, serif; font-size: 13px; color: #111; background: #f0f0f0; }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    margin: 20px auto;
+    padding: 20mm 22mm;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    page-break-after: always;
+  }
+
+  /* Cover */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 257mm;
+    border-bottom: 3px solid #9516C7;
+    padding-bottom: 20mm;
+  }
+  .cover-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #9516C7; margin-bottom: 12px; }
+  .cover-title { font-size: 36px; font-weight: bold; color: #111; line-height: 1.2; margin-bottom: 8px; }
+  .cover-subtitle { font-size: 16px; color: #444; margin-bottom: 32px; }
+  .cover-meta { font-size: 11px; color: #888; border-top: 1px solid #e5e5e5; padding-top: 12px; width: 100%; }
+
+  /* Status table */
+  .status-table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 12px; }
+  .status-table th { text-align: left; padding: 6px 10px; background: #111; color: white; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .status-table td { padding: 7px 10px; border-bottom: 1px solid #e5e5e5; vertical-align: middle; }
+  .status-table tr:nth-child(even) td { background: #fafafa; }
+  .badge-ok { background: none; color: #059669; font-size: 10px; font-weight: bold; padding: 2px 4px; }
+  .badge-pend { background: none; color: #DC2626; font-size: 10px; font-weight: bold; padding: 2px 4px; }
+
+  /* Section */
+  h1 { font-size: 16px; border-bottom: 2px solid #9516C7; color: #111; padding-bottom: 6px; margin: 28px 0 14px; text-transform: uppercase; letter-spacing: 1px; }
+  h2 { font-size: 13px; font-weight: bold; margin: 20px 0 6px; }
+  h3 { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #666; margin: 12px 0 4px; }
+
+  p { line-height: 1.7; margin-bottom: 8px; }
+
+  /* Feature block */
+  .feature { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e5e5; }
+  .feature-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .feature-num { font-size: 11px; color: #888; font-weight: bold; margin-right: 4px; }
+  .feature-title { font-size: 13px; font-weight: bold; }
+  .feature-status-ok { font-size: 11px; font-weight: bold; color: #555; }
+  .feature-status-pend { font-size: 11px; font-weight: bold; color: #DC2626; }
+
+  .label { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin: 8px 0 3px; }
+  ul { padding-left: 18px; margin-bottom: 6px; }
+  li { line-height: 1.6; margin-bottom: 2px; font-size: 12px; }
+  li .check { color: #059669; font-weight: bold; }
+
+  .note-ok { border-left: 3px solid #ddd; padding: 6px 10px; background: #f7f7f7; font-size: 11px; margin-top: 6px; }
+  .note-warn { border-left: 3px solid #ddd; padding: 6px 10px; background: #f7f7f7; font-size: 11px; margin-top: 6px; color: #555; }
+
+  /* Highlight — violet uniquement sur les mots clés */
+  mark { background: none; font-weight: bold; color: #9516C7; padding: 0; }
+
+  /* Bug cards */
+  .bug-highlight { border-left: 4px solid #9516C7; padding: 12px 14px; margin-bottom: 10px; background: #fafafa; }
+  .bug-highlight .bug-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #111; }
+  .bug-card { border-left: 3px solid #ddd; padding: 8px 12px; margin-bottom: 8px; background: #fafafa; }
+  .bug-card .bug-title { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+  .bug-card p { font-size: 12px; color: #333; margin: 0; }
+
+  /* Suggestions */
+  .suggestion { padding: 12px 14px; border-left: 3px solid #ddd; margin-bottom: 10px; background: #fafafa; }
+  .suggestion h2 { margin: 0 0 5px; font-size: 12px; color: #111; }
+  .suggestion p { font-size: 12px; margin: 0; color: #333; }
+
+  /* Pending */
+  .pending-item { margin-bottom: 10px; padding: 10px 14px; border: 1px solid #e5e5e5; border-left: 3px solid #ddd; background: #fafafa; }
+  .pending-item .pending-title { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #111; }
+  .pending-item p { font-size: 12px; color: #333; margin-bottom: 5px; }
+  .pending-action { font-size: 11px; font-style: italic; color: #555; border-top: 1px solid #e5e5e5; padding-top: 5px; margin-top: 4px; }
+
+  @media print { body { background: white; } .page { box-shadow: none; margin: 0; } }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page">
+  <div class="cover">
+    <div class="cover-tag">S for Sales x NeoCell</div>
+    <div class="cover-title">Hello, Michel !</div>
+    <div class="cover-subtitle">Améliorations &amp; Corrections de Bugs — Avril 2026</div>
+    <div class="cover-meta">
+      Avril 2026
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 1 : RÉSUMÉ + FONCTIONNALITÉS -->
+<div class="page">
+
+  <h1>Scope</h1>
+  <p>Cette mission porte sur huit axes d'amélioration de la plateforme NeoCell.</p>
+  <table class="status-table">
+    <tr><th>#</th><th>Axe</th></tr>
+    <tr><td>1</td><td>Historique inter-conversations (R1→R2) — le prospect se souvient des échanges précédents</td></tr>
+    <tr><td>2</td><td>Durée d'appel configurable — 30, 45 ou 60 minutes</td></tr>
+    <tr><td>3</td><td>Limite de 3 simulations par jour</td></tr>
+    <tr><td>4</td><td>Migration de l'infrastructure IA — Amazon Bedrock remplacé par Anthropic</td></tr>
+    <tr><td>5</td><td>Correction des bugs de connexion — reset password + redirections</td></tr>
+    <tr><td>6</td><td>Correction de l'identifiant de conversation ElevenLabs</td></tr>
+    <tr><td>7</td><td>Page Profil utilisateur</td></tr>
+    <tr><td>8</td><td>Refonte du comportement du prospect IA pour des simulations plus réalistes</td></tr>
+  </table>
+
+  <h1>1. Résumé</h1>
+  <p>
+    Huit fonctionnalités ont été développées et livrées dans le cadre de cette mission.
+    <mark>8 points sur 9 sont validés.</mark> Un seul reste à tester : la réinitialisation du mot de passe,
+    qui nécessite une action côté Shannen (voir section 5).
+  </p>
+
+  <table class="status-table">
+    <tr><th>#</th><th>Fonctionnalité</th><th>Statut</th></tr>
+    <tr><td>1</td><td>Historique inter-conversations (R1→R2)</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+    <tr><td>2</td><td>Durée d'appel configurable</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+    <tr><td>3</td><td>Limite de 3 appels par jour</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+    <tr><td>4</td><td>Migration infrastructure IA</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+    <tr><td>5</td><td>Réinitialisation du mot de passe</td><td><span class="badge-pend">⏳ À tester</span></td></tr>
+    <tr><td>6</td><td>Identifiant de conversation</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+    <tr><td>7</td><td>Page Profil utilisateur</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+    <tr><td>8</td><td>Comportement du prospect IA</td><td><span class="badge-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span></td></tr>
+  </table>
+
+  <h1>2. Fonctionnalités livrées</h1>
+
+  <!-- 1 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">1.</span><span class="feature-title">Historique inter-conversations (R1→R2)</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé — 16/04/2026</span>
+    </div>
+    <p>Avant cette mise à jour, chaque simulation repartait de zéro. Désormais, l'utilisateur peut choisir de <mark>fournir un contexte avant de lancer l'appel</mark> : soit en écrivant librement ce qui s'est passé, soit en sélectionnant des appels passés. Le prospect IA intègre ces informations dans sa façon de répondre.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>2 simulations avec le même prospect et produit → l'historique s'affiche et est injecté <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Prospect différent ou produit différent → pas d'historique proposé <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Historique saisi manuellement → le prospect jouait bien le contexte de relance post-devis <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+      <img src="historique_saisie_manuelle.png" alt="Historique saisie manuelle" style="max-width:48%;border:1px solid #e5e7eb;border-radius:6px;">
+      <img src="historique_dropdown.png" alt="Historique dropdown" style="max-width:48%;border:1px solid #e5e7eb;border-radius:6px;">
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">2.</span><span class="feature-title">Durée d'appel configurable</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé</span>
+    </div>
+    <p>L'utilisateur choisit la <mark>durée maximale de la simulation : 30, 45 ou 60 minutes</mark> (45 min par défaut). Un compteur visible pendant l'appel passe à l'orange à 5 min de la fin, au rouge à 1 min.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>Menu déroulant visible, 45 min présélectionné <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Durée transmise correctement à ElevenLabs <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Timer change de couleur aux bons moments <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+      <img src="duree_defaut_45.png" alt="Durée défaut 45 min" style="max-width:48%;border:1px solid #e5e7eb;border-radius:6px;">
+      <img src="duree_appel_dropdown.png" alt="Durée appel dropdown" style="max-width:48%;border:1px solid #e5e7eb;border-radius:6px;">
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">3.</span><span class="feature-title">Limite de 3 appels par jour</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé — 16/04/2026</span>
+    </div>
+    <p>Chaque utilisateur est limité à <mark>3 simulations par jour</mark>. Un indicateur dans le dashboard et la barre latérale affiche le nombre d'appels restants. Quand la limite est atteinte, le bouton de démarrage se désactive.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>3 simulations effectuées → la 4ème est bien bloquée <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Compteur et message "Limite atteinte · Revenez demain" affichés correctement <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+    <div style="margin-top:12px;">
+      <img src="wizard_v1_2%3A3.png" alt="Wizard v1 2/3" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block;">
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">4.</span><span class="feature-title">Migration de l'infrastructure IA</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé — 15/04/2026</span>
+    </div>
+    <p>Amazon Bedrock a été remplacé par une <mark>connexion directe à l'API Anthropic (Claude)</mark>. Le feedback et le résumé générés après chaque appel transitent maintenant par cette nouvelle connexion.</p>
+    <p style="color: #cc0000; font-style: italic; font-size: 11px;">⚠️ Action requise — supprimer toutes les variables et accès AWS Bedrock : variables d'environnement dans Vercel (AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) + désactivation des clés IAM dans la console AWS.</p>
+    <p style="color: #cc0000; font-style: italic; font-size: 11px;">⚠️ Action requise — récupérer une nouvelle clé API Anthropic auprès de Shannen. La clé actuelle ne donne accès qu'à un ancien modèle, ce qui limite la qualité des feedbacks et des résumés générés.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>Feedbacks générés correctement (note, points forts, axes d'amélioration) <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Résumés générés et stockés après chaque simulation <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Quand l'utilisateur raccroche → feedback généré <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Quand ElevenLabs raccroche automatiquement → feedback généré <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+  </div>
+
+  <!-- 5 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">5.</span><span class="feature-title">Réinitialisation du mot de passe</span></div>
+      <span class="feature-status-pend">⏳ À tester</span>
+    </div>
+    <p>Le code est en place. Pour que les emails de réinitialisation pointent vers le bon site, une variable doit être configurée dans Vercel.</p>
+    <div class="note-warn">Action requise — Shannen : ajouter <strong>NEXT_PUBLIC_SITE_URL = https://shannen-demo.vercel.app</strong> dans les variables d'environnement Vercel, puis tester le flow complet.</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">6.</span><span class="feature-title">Correction de l'identifiant de conversation</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé — 16/04/2026</span>
+    </div>
+    <p>L'identifiant enregistré après chaque appel ElevenLabs était incorrect. Corrigé — <mark>chaque appel est maintenant correctement référencé</mark>, ce qui permet de retrouver les transcripts directement depuis ElevenLabs.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>Vérification en base après plusieurs appels → identifiant de type "conv_xxx" bien enregistré <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+  </div>
+
+  <!-- 7 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">7.</span><span class="feature-title">Page Profil utilisateur</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé — 15/04/2026</span>
+    </div>
+    <p>Nouvelle page profil : <mark>photo de profil, prénom/nom, secteur et entreprise par défaut</mark> (pré-remplis à chaque simulation), changement de mot de passe.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>Upload de photo → s'affiche dans la sidebar et le header <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Secteur/entreprise sauvegardés → pré-remplis à l'étape suivante <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Changement de mot de passe → reconnexion OK <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+    <div style="margin-top:12px;">
+      <img src="wizard_v1.png" alt="Wizard v1" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block;">
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="feature">
+    <div class="feature-header">
+      <div><span class="feature-num">8.</span><span class="feature-title">Comportement du prospect IA</span></div>
+      <span class="feature-status-ok"><span style="color:#059669;font-weight:bold;">✓</span> Validé — 16/04/2026</span>
+    </div>
+    <p>Le prospect IA a été entièrement revu. Il réagit de façon <mark>progressive selon la qualité du discours</mark> : froid au départ, il peut s'ouvrir si l'accroche est bonne, ou raccrocher si le vendeur est mauvais. Le comportement varie selon le type d'appel. Les réponses sont courtes, naturelles, sans formules robotiques.</p>
+    <div class="label">Tests effectués</div>
+    <ul>
+      <li>Cold call → résistance progressive bien présente <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Follow-up → le prospect reconnaît le contexte de relance <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li><strong style="color:#059669;">Raccrochage automatique si commercial trop mauvais</strong> <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Absence de formules IA génériques <span style="color:#059669;font-weight:bold;">✓</span></li>
+      <li>Réponses courtes, en français uniquement <span style="color:#059669;font-weight:bold;">✓</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- PAGE 2 : BUGS + SUGGESTIONS + ACTIONS -->
+<div class="page">
+
+  <h1>3. Bugs corrigés</h1>
+
+  <div class="bug-highlight">
+    <div class="bug-title">Le prospect raccroche tout seul</div>
+    <p>Avant la correction, le prospect IA ne raccrochait jamais, même face à un discours très mauvais. Désormais, <mark>si le vendeur est trop peu convaincant, le prospect met fin à l'appel de lui-même</mark> — comme dans la réalité. Cela rend la simulation beaucoup plus formatrice.</p>
+  </div>
+
+
+  <div class="bug-card">
+    <div class="bug-title">Dates affichées incorrectement</div>
+    <p>Une conversation de la veille pouvait s'afficher avec la mention "Aujourd'hui". La logique de comparaison des dates a été corrigée.</p>
+    <div style="margin-top:10px;">
+      <img src="date_incorrecte.png" alt="Bug date" style="max-width:260px;border:1px solid #e5e7eb;border-radius:6px;display:block;">
+      <p style="font-size:11px;color:#888;margin-top:4px;font-style:italic;">Appel était hier mais affiché "Aujourd'hui"</p>
+    </div>
+  </div>
+
+  <div class="bug-card">
+    <div class="bug-title">Post-it de briefing coupé</div>
+    <p>Dans l'écran de simulation, le récapitulatif à gauche coupait le texte. L'affichage a été corrigé.</p>
+    <div style="margin-top:10px;">
+      <img src="post_it_coupe.png" alt="Post-it coupé" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block;">
+    </div>
+  </div>
+
+  <div class="bug-card">
+    <div class="bug-title">Photos de profil des prospects manquantes</div>
+    <p>Les prospects sans photo affichaient une image cassée. Remplacé par un avatar automatique avec les initiales.</p>
+    <div style="margin-top:10px;">
+      <img src="image_defaut.png" alt="Image par défaut" style="max-width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block;">
+    </div>
+  </div>
+
+
+  <h1>4. Suggestions d'améliorations</h1>
+
+  <div class="suggestion">
+    <h2>Raccourcis dans le wizard de simulation</h2>
+    <p>Si l'utilisateur veut créer un nouveau prospect ou produit pendant la configuration, il doit quitter le wizard et perdre sa progression. Ajouter des boutons "Créer un prospect" et "Créer un produit" directement dans les étapes concernées.</p>
+  </div>
+
+  <div class="suggestion">
+    <h2>Génération automatique de la description du prospect</h2>
+    <p>La qualité du comportement du prospect IA dépend directement de la richesse de sa description. Sans description détaillée, il répète les mêmes phrases génériques. Suggestion : <mark>bouton "Générer avec l'IA"</mark> qui crée automatiquement une personnalité réaliste à partir du nom, du poste et du niveau de difficulté.</p>
+  </div>
+
+  <h1>5. Actions en attente</h1>
+
+  <div class="pending-item">
+    <div class="pending-title">Test du reset password</div>
+    <p>Le code est en place. Il faut configurer une variable dans Vercel puis tester le flow complet.</p>
+    <div class="pending-action">Action Shannen : ajouter NEXT_PUBLIC_SITE_URL dans Vercel → tester "mot de passe oublié".</div>
+  </div>
+
+  <div class="pending-item">
+    <div class="pending-title">Nouvelle clé API Anthropic</div>
+    <p>La clé actuelle ne donne accès qu'à un ancien modèle. Une clé avec accès aux modèles récents améliorerait la qualité des feedbacks et résumés.</p>
+    <div class="pending-action">Action Shannen : fournir une nouvelle clé API Anthropic avec accès aux modèles récents.</div>
+  </div>
+
+  <div class="pending-item">
+    <div class="pending-title">Nettoyage AWS</div>
+    <p>Amazon Bedrock n'est plus utilisé. Les accès AWS peuvent être supprimés de Vercel et les clés désactivées.</p>
+    <div class="pending-action">Action Shannen : supprimer les variables AWS dans Vercel + désactiver les clés IAM.</div>
+  </div>
+
+  <div class="pending-item">
+    <div class="pending-title">Résumés des anciens appels</div>
+    <p>852 conversations existantes n'ont pas de résumé et n'apparaissent donc pas dans le sélecteur "Reprendre l'historique". On peut les générer rétroactivement mais cela représente 852 appels IA (coût à évaluer).</p>
+    <div class="pending-action">Décision Shannen : générer les résumés rétroactivement oui/non ? Pour tous les utilisateurs ?</div>
+  </div>
+
+</div>
+
+</body>
+</html>
