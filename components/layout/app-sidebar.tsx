@@ -41,6 +41,11 @@ const items = [
     icon: "fluent:home-24-filled",
   },
   {
+    title: "Suivi & analytics",
+    url: "/admin",
+    icon: "fluent:chart-multiple-24-filled",
+  },
+  {
     title: "Prospect",
     url: "/agents",
     icon: "fluent:people-12-filled",
