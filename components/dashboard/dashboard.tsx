@@ -311,7 +311,7 @@ export function Dashboard() {
                                   <img
                                     src={
                                       conversation.agents?.picture_url ||
-                                      "/default-avatar.png"
+                                      `https://ui-avatars.com/api/?name=${encodeURIComponent((conversation.agents?.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`
                                     }
                                     alt="Agent"
                                     className="w-full h-full object-cover object-top"
@@ -403,7 +403,7 @@ export function Dashboard() {
                     <div className="relative">
                       <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
                         <img
-                          src={agent.picture_url || "/default-avatar.png"}
+                          src={agent.picture_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((agent.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`}
                           alt={agent.name || "Agent"}
                           className="w-full h-full object-cover object-top"
                         />
@@ -426,7 +426,7 @@ export function Dashboard() {
                     <Badge
                       className={getDifficultyColor(agent.difficulty || "")}
                     >
-                      {agent.difficulty}
+                      {agent.difficulty === "tres_difficile" ? "très difficile" : agent.difficulty}
                     </Badge>
                   </div>
                 </CardContent>

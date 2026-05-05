@@ -2,20 +2,40 @@
 
 ## Scope
 
-1. **Historique inter-conversations (R1→R2)** — l'agent récupère l'antériorité entre les simulations, avec le contexte saisi par l'élève
+1. **Historique inter-conversations (R1→R2)** :
+  - l'agent récupère l'antériorité entre les simulations,
+  - l'agent récupère l'historique saisi par l'élève
 2. **Configuration durée d'appel** — dropdown 30 / 45 / 60 min, défaut à 45 min
 3. **Limite de consommation** — 3 appels par jour par utilisateur
-4. **Suppression Amazon Bedrock** — migration vers clé API directe (Anthropic ou OpenAI)
+4. **Suppression Amazon Bedrock** — migration vers clé API directe (Anthropic)
 5. **Correction bugs login** — reset password + redirection post-inscription
 6. **Correction erreur technique variables ElevenLabs**
+7. **Page Profil utilisateur** : context par défaut + changer le mot de passe
+8. **Mise à jour du prompt ElevenLabs — renforcement du persona prospect**
 
 ---
 
-## Plan d'implémentation
+## État d'avancement
+
+| # | Fonctionnalité | Statut |
+|---|----------------|--------|
+| 1 | Historique inter-conversations | ✅ Implémenté — validé le 16/04/2026 |
+| 2 | Configuration durée d'appel | ✅ Implémenté |
+| 3 | Limite 3 appels/jour | ✅ Implémenté — validé le 16/04/2026 |
+| 4 | Suppression Bedrock → API Anthropic | ✅ Implémenté — validé le 15/04/2026 |
+| 5a | Redirection post-login | ✅ Pas de bug (code OK) |
+| 5b | Reset password | ⏳ À tester en prod |
+| 6 | Fix variables ElevenLabs (conversation ID) | ✅ Implémenté — validé le 16/04/2026 |
+| 7 | Page Profil utilisateur | ✅ Implémenté — validé le 15/04/2026 |
+| 8 | Mise à jour du prompt ElevenLabs | ✅ Implémenté — validé le 16/04/2026 |
 
 ---
 
-### 1. Historique inter-conversations (R1→R2) ✅ IMPLÉMENTÉ
+## Fonctionnalités implémentées
+
+---
+
+### 1. Historique inter-conversations (R1→R2) ✅
 
 **Branche :** `historique_conversations`
 
@@ -31,34 +51,33 @@ ALTER TABLE conversations ADD COLUMN history_conversation_ids UUID[] NULL;
 - **Saisir manuellement** — champ texte libre, stocké dans `history_context`
 - **Reprendre l'historique des appels** — dropdown avec sélection "jusqu'à quel appel" (Option B cascade : sélectionner le 3ème appel inclut automatiquement les 1er et 2ème), stocké dans `history_conversation_ids[]`
 
-**Condition d'affichage du sélecteur :** uniquement les conversations avec `summary IS NOT NULL`, même `agent_id` (même prospect) ET même `product_id` (même produit), triées par ordre chronologique ASC.
-- Si l'appel concernait un produit différent → n'apparaît pas (injecter un historique sur un produit différent n'aurait pas de sens)
-- Si l'appel concernait un autre prospect avec le même produit → n'apparaît pas non plus (Jean Verdi ne peut pas se souvenir d'une conversation qu'il n'a pas eue)
+**Condition d'affichage du sélecteur :** uniquement les conversations avec `summary IS NOT NULL`, même `agent_id` ET même `product_id`, triées par ordre chronologique ASC.
+- Produit différent → n'apparaît pas
+- Autre prospect avec même produit → n'apparaît pas
 
 **Fichiers modifiés :**
 - `lib/types/database.ts` — 3 nouvelles colonnes dans Row/Insert/Update
-- `components/simulation/simulation-stepper.tsx` — `historyMode`, `historyContext`, `historyUntilId` dans l'interface + `loadPreviousConversations()` chargé quand agent+produit sont sélectionnés + section UI étape 4 + calcul `history_conversation_ids` dans `startSimulation()`
-- `app/api/simulation/[id]/end/route.ts` — génération du résumé post-simulation via Bedrock (second appel IA après le feedback, non-bloquant), stocké dans `conversations.summary`
-- `app/api/simulation/start/route.ts` — injection de l'historique dans le prompt ElevenLabs si `history_conversation_ids` ou `history_context` renseigné
+- `components/simulation/simulation-stepper.tsx` — `historyMode`, `historyContext`, `historyUntilId` + `loadPreviousConversations()` + section UI étape 4 + calcul `history_conversation_ids` dans `startSimulation()`
+- `app/api/simulation/[id]/end/route.ts` — génération du résumé post-simulation via Anthropic (non-bloquant), stocké dans `conversations.summary`
+- `app/api/simulation/start/route.ts` — injection de l'historique dans le prompt ElevenLabs
 
-**Conditions importantes :**
-- Le résumé est généré uniquement à partir de cette implémentation → les conversations passées (852 sans résumé) ne sont **pas** visibles dans le sélecteur tant qu'elles n'ont pas de `summary`
+**Notes :**
+- Les conversations passées (852 sans résumé) ne sont pas visibles dans le sélecteur — voir section "À demander à Shannen"
 - Le sélecteur est grisé avec "Aucun appel précédent pour ce produit" si aucune conversation disponible
-- La cohérence est assurée par l'Option B (cascade) : impossible de sélectionner un appel sans inclure ceux qui le précèdent
 
-**À tester (test humain obligatoire) :**
+**Tests :**
 - ✅ Faire 2 simulations avec le même agent + même produit → historique présent
 - ✅ Vérifier que la 2ème simulation affiche la 1ère dans le sélecteur "Reprendre l'historique des appels"
 - ✅ Prospect différent + même produit → pas d'historique
 - ✅ Même prospect + produit différent → pas d'historique
-- Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
-- Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt
+- ✅ Vérifier que le résumé est bien injecté dans le prompt ElevenLabs au démarrage
+- ✅ Vérifier que le mode "Saisir manuellement" injecte bien le texte saisi dans le prompt — **validé le 16/04/2026** : history_context bien enregistré en base + agent jouait le contexte de relance post-devis
 
-> ✅ **Partiellement validé le 15/04/2026** — filtrage par agent+produit OK. Reste à vérifier l'injection dans le prompt ElevenLabs.
+> ✅ **Validé le 16/04/2026** — filtrage par agent+produit OK + injection "Saisir manuellement" confirmée en prod (history_context enregistré + agent jouait le contexte de relance post-devis).
 
 ---
 
-### 2. Configuration durée d'appel ✅ IMPLÉMENTÉ
+### 2. Configuration durée d'appel ✅
 
 **Branche :** `duree_appel_configuration`
 
@@ -68,136 +87,61 @@ ALTER TABLE conversations ADD COLUMN max_duration_seconds INTEGER DEFAULT 2700;
 ```
 
 **Fichiers modifiés :**
-- `lib/types/database.ts` — `max_duration_seconds: number` ajouté dans Row/Insert/Update de `conversations`
-- `components/simulation/simulation-stepper.tsx` — `maxDuration: 2700` dans l'interface + état initial + dropdown 30/45/60 min à l'étape 4 + valeur envoyée à Supabase dans l'insert
-- `app/api/simulation/start/route.ts` — ligne 145 : `2700` fixe (init générique agent) ; lignes 464 et 548 : `conversationDetails.max_duration_seconds ?? 2700`
+- `lib/types/database.ts` — `max_duration_seconds: number` ajouté dans Row/Insert/Update
+- `components/simulation/simulation-stepper.tsx` — `maxDuration: 2700` + dropdown 30/45/60 min à l'étape 4
+- `app/api/simulation/start/route.ts` — `conversationDetails.max_duration_seconds ?? 2700` (2 occurrences)
 - `components/simulation/simulation-conversation.tsx` — timer "XX:XX restantes" affiché sous le chrono, orange à -5min, rouge à -1min
 
 **Vérifié :**
 - Dropdown visible à l'étape 4 avec 45 min par défaut
 - Valeur `2700` confirmée en base Supabase
-- Valeur `2700` confirmée sur l'agent ElevenLabs `agent_5501kp5r0nwqemb9tydrbez2zdzw` via API
+- Valeur `2700` confirmée sur l'agent ElevenLabs via API
 
 ---
 
-### 3. Limite de consommation — 3 appels/jour par utilisateur ✅ IMPLÉMENTÉ
+### 3. Limite de consommation — 3 appels/jour par utilisateur ✅
 
 **Branche :** `limite_simulations_jour`
 
 **Pas de migration SQL** — comptage direct sur la table `conversations` existante.
 
 **Fichiers modifiés :**
-- `app/api/simulation/start/route.ts` — vérification serveur : COUNT conversations du jour avant création, retourne 429 si >= 3
-- `components/layout/app-sidebar.tsx` — `dailyCount` state, chargé en parallèle avec les conversations via `Promise.all`. Affiche une barre de progression violette sous le bouton "Démarrer !". Si limite atteinte : bouton désactivé + message "Limite atteinte · Revenez demain"
-- `components/dashboard/dashboard.tsx` — `dailyCount` state, chargé en parallèle. Affiche une pill "X/3 aujourd'hui" avec 3 points violets alignée à droite du titre
-
-**Tests :**
-- ✅ Test automatique (Claude) concluant — 2 conversations fictives insérées en base pour atteindre la limite, bouton désactivé côté sidebar + message "Limite atteinte · Revenez demain", pill "Limite atteinte" côté dashboard, données de test supprimées après vérification
-- ⚠️ Bug confirmé le 15/04/2026 : la 3ème simulation était bloquée au lieu de la 4ème. Cause : la conversation est créée en base avant `/start`, donc déjà comptée. Fix : `.neq("id", conversation_id)` pour exclure la conversation courante du comptage. À re-tester après déploiement.
-
-**Étape 1 — Vérification au démarrage**
-
-Fichier : `app/api/simulation/start/route.ts`
-
-Avant de créer la conversation, compter le nombre de simulations du jour :
-```sql
-SELECT COUNT(*) FROM conversations
-WHERE user_id = $userId
-  AND created_at >= CURRENT_DATE
-  AND created_at < CURRENT_DATE + INTERVAL '1 day'
-```
-
-Si `count >= 3` → retourner une erreur 429 avec message clair.
-
-**Étape 2 — Affichage côté frontend**
-
-Afficher dans le dashboard ou dans le wizard le nombre d'appels restants pour la journée (ex : "2 simulations restantes aujourd'hui"). Appel simple à une route ou ajout dans le payload du dashboard existant.
+- `app/api/simulation/start/route.ts` — vérification serveur : COUNT conversations du jour avant création, retourne 429 si >= 3. Fix `.neq("id", conversation_id)` pour ne pas compter la conversation en cours de création.
+- `components/layout/app-sidebar.tsx` — `dailyCount` state, barre de progression violette sous "Démarrer !". Si limite atteinte : bouton désactivé + "Limite atteinte · Revenez demain"
+- `components/dashboard/dashboard.tsx` — pill "X/3 aujourd'hui" avec 3 points violets alignée à droite du titre
 
 **Notes :**
-- La colonne `credits` dans `users` existe déjà mais n'est pas utilisée — ne pas la toucher dans cette mission (clarification à avoir avec Shannen sur son usage prévu)
-- Le comptage par date évite d'avoir à décrémenter quoi que ce soit
+- La colonne `credits` dans `users` existe déjà mais n'est pas utilisée — à clarifier avec Shannen
 
-**Fichiers touchés :**
-- `app/api/simulation/start/route.ts` — ajout vérification
-- Frontend dashboard / wizard — affichage compteur
+**Tests :**
+- ✅ Validé le 16/04/2026 — la 4ème simulation est bien bloquée (bug initial corrigé : la 3ème était bloquée à tort)
 
 ---
 
-### 4. Suppression Amazon Bedrock → API directe ✅ IMPLÉMENTÉ
+### 4. Suppression Amazon Bedrock → API directe Anthropic ✅
 
 **Branche :** `suppression_bedrock`
-
-**Objectif :** remplacer le client AWS Bedrock par un appel direct à l'API Anthropic dans la route de génération de feedback.
-
-**Variable d'environnement à ajouter :**
-```
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-**Étape 1 — Remplacer le client**
-
-Fichier : `app/api/simulation/[id]/end/route.ts`
-
-Supprimer :
-```typescript
-import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
-```
-
-Remplacer par le SDK Anthropic :
-```typescript
-import Anthropic from "@anthropic-ai/sdk";
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-```
-
-Remplacer l'appel `ConverseCommand` par `anthropic.messages.create()` avec le même prompt et les mêmes paramètres (modèle : `claude-3-5-haiku-20241022`, maxTokens : 2000, temperature : 0.1).
-
-**Étape 2 — Même opération sur la route legacy**
-
-Fichier : `app/api/simulation/end/route.ts` — appliquer le même remplacement (ou supprimer cette route si elle est confirmée comme morte, cf. audit point 10).
-
-**Étape 3 — Nettoyer les dépendances**
-
-```bash
-npm uninstall @aws-sdk/client-bedrock-runtime
-```
-
-Supprimer les variables d'environnement AWS du `.env` et des configs Vercel :
-- `AWS_REGION`
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-
-**Étape 4 — Mettre à jour le modèle dans le PATCH ElevenLabs**
-
-Fichier : `app/api/simulation/start/route.ts` ligne ~421
-
-Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH ElevenLabs (modèle du roleplay conversationnel).
-
-**Modèles utilisés :**
-- Feedback post-simulation : `claude-3-5-haiku-20241022` (maxTokens: 2000, temperature: 0.1)
-- Résumé inter-conversations : `claude-3-5-haiku-20241022` (maxTokens: 300, temperature: 0.1)
-- Roleplay ElevenLabs (conversationnel) : `claude-3-5-haiku` (via PATCH ElevenLabs)
 
 **Fichiers modifiés :**
 - `app/api/simulation/[id]/end/route.ts` — remplacement complet Bedrock → `anthropic.messages.create()` (feedback + summary)
 - `app/api/simulation/end/route.ts` — idem (route legacy)
-- `app/api/simulation/start/route.ts` — modèle ElevenLabs `claude-3-7-sonnet` → `claude-3-5-haiku` (2 occurrences)
+- `app/api/simulation/start/route.ts` — modèle ElevenLabs `claude-3-7-sonnet` → `claude-haiku-4-5` (2 occurrences)
 - `package.json` — `@aws-sdk/client-bedrock-runtime` désinstallé, `@anthropic-ai/sdk` installé
+
+**Modèles utilisés :**
+- Feedback post-simulation : `claude-3-haiku-20240307` (maxTokens: 2000, temperature: 0.1)
+- Résumé inter-conversations : `claude-3-haiku-20240307` (maxTokens: 300, temperature: 0.1)
+- Roleplay ElevenLabs : `claude-haiku-4-5` (via PATCH ElevenLabs)
 
 **Variables d'environnement :**
 - ✅ `ANTHROPIC_API_KEY` ajouté dans Vercel et `.env` local
-- `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` peuvent être supprimés des variables Vercel (plus utilisés)
 
 **⚠️ Nettoyage AWS à faire (post-merge) :**
-- [ ] Supprimer les variables `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` dans les settings Vercel
-- [ ] Supprimer les clés d'accès IAM associées dans la console AWS
-- [ ] Vérifier qu'aucun autre service du projet n'utilise encore AWS (recherche `aws-sdk` dans le code)
+- [ ] Supprimer `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` dans Vercel
+- [ ] Supprimer les clés IAM associées dans la console AWS
 - [ ] Désactiver / supprimer le compte AWS si Bedrock était le seul service utilisé
 
-**À tester :** faire une simulation complète et vérifier que le feedback est bien généré (plus d'erreur Bedrock dans les logs Vercel).
-
-> ✅ **Validé le 15/04/2026** — vérifié en base Supabase : plusieurs conversations ont un `feedback_id` et un `summary` correctement générés par Anthropic (`claude-3-5-haiku`).
-
-> ⚠️ **Bug trouvé le 15/04/2026** : feedback non généré quand c'est ElevenLabs qui raccroche (fin naturelle). Cause : stale closure sur `elapsedTime` dans `onDisconnect` — valait toujours 0, donc `endConversation()` jamais appelé. Fix : `elapsedTimeRef` synchronisé à chaque tick du timer. Fonctionne correctement quand l'utilisateur clique manuellement sur "Terminer". **À re-tester après déploiement.**
+> ✅ **Validé le 15/04/2026** — plusieurs conversations ont un `feedback_id` et un `summary` correctement générés.
 
 ---
 
@@ -205,66 +149,41 @@ Changer `"claude-3-7-sonnet"` → `"claude-3-5-haiku"` dans le payload PATCH Ele
 
 #### 5a. Redirection post-login / post-inscription ✅ PAS DE BUG
 
-**Vérification :** `login/page.tsx` et `SignupForm.tsx` utilisent `try { ... } finally { ... }` **sans `catch`** — le `NEXT_REDIRECT` lancé par `redirect()` côté serveur se propage correctement et la redirection fonctionne. Rien à corriger.
+`login/page.tsx` et `SignupForm.tsx` utilisent `try { ... } finally { ... }` sans `catch` — le `NEXT_REDIRECT` se propage correctement. Rien à corriger.
 
-#### 5b. Reset password
+#### 5b. Reset password ⏳ À TESTER
 
 **Code vérifié** — le flow est complet et correct (`PASSWORD_RECOVERY` event → `updateUser` → redirect `/login`).
 
-**Seul bug identifié :** `NEXT_PUBLIC_SITE_URL` non défini sur Vercel → les liens de reset pointent sur `localhost:3000`.
+**Seul prérequis :** `NEXT_PUBLIC_SITE_URL` doit être défini sur Vercel pour que les liens de reset pointent vers la prod et non `localhost:3000`.
 
-**Fix :** ajouter dans Vercel → Settings → Environment Variables :
 ```
 NEXT_PUBLIC_SITE_URL = https://shannen-demo.vercel.app
 ```
 
 Aucun changement de code nécessaire.
 
-**Fichiers touchés :**
-- `app/login/page.tsx` — fix redirect
-- `app/signup/page.tsx` — fix redirect
-- `app/login/actions.ts` — retourner `{ success: true }` au lieu de `redirect()`
-- `app/signup/actions.ts` — idem
-- `app/forgot-password/actions.ts` — vérification URL + feedback UI
-- Variables d'environnement Vercel : `NEXT_PUBLIC_SITE_URL`
+> ⏳ **À tester** : flow complet "mot de passe oublié" → email reçu → lien de réinitialisation → nouveau mot de passe → reconnexion.
 
 ---
 
-### 6. Correction erreur technique variables ElevenLabs ✅ IMPLÉMENTÉ
+### 6. Correction erreur technique variables ElevenLabs ✅
 
 **Branche :** `fix_elevenlabs_conversation_id`
 
-**Problème identifié dans l'audit :** le champ `elevenlabs_conversation_id` dans la table `conversations` stocke en réalité l'`agent_id` ElevenLabs et non le `conversation_id`. Cela empêche de récupérer le transcript depuis l'API ElevenLabs (l'appel échoue toujours, c'est le fallback frontend qui sauve).
+**Problème :** `elevenlabs_conversation_id` stockait l'`agent_id` au lieu du `conversation_id` réel.
 
-**Fix :**
-
-**Étape 1 — Stocker le vrai conversation ID**
-
-Fichier : `components/simulation/simulation-conversation.tsx` (ou le hook qui gère la session ElevenLabs)
-
-Au moment de la connexion websocket ElevenLabs, le `conversation_id` réel est reçu dans les métadonnées de session. L'identifier et le capturer.
-
-Appeler une route pour mettre à jour `conversations.elevenlabs_conversation_id` avec la vraie valeur dès la connexion établie.
-
-**Étape 2 — Pas de migration nécessaire**
-
-Les anciennes données n'ont pas besoin d'être corrigées (les transcripts sont déjà sauvegardés via le fallback frontend). On corrige uniquement les nouvelles conversations.
-
-**Note sur les deux implémentations de PATCH incohérentes :**
-
-`manage-agent/route.ts` utilise un payload minimal différent de `start/route.ts`. À aligner ou à supprimer si la route n'est plus utilisée — à vérifier.
+**Fix :** récupération de l'ID dans `onDisconnect` (disponible uniquement après déconnexion, contrairement à `onConnect`).
 
 **Fichiers modifiés :**
-- `components/simulation/simulation-conversation.tsx` — dans `onConnect`, appel PATCH non-bloquant avec `conversation.getId()`
+- `components/simulation/simulation-conversation.tsx` — récupération du vrai `conversation_id` dans `onDisconnect`
 - `app/api/simulation/[id]/elevenlabs-id/route.ts` — nouvelle route PATCH créée
 
-**À tester :** faire une simulation, vérifier dans Supabase que `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx` et non un `agent_xxx`.
-
-> ⚠️ **Bug confirmé le 15/04/2026** : `getId()` dans `onConnect` retournait l'`agent_id`. Fix appliqué : récupération de l'ID dans `onDisconnect` (disponible uniquement après déconnexion). **À re-tester après déploiement.**
+> ✅ **Validé le 16/04/2026** : `elevenlabs_conversation_id` contient bien un ID de type `conv_xxx`.
 
 ---
 
-### 7. Page Profil utilisateur ✅ IMPLÉMENTÉ
+### 7. Page Profil utilisateur ✅
 
 **Branche :** `profil_utilisateur`
 
@@ -275,71 +194,36 @@ ALTER TABLE users ADD COLUMN default_company TEXT NULL;
 ```
 
 **Bucket Supabase Storage créé :** `avatars` (public, 5MB max, jpg/png/webp/gif)
-- Policies RLS : lecture publique, upload/update/delete uniquement par le propriétaire (`auth.uid() = foldername[1]`)
 
 **Fichiers créés/modifiés :**
-- `app/(dashboard)/profile/page.tsx` — page profil (server component, auth guard)
-- `components/profile/profile-form.tsx` — formulaire profil avec 4 sections :
-  - Photo de profil (upload → Supabase Storage bucket `avatars`, path `{user_id}/avatar.{ext}`)
-  - Identité : prénom, nom (email désactivé, non modifiable)
-  - Contexte par défaut : `default_secteur` + `default_company` pré-remplis dans le wizard
-  - Changement de mot de passe : re-authentification + `supabase.auth.updateUser()`
-- `components/layout/app-sidebar.tsx` — footer remplacé par bloc avatar cliquable (photo + email, nom si renseigné) → `/profile` + bouton logout icône séparé. Email toujours affiché même si pas de nom/prénom.
-- `components/layout/header.tsx` — popover avatar : ajout lien "Mon profil" + "Se déconnecter" en rouge
-- `components/simulation/simulation-stepper.tsx` — `loadUserDefaults()` au montage ; si pas de localStorage pour l'agent, fallback sur `default_secteur` / `default_company` du profil
-- `lib/types/database.ts` — `default_secteur` + `default_company` ajoutés dans `users` Row/Insert/Update
+- `app/(dashboard)/profile/page.tsx` — page profil
+- `components/profile/profile-form.tsx` — formulaire avec 4 sections : photo, identité, contexte par défaut, changement de mot de passe
+- `components/layout/app-sidebar.tsx` — footer remplacé par bloc avatar cliquable → `/profile`
+- `components/layout/header.tsx` — popover avatar avec lien "Mon profil"
+- `components/simulation/simulation-stepper.tsx` — `loadUserDefaults()` au montage ; fallback sur `default_secteur` / `default_company` du profil
+- `lib/types/database.ts` — `default_secteur` + `default_company` ajoutés
 
-**À tester :**
-- ✅ Uploader une photo → vérifier qu'elle s'affiche dans la sidebar et le header
-- ✅ Sauvegarder secteur/entreprise par défaut → créer une nouvelle simulation avec un nouvel agent → vérifier que les champs sont pré-remplis à l'étape 4
-- ✅ Changer le mot de passe → se déconnecter → se reconnecter avec le nouveau mdp
+**Tests :**
+- ✅ Uploader une photo → s'affiche dans sidebar et header
+- ✅ Sauvegarder secteur/entreprise → pré-remplis à l'étape 4 du wizard
+- ✅ Changer le mot de passe → reconnexion OK
 
 > ✅ **Validé le 15/04/2026**
 
 ---
 
-## Ordre d'implémentation recommandé
-
-| Priorité | Point | Effort | Impact |
-|----------|-------|--------|--------|
-| 🔴 1 | Bugs login (redirection + reset password) | Faible | Bloquant pour les users |
-| 🔴 2 | Limite 3 appels/jour | Faible | Urgent (crédits ElevenLabs) |
-| 🟠 3 | Suppression Bedrock → API directe | Moyen | Simplification stack |
-| 🟠 4 | Configuration durée d'appel | Moyen | Économie crédits + UX |
-| 🟡 5 | Fix variables ElevenLabs (conversation ID) | Faible | Qualité technique |
-| 🟡 6 | Historique inter-conversations | Élevé | Feature principale |
-
----
-
-## Remarques
-
-- **localStorage dans le wizard** — l'étape 4 du wizard (secteur, entreprise, contexte personnalisé) est pré-remplie automatiquement avec la dernière config sauvegardée pour chaque agent. C'est le comportement voulu via `loadSavedConfig` / `saveConfig` dans `simulation-stepper.tsx`. Ce comportement est identique en local et en prod — chaque utilisateur a ses propres données stockées dans le `localStorage` de son navigateur.
-
----
-
-### 8. Fusion prompt ElevenLabs — renforcement du persona prospect
+### 8. Fusion prompt ElevenLabs — renforcement du persona prospect ✅
 
 **Branche :** `fusion_prompt_elevenlabs`
 
-**Contexte :** le prompt actuel dans `start/route.ts` est trop simpliste (instructions 1-11 génériques). Le client a fourni un document de référence (`elo_michel_prompt_config.pdf`) avec une structure en 5 blocs plus réaliste.
-
-**Décision :** fusion des deux prompts avec priorité sur le nouveau document. Suppression du BLOC 5 scoring (géré par Anthropic côté feedback). Remplacement de `[raccroches]` par le system tool natif ElevenLabs `end_call`.
-
----
-
-**Structure finale du prompt assemblé :**
+**Structure du prompt assemblé (`app/api/simulation/start/route.ts`) :**
 
 ```
-BLOC 1 — Identité & contexte          ← dynamique (actuel, conservé)
-BLOC 2 — Comportement général         ← nouveau doc (remplace instructions 1-11)
-BLOC 3 — Texture des réponses/niveau  ← nouveau doc, calibré par agent.difficulty
-BLOC 4 — Résistances & raccrochage    ← nouveau doc, conditionné par callType
+BLOC 1 — Identité & contexte          ← dynamique (agent, produit, type d'appel, historique)
+BLOC 2 — Comportement général         ← prospect passif, phrases courtes, patterns interdits
+BLOC 3 — Texture des réponses/niveau  ← calibré par agent.difficulty (facile/moyen/difficile)
+BLOC 4 — Résistances & raccrochage    ← conditionné par callType
 ```
-
-**Règle `end_call` tool :**
-- Ajout du system tool `end_call` dans le payload PATCH ElevenLabs
-- `end_call` actif uniquement pour `cold_call` et `follow_up_call`
-- Les autres types (`discovery_meeting`, `product_demo`, `closing_call`) utilisent une clôture polie sans raccrocher
 
 **Comportement par callType :**
 
@@ -347,69 +231,56 @@ BLOC 4 — Résistances & raccrochage    ← nouveau doc, conditionné par callT
 |---|---|---|---|
 | `cold_call` | Palier 1 (résistance froide) | Palier 3 ou hardcore | ✅ |
 | `follow_up_call` | Palier 1 mais moins hostile | Palier 3 uniquement | ✅ |
-| `discovery_meeting` | Pas de résistance froide (RDV accepté) | Non — clôture polie | ❌ |
-| `product_demo` | Ouvert (niveau facile par défaut) | Non — clôture polie | ❌ |
-| `closing_call` | Neutre/exigeant, objections précises | Non — "je reviens vers vous" | ❌ |
+| `discovery_meeting` | Pas de résistance froide | Non — clôture polie | ❌ |
+| `product_demo` | Ouvert | Non — clôture polie | ❌ |
+| `closing_call` | Neutre/exigeant | Non — "je reviens vers vous" | ❌ |
 
-**Niveau HARDCORE :**
-- Réservé aux élèves ayant validé les niveaux 1 à 3
-- Raccrochage dès le 1er ou 2ème échange
-- ⚠️ À implémenter : système de progression par niveau dans l'app (feature future)
-- Pour l'instant : niveau hardcore disponible comme option de difficulté dans la fiche agent
-
-**Fichiers modifiés :**
-- `app/api/simulation/start/route.ts` — remplacement des instructions 1-11 + ajout tool `end_call`
-
-**À tester (test humain obligatoire) :**
-
-Cold call — niveau difficile :
-- L'agent démarre en palier 1 (résistance froide : "Oui ?" ou "Allô." sans rien ajouter)
-- Si accroche générique → passage palier 2 ("Ça ressemble à tous les appels que je reçois.")
-- Si toujours mauvais → palier 3 + raccrochage via tool `end_call` natif ElevenLabs
-- Si accroche pertinente → l'agent s'ouvre progressivement et revient palier 1
-
-> ⚠️ **Testé le 15/04/2026 (Pierre Moreau, niveau difficile)** : le comportement de résistance est présent mais le raccrochage automatique n'a pas fonctionné. À re-tester en jouant délibérément un mauvais vendeur jusqu'au bout pour forcer le `end_call`. Note : le tool `end_call` est déclenché par le **prospect** (l'IA), pas par le vendeur — dire "c'est terminé" côté vendeur ne suffit pas.
-
-Cold call — niveau hardcore :
-- Accroche type "je vous dérange" ou pitch générique → raccrochage immédiat dès le 1er échange
-- Accroche pertinente → "Hmm. Continuez." / "J'ai 30 secondes."
-
-Follow-up call :
-- L'agent reconnaît la personne mais reste neutre/hésitant
-- Objections spécifiques relance (prix, concurrent, délai décision)
-- Raccroche poliment si vendeur ne répond pas aux points bloquants
-
-Discovery / Demo / Closing :
-- Vérifier qu'il n'y a PAS de raccrochage brutal (clôture polie uniquement)
-- Vérifier que l'agent pose des questions sur le contexte si le vendeur pitch trop tôt
-
-Tous niveaux :
-- Aucun pattern IA ("Je vous écoute attentivement", "C'est une excellente question", etc.)
-- Réponses en 1-2 phrases max
-- Langue française exclusivement
+**Tests :**
+- ✅ Comportement de résistance présent (validé le 15/04/2026)
+- ✅ Raccrochage automatique via `end_call` — validé le 16/04/2026
+- ✅ Vérifier l'absence de patterns IA — validé le 16/04/2026
+- ✅ Vérifier réponses en 1-2 phrases max, langue française uniquement — validé le 16/04/2026
 
 ---
 
-## Mini-bugs à corriger
+## Bugs corrigés
 
-- ✅ **Modèle ElevenLabs `claude-3-5-haiku` invalide** → remplacé par `claude-haiku-4-5` (`app/api/simulation/start/route.ts`)
-- ✅ **`first_message` manquant dans le PATCH ElevenLabs** : l'agent gardait "Bonjour" → comportement vendeur. Fix : "Allô ?" pour cold_call, "Oui, bonjour ?" pour les autres.
-- ⚠️ **Feedback non généré quand ElevenLabs raccroche** : stale closure `elapsedTime = 0` dans `onDisconnect` → `endConversation()` jamais appelé. Fix `elapsedTimeRef` sur `debugs2_mission1_neocell`. **À re-tester.**
-- ⚠️ **Limite 3 simulations/jour bloquait à la 3ème** : conversation créée avant `/start` donc déjà comptée. Fix `.neq("id", conversation_id)` sur `debugs2_mission1_neocell`. **À re-tester.**
-- ✅ **Wizard étape 4 — "Historique de la relation" mal initialisé** : le localStorage restaurait l'ancienne valeur. Fix : `historique_relation` toujours réinitialisé à `"Premier contact"` au chargement, indépendamment du localStorage. (`simulation-stepper.tsx`)
-- ✅ **Agents disponibles — photo manquante pour Céline Laurent** : `picture_url` était null en base. Fix : avatar généré via `ui-avatars.com` (initiales violet #9516C7) mis à jour directement en Supabase.
-- ✅ **Date affichée incorrecte ("aujourd'hui" au lieu de "hier")** : comparaison basée sur les millisecondes — une conversation de la veille à 23h59 affichait "aujourd'hui". Fix : comparaison calendaire (date normalisée sans heure) dans `dashboard.tsx` et `app-sidebar.tsx`.
-- ✅ **Feedback toujours en fallback ("Conversation complétée")** : le modèle `claude-3-5-haiku-20241022` retournait `404 not_found_error` sur l'org Anthropic → catch block déclenché systématiquement. Fix : switch vers `claude-3-7-sonnet-20250219` pour feedback + summary dans `app/api/simulation/[id]/end/route.ts` (`debugs4_mission1_neocell`). **À re-tester.**
-- ⏳ **Post-it "Briefing de Simulation" trop court** : lors de la simulation en cours, le post-it affiché à gauche tronque le texte (champs "Objectif", "Secteur", etc. coupés). À corriger : hauteur auto / `overflow-visible` / taille de police / layout. (`debugs5_mission1_neocell`)
+- ✅ **Modèle ElevenLabs `claude-3-5-haiku` invalide** → remplacé par `claude-haiku-4-5`
+- ✅ **`first_message` manquant dans le PATCH ElevenLabs** : l'agent gardait "Bonjour" → fix "Allô ?" pour cold_call, "Oui, bonjour ?" pour les autres
+- ✅ **Feedback non généré quand ElevenLabs raccroche** : stale closure `elapsedTime = 0` dans `onDisconnect` → fix `elapsedTimeRef` synchronisé à chaque tick. **Validé le 16/04/2026**
+- ✅ **Limite 3 simulations/jour bloquait à la 3ème** : conversation créée avant `/start` donc déjà comptée. Fix `.neq("id", conversation_id)`. **Validé le 16/04/2026**
+- ✅ **Wizard étape 4 — "Historique de la relation" mal initialisé** : le localStorage restaurait l'ancienne valeur. Fix : `historique_relation` toujours réinitialisé à `"Premier contact"` au chargement
+- ✅ **Date affichée incorrecte ("aujourd'hui" au lieu de "hier")** : comparaison calendaire corrigée dans `dashboard.tsx` et `app-sidebar.tsx`
+- ✅ **Feedback toujours en fallback ("Conversation complétée")** : modèle `claude-3-5-haiku-20241022` → 404 sur l'org Anthropic. Fix : switch vers `claude-3-haiku-20240307`. **Validé le 16/04/2026**
+- ✅ **Post-it "Briefing de Simulation" trop court** : `overflow-hidden` retiré, `line-clamp` → `break-words`. **Validé le 16/04/2026**
+- ✅ **Photo manquante pour Céline Laurent** : `picture_url` null en base. Fix : avatar `ui-avatars.com` mis à jour directement en Supabase
+- ✅ **Erreurs de hydration Next.js (`<p>` imbriqué dans `<p>`)** : `AlertDialogDescription` rendait un `<p>` contenant des `<p>` enfants dans `agents-grid.tsx` et `products-grid.tsx`. Fix : `asChild` + `<div>`/`<span>`
+- ✅ **Avatar par défaut manquant à la création d'agent** : quand aucune photo uploadée, avatar auto-généré via `ui-avatars.com` (initiales + fond violet #9516C7). (`agents-grid.tsx`)
+- ✅ **Fallback `/default-avatar.png` (fichier inexistant) partout** : remplacé par `ui-avatars.com` dans tous les composants — `dashboard.tsx`, `conversation-details.tsx`, `simulation-stepper.tsx`, `simulation-conversation.tsx`, `agents-grid.tsx`
 
 ---
 
 ## À demander à Shannen
 
-- **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé (feature inexistante avant cette mission). Le sélecteur "Reprendre l'historique" ne les affiche donc pas. On peut générer les résumés manquants via Bedrock en batch, mais c'est coûteux (852 appels IA). À valider avec Shannen : est-ce qu'on génère les résumés rétroactivement, et si oui pour tous les users ou seulement certains ?
+- **Résumés des conversations existantes** — 852 conversations ont un transcript mais pas de résumé. Le sélecteur "Reprendre l'historique" ne les affiche donc pas. Générer les résumés manquants serait coûteux (852 appels IA). À valider : génération rétroactive oui/non, et si oui pour tous les users ou seulement certains ?
+- **Nouvelle clé API Anthropic** — la clé actuelle (`ANTHROPIC_API_KEY` dans Vercel) n'a accès qu'à `claude-3-haiku-20240307`. Demander une clé avec accès aux modèles récents pour améliorer la qualité du feedback et des résumés.
+  - ❌ `claude-3-5-haiku-20241022` : 404 (testé le 15/04/2026)
+  - ❌ `claude-3-7-sonnet-20250219` : deprecated + 404 (testé le 16/04/2026 — EOL février 2026)
+  - ❌ `claude-sonnet-4-5-20250929` : 404 (testé le 15/04/2026)
+  - ✅ `claude-3-haiku-20240307` : fonctionne (modèle actuel en prod)
+- **Nettoyage AWS** — supprimer les variables `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` dans Vercel + désactiver les clés IAM associées
+
+---
+
+## Remarques techniques
+
+- **localStorage dans le wizard** — l'étape 4 (secteur, entreprise, contexte personnalisé) est pré-remplie avec la dernière config par agent. Comportement voulu via `loadSavedConfig` / `saveConfig` dans `simulation-stepper.tsx`.
+- **Qualité des simulations** — l'agent IA répète les mêmes répliques scriptées génériques si le prospect n'a pas de description détaillée dans son champ "Objectif / contexte". Les phrases d'exemple du system prompt (`"Vous êtes la 3e personne ce mois-ci..."`) sont reprises mot pour mot par le modèle.
 
 ---
 
 ## Suggestions UX / futures améliorations
 
-- [ ] **Création de simulation — raccourcis étape 1 & 2** : sur létape 1 (choix du prospect), ajouter un bouton "Créer un prospect" inline pour aller directement à la création sans quitter le wizard. Idem sur létape 2 (choix du produit), ajouter un bouton "Créer un produit". Objectif : réduire le nombre de clics et éviter de perdre la progression du wizard.
+- [ ] **Création de simulation — raccourcis étape 1 & 2** : ajouter un bouton "Créer un prospect" inline à l'étape 1 et "Créer un produit" à l'étape 2. Évite de quitter le wizard et perdre la progression.
+
+- [ ] **Création de prospect — description enrichie + génération IA** : le champ "Objectif / contexte" est injecté directement dans le system prompt ElevenLabs — sans description détaillée, l'agent utilise des répliques génériques répétitives. **Suggestion : bouton "Générer avec l'IA"** qui génère automatiquement une description riche (traits de caractère, objections typiques, contexte d'entreprise, comportement face aux vendeurs) à partir du nom, job title et difficulté.

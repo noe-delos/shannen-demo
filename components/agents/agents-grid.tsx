@@ -224,6 +224,10 @@ export function AgentsGrid() {
       if (createForm.picture_file) {
         picture_url = await uploadImage(createForm.picture_file);
         if (!picture_url) return;
+      } else {
+        // Generate default avatar from initials
+        const initials = `${(createForm.firstname || "")[0] || ""}${(createForm.lastname || "")[0] || ""}`.toUpperCase() || "?";
+        picture_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=9516C7&color=fff&size=128&bold=true`;
       }
 
       const { error } = await supabase
@@ -355,7 +359,9 @@ export function AgentsGrid() {
       case "moyen":
         return "bg-yellow-100 text-yellow-800";
       case "difficile":
-        return "bg-red-100 text-red-800";
+        return "bg-red-700 text-white";
+      case "tres_difficile":
+        return "bg-red-950 text-white";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -368,7 +374,9 @@ export function AgentsGrid() {
       case "moyen":
         return "😐";
       case "difficile":
-        return "😤";
+        return "💀";
+      case "tres_difficile":
+        return "☠️";
       default:
         return "🤖";
     }
@@ -500,6 +508,7 @@ export function AgentsGrid() {
                       <SelectItem value="facile">Facile</SelectItem>
                       <SelectItem value="moyen">Moyen</SelectItem>
                       <SelectItem value="difficile">Difficile</SelectItem>
+                      <SelectItem value="tres_difficile">Très difficile</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -623,7 +632,7 @@ export function AgentsGrid() {
                   <div className="relative">
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
                       <img
-                        src={agent.picture_url || "/default-avatar.png"}
+                        src={agent.picture_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((agent.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`}
                         alt={agent.name || "Agent"}
                         className="w-full h-full object-cover object-top"
                       />
@@ -656,7 +665,7 @@ export function AgentsGrid() {
                       <Badge
                         className={getDifficultyColor(agent.difficulty || "")}
                       >
-                        {agent.difficulty}
+                        {agent.difficulty === "tres_difficile" ? "très difficile" : agent.difficulty}
                       </Badge>
                       {agent.voice_id && (
                         <Icon
@@ -771,6 +780,7 @@ export function AgentsGrid() {
                     <SelectItem value="facile">Facile</SelectItem>
                     <SelectItem value="moyen">Moyen</SelectItem>
                     <SelectItem value="difficile">Difficile</SelectItem>
+                    <SelectItem value="tres_difficile">Très difficile</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1013,18 +1023,20 @@ export function AgentsGrid() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer l'agent</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Êtes-vous sûr de vouloir supprimer l'agent "
-                {deletingAgent?.name}" ?
-              </p>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-                <p className="text-sm text-orange-800 font-medium">
-                  ⚠️ Attention ! Si vous supprimez cet agent, les conversations
-                  et feedbacks liés seront également supprimés.
-                </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <span className="block">
+                  Êtes-vous sûr de vouloir supprimer l'agent "
+                  {deletingAgent?.name}" ?
+                </span>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                  <span className="block text-sm text-orange-800 font-medium">
+                    ⚠️ Attention ! Si vous supprimez cet agent, les conversations
+                    et feedbacks liés seront également supprimés.
+                  </span>
+                </div>
+                <span className="block text-sm">Cette action est irréversible.</span>
               </div>
-              <p className="text-sm">Cette action est irréversible.</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
