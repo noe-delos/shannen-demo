@@ -891,7 +891,7 @@ export function SimulationConversation({
                             <img
                               src={
                                 conversationData.agents?.picture_url ||
-                                "/default-avatar.png"
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent((conversationData.agents?.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`
                               }
                               alt={conversationData.agents?.name}
                               className="w-full h-full object-cover object-top"
@@ -968,7 +968,7 @@ export function SimulationConversation({
                             <img
                               src={
                                 conversationData.agents?.picture_url ||
-                                "/default-avatar.png"
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent((conversationData.agents?.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`
                               }
                               alt={conversationData.agents?.name}
                               className="w-full h-full object-cover object-top"

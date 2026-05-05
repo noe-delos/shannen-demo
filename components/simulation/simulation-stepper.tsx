@@ -489,7 +489,7 @@ export function SimulationStepper() {
                               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0">
                                 <img
                                   src={
-                                    agent.picture_url || "/default-avatar.png"
+                                    agent.picture_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((agent.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`
                                   }
                                   alt={agent.name || "Agent"}
                                   className="w-full h-full object-cover object-top"
@@ -505,7 +505,7 @@ export function SimulationStepper() {
                                   {agent.job_title}
                                 </p>
                                 <Badge variant="outline" className="mt-1">
-                                  {agent.difficulty}
+                                  {agent.difficulty === "tres_difficile" ? "très difficile" : agent.difficulty}
                                 </Badge>
                               </div>
                             </div>
@@ -831,7 +831,7 @@ export function SimulationStepper() {
                               <img
                                 src={
                                   config.agent?.picture_url ||
-                                  "/default-avatar.png"
+                                  `https://ui-avatars.com/api/?name=${encodeURIComponent((config.agent?.name || "?")[0])}&background=9516C7&color=fff&size=128&bold=true`
                                 }
                                 alt={config.agent?.name || "Agent"}
                                 className="w-full h-full object-cover object-top"
