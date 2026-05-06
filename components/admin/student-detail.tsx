@@ -227,6 +227,11 @@ export function StudentDetail({ student, conversations, demoMode = false, nowIso
       .sort((a, b) => b.count - a.count);
   }, [conversations]);
 
+  const dominantCallType = distribution[0] ?? null;
+  const primaryStrength = topPointsForts[0] ?? null;
+  const primaryAxis = topAxes[0] ?? null;
+  const latestScore = conversations[0]?.feedback?.note ?? null;
+
   const fullName =
     `${student.firstname ?? ""} ${student.lastname ?? ""}`.trim() || student.email || "Élève";
 
@@ -271,55 +276,62 @@ export function StudentDetail({ student, conversations, demoMode = false, nowIso
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="relative overflow-hidden rounded-2xl border bg-card p-7"
+        className="relative overflow-hidden rounded-[28px] border bg-card p-7"
       >
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at 100% 0%, rgba(255,187,117,.18) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(116,3,206,.10) 0%, transparent 45%)",
+              "radial-gradient(circle at 100% 0%, rgba(255,187,117,.20) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(116,3,206,.10) 0%, transparent 45%)",
           }}
         />
-        <div className="relative flex flex-wrap items-start gap-5">
-          <StudentAvatar
-            pictureUrl={student.picture_url}
-            userId={student.id}
-            firstname={student.firstname}
-            lastname={student.lastname}
-            email={student.email}
-            size={20}
-          />
-          <div className="min-w-0 flex-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7403ce]">
-              Fiche élève
-            </p>
-            <h1 className="mt-2 text-4xl font-extrabold tracking-tight leading-[1.05]">
-              {fullName}
-            </h1>
-            <p className="mt-1.5 truncate text-sm text-muted-foreground">{student.email}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <StatusPill status={status} />
-              <span className="font-mono text-[11px] text-muted-foreground">
-                {kpis.totalSessions} session{kpis.totalSessions > 1 ? "s" : ""} ·
-                dernière activité {formatRelative(conversations[0].created_at, nowTs)}
-              </span>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              Score moyen
-            </div>
-            <div
-              className={`mt-1 text-5xl font-extrabold tracking-tight leading-none ${
-                kpis.avgScore >= 80
-                  ? "bg-gradient-to-r from-[#ffbb75] via-[#fa71ab] to-[#7403ce] bg-clip-text text-transparent"
-                  : ""
-              }`}
-            >
-              {kpis.avgScore}
-            </div>
-            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              / 100
+        <div className="relative">
+          <div className="flex flex-wrap items-start gap-5">
+            <StudentAvatar
+              pictureUrl={student.picture_url}
+              userId={student.id}
+              firstname={student.firstname}
+              lastname={student.lastname}
+              email={student.email}
+              size={20}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7403ce]">
+                Fiche élève
+              </p>
+              <h1 className="mt-2 text-4xl font-extrabold tracking-tight leading-[1.05]">
+                {fullName}
+              </h1>
+              <p className="mt-1.5 truncate text-sm text-muted-foreground">{student.email}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <StatusPill status={status} />
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  {kpis.totalSessions} session{kpis.totalSessions > 1 ? "s" : ""} · dernière
+                  activité {formatRelative(conversations[0].created_at, nowTs)}
+                </span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <HeroFact
+                  label="Dernière note"
+                  value={latestScore != null ? `${latestScore}/100` : "—"}
+                />
+                <HeroFact
+                  label="Variation 7 j"
+                  value={
+                    kpis.trend === 0
+                      ? "stable"
+                      : `${kpis.trend > 0 ? "+" : ""}${kpis.trend} pts`
+                  }
+                />
+                <HeroFact
+                  label="Type dominant"
+                  value={
+                    dominantCallType
+                      ? `${dominantCallType.label} · ${dominantCallType.count}`
+                      : "—"
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -338,6 +350,31 @@ export function StudentDetail({ student, conversations, demoMode = false, nowIso
         <KpiCard label="Sessions" value={kpis.totalSessions.toString()} icon="fluent:headset-24-filled" />
         <KpiCard label="Temps cumulé" value={kpis.totalDuration} icon="fluent:clock-24-filled" />
         <KpiCard label="Série en cours" value={`${kpis.streak} j`} icon="fluent:fire-24-filled" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <SummaryCard
+          icon="fluent:star-24-filled"
+          title="Point fort dominant"
+          value={primaryStrength?.[0] ?? "Pas encore assez de matière"}
+          hint={
+            primaryStrength
+              ? `Revient ${primaryStrength[1]} fois dans les retours IA`
+              : "Les synthèses IA apparaîtront ici"
+          }
+          accent="emerald"
+        />
+        <SummaryCard
+          icon="fluent:target-arrow-24-filled"
+          title="Priorité coaching"
+          value={primaryAxis?.[0] ?? "Aucun axe prioritaire détecté"}
+          hint={
+            primaryAxis
+              ? `Revient ${primaryAxis[1]} fois dans les axes d'amélioration`
+              : "Le suivi coaching s’enrichira avec plus de sessions"
+          }
+          accent="amber"
+        />
       </div>
 
       {/* Charts row */}
@@ -702,5 +739,55 @@ function BackLink({ demoMode }: { demoMode: boolean }) {
       <Icon icon="fluent:arrow-left-24-regular" className="size-4" />
       Retour à la liste des élèves
     </Link>
+  );
+}
+
+function SummaryCard({
+  icon,
+  title,
+  value,
+  hint,
+  accent,
+}: {
+  icon: string;
+  title: string;
+  value: string;
+  hint: string;
+  accent: "emerald" | "amber" | "violet";
+}) {
+  const accentClasses = {
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    violet: "bg-[#7403ce]/7 text-[#7403ce] border-[#7403ce]/10",
+  };
+
+  return (
+    <Card className="py-0">
+      <CardContent className="p-5">
+        <div className="flex items-start gap-3">
+          <div className={`rounded-2xl border p-3 ${accentClasses[accent]}`}>
+            <Icon icon={icon} className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              {title}
+            </p>
+            <p className="mt-2 text-[15px] font-semibold leading-6 text-foreground">{value}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{hint}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function HeroFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-full border border-white/70 bg-white/80 px-3 py-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </span>
+      <span className="ml-2 text-sm font-medium text-foreground">{value}</span>
+    </div>
   );
 }

@@ -14,6 +14,7 @@ export type Database = {
           credits: number;
           default_secteur: string | null;
           default_company: string | null;
+          is_admin: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export type Database = {
           credits?: number;
           default_secteur?: string | null;
           default_company?: string | null;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -40,6 +42,7 @@ export type Database = {
           credits?: number;
           default_secteur?: string | null;
           default_company?: string | null;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -212,6 +215,26 @@ export type Database = {
           updated_at?: string;
         };
       };
+      app_settings: {
+        Row: {
+          id: number;
+          system_instructions: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: number;
+          system_instructions?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: number;
+          system_instructions?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+      };
       feedback: {
         Row: {
           id: string;
@@ -263,6 +286,7 @@ export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Agent = Database["public"]["Tables"]["agents"]["Row"];
 export type Conversation = Database["public"]["Tables"]["conversations"]["Row"];
 export type Feedback = Database["public"]["Tables"]["feedback"]["Row"];
+export type AppSettings = Database["public"]["Tables"]["app_settings"]["Row"];
 
 export type CallType =
   | "cold_call"

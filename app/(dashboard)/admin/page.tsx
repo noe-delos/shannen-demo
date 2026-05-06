@@ -1,21 +1,29 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireAdmin } from "@/utils/auth/require-admin";
 import { Header } from "@/components/layout/header";
 import { StudentsList, type StudentRow } from "@/components/admin/students-list";
 import { getDemoConversationsAll, getDemoStudents, REFERENCE_DATE_ISO } from "@/components/admin/demo-data";
 
 type SearchParams = Promise<{ demo?: string }>;
 
+function buildTeamScoreSparkline(
+  conversations: Array<{ created_at: string; feedback: { note: number | null } | null }>
+) {
+  const scored = conversations.filter((conversation) => conversation.feedback?.note != null);
+  if (scored.length < 2) return undefined;
+
+  return [...scored]
+    .sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
+    .slice(-10)
+    .map((conversation) => conversation.feedback!.note ?? 0);
+}
+
 export default async function AdminListPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  // Auth gate
-  const supabase = await createClient();
-  const { data: auth, error } = await supabase.auth.getUser();
-  if (error || !auth?.user) redirect("/login");
+  await requireAdmin();
 
   const { demo } = await searchParams;
   const demoMode = demo === "1";
@@ -26,6 +34,7 @@ export default async function AdminListPage({
     totalSessions: number;
     teamAvgScore: number;
     sessionsThisWeek: number;
+    teamScoreSparkline?: number[];
   };
   let nowIso: string;
 
@@ -77,6 +86,7 @@ export default async function AdminListPage({
       totalSessions: allConvs.length,
       teamAvgScore: students.length ? students.reduce((a, s) => a + s.avgScore, 0) / students.length : 0,
       sessionsThisWeek: allConvs.filter((c) => new Date(c.created_at).getTime() >= weekAgo).length,
+      teamScoreSparkline: buildTeamScoreSparkline(allConvs),
     };
     nowIso = REFERENCE_DATE_ISO;
   } else {
@@ -152,6 +162,7 @@ export default async function AdminListPage({
       totalSessions: allConvs.length,
       teamAvgScore: students.length ? students.reduce((a, s) => a + s.avgScore, 0) / students.length : 0,
       sessionsThisWeek: allConvs.filter((c) => new Date(c.created_at).getTime() >= weekAgo).length,
+      teamScoreSparkline: buildTeamScoreSparkline(allConvs),
     };
     nowIso = new Date().toISOString();
   }

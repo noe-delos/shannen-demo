@@ -1,6 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
 // Mix of solid colors and gradients — solids dominate for fast visual ID at
 // small sizes, gradients for variety. Each palette is a complete bg-* class.
 const PALETTES: string[] = [
@@ -70,28 +73,54 @@ export function StudentAvatar({
   size?: 8 | 9 | 10 | 11 | 12 | 14 | 16 | 20;
   className?: string;
 }) {
-  const sizeClass = `size-${size}`;
+  const [imageFailed, setImageFailed] = useState(false);
+  const sizeClass = {
+    8: "size-8",
+    9: "size-9",
+    10: "size-10",
+    11: "size-11",
+    12: "size-12",
+    14: "size-14",
+    16: "size-16",
+    20: "size-20",
+  }[size];
   const fontSize =
     size <= 9 ? "text-[10px]" : size <= 11 ? "text-sm" : size <= 14 ? "text-base" : "text-xl";
-
-  if (pictureUrl) {
-    return (
-      <img
-        src={pictureUrl}
-        alt={`${firstname ?? ""} ${lastname ?? ""}`.trim() || email || "Avatar"}
-        className={`${sizeClass} shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm ${className}`}
-      />
-    );
-  }
-
-  const palette = gradientFor(userId || email || "x");
   const initials = getInitials({ firstname, lastname, email });
+  const palette = gradientFor(userId || email || "x");
+  const showImage = Boolean(pictureUrl && !imageFailed);
 
   return (
     <div
-      className={`${sizeClass} ${fontSize} flex shrink-0 items-center justify-center rounded-full ${palette} font-bold text-white shadow-sm ring-2 ring-white ${className}`}
+      className={cn(
+        sizeClass,
+        "relative shrink-0 overflow-hidden rounded-full border border-slate-200/80 bg-white shadow-[0_4px_14px_rgba(15,23,42,.08)]",
+        className
+      )}
     >
-      {initials}
+      {showImage ? (
+        <>
+          <img
+            src={pictureUrl ?? undefined}
+            alt={`${firstname ?? ""} ${lastname ?? ""}`.trim() || email || "Avatar"}
+            onError={() => setImageFailed(true)}
+            className="size-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(15,23,42,.10))]" />
+          <div className="pointer-events-none absolute inset-[1px] rounded-full border border-white/35" />
+        </>
+      ) : (
+        <div
+          className={cn(
+            "relative flex size-full items-center justify-center text-white",
+            palette
+          )}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,.26),transparent_38%)]" />
+          <div className="absolute inset-[1px] rounded-full border border-white/20" />
+          <span className={cn(fontSize, "relative font-semibold tracking-[-0.04em]")}>{initials}</span>
+        </div>
+      )}
     </div>
   );
 }

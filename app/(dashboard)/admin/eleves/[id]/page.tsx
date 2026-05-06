@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
+import { notFound } from "next/navigation";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireAdmin } from "@/utils/auth/require-admin";
 import { Header } from "@/components/layout/header";
 import { StudentDetail } from "@/components/admin/student-detail";
 import {
@@ -19,9 +19,7 @@ export default async function StudentDetailPage({
   params: Params;
   searchParams: SearchParams;
 }) {
-  const supabase = await createClient();
-  const { data: auth, error } = await supabase.auth.getUser();
-  if (error || !auth?.user) redirect("/login");
+  await requireAdmin();
 
   const { id } = await params;
   const { demo } = await searchParams;

@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@iconify/react";
-import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface ConversationDetailsProps {
@@ -32,7 +31,6 @@ export function ConversationDetails({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -40,68 +38,23 @@ export function ConversationDetails({
         setLoading(true);
         setError(null);
 
-        // Check if user is authenticated
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
+        const res = await fetch(`/api/conversations/${conversationId}`, {
+          credentials: "include",
+        });
 
-        if (userError || !user) {
+        if (res.status === 401) {
           router.push("/login");
           return;
         }
 
-        // Fetch conversation with related data
-        const { data: conversationData, error: fetchError } = await supabase
-          .from("conversations")
-          .select(
-            `
-            *,
-            agents:agent_id (
-              id,
-              name,
-              job_title,
-              picture_url,
-              difficulty,
-              personnality,
-              firstname,
-              lastname
-            ),
-            products:product_id (
-              id,
-              name,
-              pitch,
-              price,
-              marche
-            ),
-            feedback:feedback_id (
-              id,
-              note,
-              points_forts,
-              axes_amelioration,
-              moments_cles,
-              suggestions,
-              analyse_complete,
-              created_at
-            )
-          `
-          )
-          .eq("id", conversationId)
-          .single();
+        const json = await res.json().catch(() => ({}));
 
-        if (fetchError) {
-          console.error("Error fetching conversation:", fetchError);
-          setError("Conversation introuvable");
+        if (!res.ok) {
+          setError(json?.error || "Conversation introuvable");
           return;
         }
 
-        // Check if user owns this conversation
-        if (conversationData.user_id !== user.id) {
-          setError("Accès non autorisé à cette conversation");
-          return;
-        }
-
-        setConversation(conversationData);
+        setConversation(json.conversation);
       } catch (err) {
         console.error("Error:", err);
         setError("Erreur lors du chargement de la conversation");
@@ -111,7 +64,7 @@ export function ConversationDetails({
     };
 
     fetchConversation();
-  }, [conversationId, supabase, router]);
+  }, [conversationId, router]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
