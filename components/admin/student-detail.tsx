@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,6 +61,7 @@ type Props = {
 
 export function StudentDetail({ student, conversations, demoMode = false, nowIso }: Props) {
   const nowTs = new Date(nowIso).getTime();
+  const [sessionsLimit, setSessionsLimit] = useState(20);
 
   const kpis = useMemo(() => {
     const withFb = conversations.filter((c) => c.feedback?.note != null);
@@ -676,7 +677,7 @@ export function StudentDetail({ student, conversations, demoMode = false, nowIso
                   </tr>
                 </thead>
                 <tbody>
-                  {conversations.slice(0, 20).map((c) => (
+                  {conversations.slice(0, sessionsLimit).map((c) => (
                     <tr
                       key={c.id}
                       className="group border-b transition-all last:border-0 hover:bg-gradient-to-r hover:from-[#7403ce]/5 hover:to-transparent"
@@ -720,10 +721,31 @@ export function StudentDetail({ student, conversations, demoMode = false, nowIso
                 </tbody>
               </table>
             </div>
-            {conversations.length > 20 && (
-              <p className="mt-2 text-center text-xs text-muted-foreground">
-                {conversations.length - 20} sessions plus anciennes non affichées.
-              </p>
+            {conversations.length > sessionsLimit && (
+              <div className="mt-3 flex flex-col items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSessionsLimit((n) => n + 20)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:border-[#7403ce]/40 hover:bg-[#7403ce]/5 hover:text-[#7403ce]"
+                >
+                  <Icon icon="fluent:chevron-down-24-regular" className="size-3.5" />
+                  Voir {Math.min(20, conversations.length - sessionsLimit)} sessions plus anciennes
+                </button>
+                <p className="text-[11px] text-muted-foreground">
+                  {sessionsLimit} sur {conversations.length} sessions affichées
+                </p>
+              </div>
+            )}
+            {sessionsLimit > 20 && conversations.length <= sessionsLimit && (
+              <div className="mt-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setSessionsLimit(20)}
+                  className="text-xs text-muted-foreground hover:text-[#7403ce]"
+                >
+                  Réduire la liste
+                </button>
+              </div>
             )}
           </CardContent>
         </Card>
