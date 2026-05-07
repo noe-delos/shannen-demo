@@ -55,6 +55,7 @@ export function PromptEditor({ initialPersona, initialBehavior, updatedAt }: Pro
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const dirty = persona !== savedPersona || behavior !== savedBehavior;
+  const bothEmpty = persona.trim().length === 0 && behavior.trim().length === 0;
 
   const fetchPreview = async (callType: string) => {
     setPreviewLoading(true);
@@ -235,13 +236,30 @@ export function PromptEditor({ initialPersona, initialBehavior, updatedAt }: Pro
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            <Icon icon="fluent:warning-24-filled" className="size-5 text-amber-500" />
-            Confirmer la mise à jour du prompt système
+            <Icon
+              icon="fluent:warning-24-filled"
+              className={`size-5 ${bothEmpty ? "text-rose-500" : "text-amber-500"}`}
+            />
+            {bothEmpty
+              ? "Effacer toutes les consignes personnalisées ?"
+              : "Confirmer la mise à jour du prompt système"}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Ces instructions seront injectées dans <strong>toutes les simulations futures</strong>,
-            pour tous les élèves et toutes les voix. Les simulations en cours ne sont pas affectées.
-            Continuer&nbsp;?
+            {bothEmpty ? (
+              <>
+                Les deux zones sont vides. En enregistrant, vous{" "}
+                <strong>supprimez les consignes existantes</strong> : toutes les
+                simulations futures repasseront sur le comportement par défaut du
+                moteur, sans persona ni règles additionnelles.
+              </>
+            ) : (
+              <>
+                Ces instructions seront injectées dans{" "}
+                <strong>toutes les simulations futures</strong>, pour tous les
+                élèves et toutes les voix. Les simulations en cours ne sont pas
+                affectées. Continuer&nbsp;?
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -252,9 +270,13 @@ export function PromptEditor({ initialPersona, initialBehavior, updatedAt }: Pro
               setConfirmOpen(false);
               handleSave();
             }}
-            className="shannen-gradient text-white"
+            className={
+              bothEmpty
+                ? "bg-rose-600 text-white hover:bg-rose-700"
+                : "shannen-gradient text-white"
+            }
           >
-            Confirmer et enregistrer
+            {bothEmpty ? "Effacer les consignes" : "Confirmer et enregistrer"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
