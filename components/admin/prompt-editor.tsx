@@ -9,6 +9,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CALL_TYPE_OPTIONS: { value: string; label: string }[] = [
   { value: "cold_call", label: "Cold call" },
@@ -42,6 +52,7 @@ export function PromptEditor({ initialPersona, initialBehavior, updatedAt }: Pro
     company?: string;
   } | null>(null);
   const [previewCallType, setPreviewCallType] = useState("cold_call");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const dirty = persona !== savedPersona || behavior !== savedBehavior;
 
@@ -199,7 +210,7 @@ export function PromptEditor({ initialPersona, initialBehavior, updatedAt }: Pro
               Annuler
             </Button>
             <Button
-              onClick={handleSave}
+              onClick={() => setConfirmOpen(true)}
               disabled={!dirty || isPending}
               className="shannen-gradient text-white"
             >
@@ -219,6 +230,35 @@ export function PromptEditor({ initialPersona, initialBehavior, updatedAt }: Pro
         </div>
       </CardContent>
     </Card>
+
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Icon icon="fluent:warning-24-filled" className="size-5 text-amber-500" />
+            Confirmer la mise à jour du prompt système
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Ces instructions seront injectées dans <strong>toutes les simulations futures</strong>,
+            pour tous les élèves et toutes les voix. Les simulations en cours ne sont pas affectées.
+            Continuer&nbsp;?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirmOpen(false);
+              handleSave();
+            }}
+            className="shannen-gradient text-white"
+          >
+            Confirmer et enregistrer
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
     <Card>
       <CardHeader className="cursor-pointer select-none" onClick={togglePreview}>
