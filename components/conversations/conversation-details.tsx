@@ -310,7 +310,13 @@ export function ConversationDetails({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push("/")}
+                  onClick={() => {
+                    if (window.history.length > 1) {
+                      router.back();
+                    } else {
+                      router.push("/");
+                    }
+                  }}
                   className="w-fit"
                 >
                   <Icon icon="mdi:arrow-left" className="h-4 w-4 mr-2" />
