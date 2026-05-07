@@ -259,7 +259,9 @@ export function StudentDetail({ student, conversations, demoMode = false, nowIso
             <h2 className="text-2xl font-bold">{fullName}</h2>
             <p className="text-sm text-muted-foreground">{student.email}</p>
             <p className="mt-3 max-w-md text-sm text-muted-foreground">
-              Aucune simulation enregistrée pour cet élève. Les données apparaîtront ici dès la première session terminée.
+              Cet élève n&apos;a pas encore lancé de simulation depuis son
+              compte. Les KPIs, l&apos;évolution du score et l&apos;historique
+              des sessions apparaîtront ici dès la première session terminée.
             </p>
           </CardContent>
         </Card>

@@ -157,7 +157,8 @@ export function StudentsList({ students, totals, demoMode = false, nowIso }: Pro
             </div>
             <h2 className="mb-1 text-xl font-bold">Aucun élève actif</h2>
             <p className="text-sm text-muted-foreground">
-              Les statistiques apparaîtront ici dès les premières simulations.
+              Les statistiques apparaîtront ici quand vos élèves auront
+              terminé leur première simulation depuis leur compte.
             </p>
           </CardContent>
         </Card>
