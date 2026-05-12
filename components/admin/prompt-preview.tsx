@@ -9,13 +9,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { buildAgentPrompt } from "@/lib/prompt/build-agent-prompt";
 
 type AgentLike = {
@@ -41,13 +34,6 @@ const SAMPLE_CONTEXT = {
   secteur: "SaaS",
   company: "Acme Industries",
   historique_relation: "Premier contact",
-};
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  facile: "Facile",
-  moyen: "Moyen",
-  difficile: "Difficile",
-  tres_difficile: "Très difficile",
 };
 
 const BLOC_REGEX = /(— BLOC \d+ — [^—]+ —)/g;
@@ -122,8 +108,10 @@ function reassembleWithOverrides(
 
 export function PromptPreview({ sampleAgents }: { sampleAgents: AgentLike[] }) {
   const [tab, setTab] = useState("option2");
-  const [agentId, setAgentId] = useState(sampleAgents[0]?.id ?? "");
-  const [callType, setCallType] = useState("cold_call");
+  // Scénario d'exemple FIXE pour les aperçus rendus.
+  // L'édition reste 100 % globale — ce scénario sert juste à montrer à quoi ressemble le rendu.
+  const agentId = sampleAgents[0]?.id ?? "";
+  const callType = "cold_call";
 
   const agent = useMemo(
     () => sampleAgents.find((a) => a.id === agentId) ?? sampleAgents[0] ?? null,
@@ -213,20 +201,28 @@ export function PromptPreview({ sampleAgents }: { sampleAgents: AgentLike[] }) {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">Choix de l&apos;éditeur de prompt système</h1>
         <p className="text-sm text-muted-foreground">
-          3 formats possibles, avec des <strong>vraies données</strong> (prospect, scénario, prompt généré
-          en live). Bascule pour comparer. <strong>Aucune sauvegarde réelle</strong> — c&apos;est une
-          maquette pour t&apos;aider à choisir le format qu&apos;on livrera en V1.
+          3 formats possibles. Bascule entre les onglets pour comparer.{" "}
+          <strong>Aucune sauvegarde réelle</strong> — c&apos;est une maquette pour t&apos;aider à choisir
+          le format qu&apos;on livrera en V1.
         </p>
       </div>
 
-      <ScenarioPicker
-        agents={sampleAgents}
-        agentId={agentId}
-        onAgentChange={setAgentId}
-        callType={callType}
-        onCallTypeChange={setCallType}
-        agentLabel={agentFullName}
-      />
+      <Card className="p-4 border-purple-200 bg-purple-50/60">
+        <div className="flex items-start gap-3">
+          <Icon icon="fluent:info-24-filled" className="size-5 text-[#9516C7] mt-0.5 shrink-0" />
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-purple-900">
+              Tes modifications s&apos;appliquent à <u>TOUS les prospects</u> et à <u>toutes les simulations</u>
+            </p>
+            <p className="text-xs text-purple-900/80 leading-relaxed">
+              L&apos;exemple ci-dessous utilise <strong>{agentFullName}</strong> en <strong>cold call</strong>{" "}
+              juste pour visualiser à quoi ressemble le rendu. Mais ce que tu édites est{" "}
+              <strong>global</strong> — ça s&apos;appliquera à Sophie, Catherine, Thomas, et tous les futurs
+              prospects, quel que soit le type d&apos;appel.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-auto">
@@ -274,75 +270,6 @@ export function PromptPreview({ sampleAgents }: { sampleAgents: AgentLike[] }) {
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function ScenarioPicker({
-  agents,
-  agentId,
-  onAgentChange,
-  callType,
-  onCallTypeChange,
-  agentLabel,
-}: {
-  agents: AgentLike[];
-  agentId: string;
-  onAgentChange: (id: string) => void;
-  callType: string;
-  onCallTypeChange: (ct: string) => void;
-  agentLabel: string;
-}) {
-  return (
-    <Card className="p-4 border-purple-100 bg-purple-50/40">
-      <div className="flex items-center gap-2 mb-3">
-        <Icon icon="fluent:beaker-24-filled" className="size-4 text-[#9516C7]" />
-        <p className="text-sm font-semibold">Aperçu pour ce scénario</p>
-        <span className="text-xs text-muted-foreground">
-          (la maquette utilise ces données réelles pour générer le prompt ci-dessous)
-        </span>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Prospect</Label>
-          <Select value={agentId} onValueChange={onAgentChange}>
-            <SelectTrigger className="bg-white">
-              <SelectValue>{agentLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {agents.map((a) => {
-                const fullName =
-                  a.firstname && a.lastname
-                    ? `${a.firstname} ${a.lastname}`
-                    : a.name ?? "Prospect";
-                const diff = a.difficulty
-                  ? DIFFICULTY_LABEL[a.difficulty] ?? a.difficulty
-                  : "—";
-                return (
-                  <SelectItem key={a.id} value={a.id}>
-                    {fullName} · {a.job_title ?? "—"} · {diff}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Type d&apos;appel</Label>
-          <Select value={callType} onValueChange={onCallTypeChange}>
-            <SelectTrigger className="bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CALL_TYPES.map((ct) => (
-                <SelectItem key={ct.value} value={ct.value}>
-                  {ct.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </Card>
   );
 }
 
