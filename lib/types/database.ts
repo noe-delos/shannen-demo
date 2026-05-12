@@ -14,6 +14,7 @@ export type Database = {
           credits: number;
           default_secteur: string | null;
           default_company: string | null;
+          is_admin: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export type Database = {
           credits?: number;
           default_secteur?: string | null;
           default_company?: string | null;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -40,6 +42,7 @@ export type Database = {
           credits?: number;
           default_secteur?: string | null;
           default_company?: string | null;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };

@@ -39,16 +39,25 @@ const items = [
     title: "Dashboard",
     url: "/",
     icon: "fluent:home-24-filled",
+    adminOnly: false,
+  },
+  {
+    title: "Suivi & analytics",
+    url: "/admin",
+    icon: "fluent:chart-multiple-24-filled",
+    adminOnly: true,
   },
   {
     title: "Prospect",
     url: "/agents",
     icon: "fluent:people-12-filled",
+    adminOnly: false,
   },
   {
     title: "Produits",
     url: "/products",
     icon: "majesticons:box",
+    adminOnly: false,
   },
 ];
 
@@ -109,7 +118,7 @@ export function AppSidebar() {
             .gte("created_at", today.toISOString()),
           supabase
             .from("users")
-            .select("firstname, lastname, picture_url, email")
+            .select("firstname, lastname, picture_url, email, is_admin")
             .eq("id", user.id)
             .single(),
         ]);
@@ -227,7 +236,9 @@ export function AppSidebar() {
               )}
             </div>
             <SidebarMenu>
-              {items.map((item) => (
+              {items
+                .filter((item) => !item.adminOnly || userProfile?.is_admin)
+                .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link

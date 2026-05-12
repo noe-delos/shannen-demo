@@ -36,3 +36,13 @@ Thumbs.db
 # Optional: Mac system files
 .AppleDouble
 .LSOverride
+.vercel
+.env*.local
+
+# Local-only: Claude Code guidance + Playwright MCP artifacts
+CLAUDE.md
+.playwright-mcp/
+
+# Local screenshots from manual QA (admin dashboard, proposal previews)
+/admin-*.png
+/proposal-*.png
