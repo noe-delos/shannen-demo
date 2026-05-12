@@ -1,0 +1,1500 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Proposition Shannen — SforSales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-orange: #ffbb75;
+    --brand-pink:   #fa71ab;
+    --brand-magenta:#bc30c4;
+    --brand-purple: #7403ce;
+    --brand-deep:   #3b026d;
+    --ink:          #0d0a14;
+    --ink-2:        #2a2535;
+    --ink-3:        #5a5366;
+    --ink-mute:     #8b8497;
+    --line:         #ebe7ef;
+    --line-soft:    #f3f0f5;
+    --bg:           #ffffff;
+    --bg-2:         #faf9fc;
+    --bg-3:         #f4f2f7;
+    --good:         #18a957;
+    --warn:         #d97706;
+    --bad:          #dc2626;
+    --gradient: linear-gradient(135deg, #ffbb75 0%, #fa71ab 30%, #bc30c4 60%, #7403ce 85%, #3b026d 100%);
+    --gradient-soft: linear-gradient(135deg, rgba(255,187,117,.10) 0%, rgba(250,113,171,.08) 30%, rgba(188,48,196,.08) 60%, rgba(116,3,206,.10) 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #e8e4ee;
+    color: var(--ink);
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10pt;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga", "calt", "ss01", "ss02";
+  }
+
+  ::selection { background: var(--brand-magenta); color: white; }
+
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; font-feature-settings: "calt", "ss01"; }
+
+  /* ==== Page layout (A4 portrait) ==== */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 14mm auto;
+    background: var(--bg);
+    padding: 18mm 18mm 16mm;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 24px 50px -22px rgba(60,30,90,.18);
+    overflow: hidden;
+  }
+
+  .page-num {
+    position: absolute;
+    bottom: 12mm;
+    right: 18mm;
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+  }
+
+  .page-num strong { color: var(--ink); font-weight: 600; }
+
+  .page-mark {
+    position: absolute;
+    bottom: 12mm;
+    left: 18mm;
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10mm;
+    margin-bottom: 12mm;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 11pt;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-dot {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--gradient);
+    box-shadow: 0 1px 4px rgba(116,3,206,.3);
+  }
+
+  .doc-meta {
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--ink-mute);
+  }
+
+  .doc-meta strong { color: var(--ink); font-weight: 600; }
+
+  /* ==== Eyebrow / titles ==== */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brand-purple);
+    font-weight: 600;
+    margin-bottom: 6mm;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 24px; height: 2px;
+    background: var(--gradient);
+    border-radius: 2px;
+  }
+
+  h2.section {
+    font-size: 30pt;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 4mm;
+    max-width: 150mm;
+  }
+
+  .section-lede {
+    font-size: 11.5pt;
+    line-height: 1.5;
+    color: var(--ink-3);
+    max-width: 140mm;
+    margin-bottom: 10mm;
+  }
+
+  /* ==== COVER ==== */
+  .page.cover {
+    background: var(--ink);
+    color: white;
+    padding: 22mm 22mm 18mm;
+  }
+
+  .cover-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 110% -10%, rgba(255,187,117,.55) 0%, transparent 35%),
+      radial-gradient(circle at -10% 30%, rgba(250,113,171,.45) 0%, transparent 35%),
+      radial-gradient(circle at 60% 110%, rgba(116,3,206,.65) 0%, transparent 50%),
+      linear-gradient(155deg, #1a0c2e 0%, #0d0a14 100%);
+    z-index: 0;
+  }
+
+  .cover-grid-noise {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size: 48px 48px;
+    z-index: 1;
+  }
+
+  .cover-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
+
+  .cover-top { display: flex; justify-content: space-between; align-items: center; }
+
+  .cover-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 12pt; }
+  .cover-brand .dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--gradient);
+    box-shadow: 0 6px 24px rgba(250,113,171,.5);
+  }
+
+  .cover-meta-top {
+    font-family: "Geist Mono", monospace;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,.6);
+  }
+  .cover-meta-top strong { color: white; font-weight: 600; }
+
+  .cover-body { margin: auto 0; }
+
+  .cover-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 999px;
+    font-family: "Geist Mono", monospace;
+    font-size: 8.5pt;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.85);
+    margin-bottom: 14mm;
+  }
+  .cover-tag .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #ffbb75;
+    box-shadow: 0 0 10px #ffbb75;
+  }
+
+  .cover-title {
+    font-size: 64pt;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 8mm;
+  }
+
+  .cover-title .accent {
+    background: linear-gradient(120deg, #ffbb75, #fa71ab 50%, #bc30c4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .cover-sub {
+    font-size: 14pt;
+    color: rgba(255,255,255,.75);
+    line-height: 1.45;
+    max-width: 130mm;
+    font-weight: 300;
+  }
+
+  .cover-foot {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10mm;
+    padding-top: 10mm;
+    border-top: 1px solid rgba(255,255,255,.12);
+  }
+  .cover-foot dt {
+    font-family: "Geist Mono", monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,.45);
+    margin-bottom: 3mm;
+  }
+  .cover-foot dd {
+    font-size: 11pt;
+    font-weight: 500;
+    color: white;
+  }
+  .cover-foot dd small { display: block; font-weight: 400; color: rgba(255,255,255,.6); font-size: 9pt; margin-top: 1mm; }
+
+  /* ==== DIAGNOSTIC ==== */
+  .diag-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7mm;
+    margin-bottom: 9mm;
+  }
+
+  .diag-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 7mm 7mm 8mm;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diag-card.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+    border-color: rgba(250,113,171,.25);
+  }
+
+  .diag-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 5mm;
+    gap: 4mm;
+  }
+
+  .diag-tag {
+    font-family: "Geist Mono", monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-mute);
+    padding: 3px 7px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+
+  .diag-tag.urgent { color: var(--bad); border-color: rgba(220,38,38,.3); background: rgba(220,38,38,.05); }
+  .diag-tag.med    { color: var(--warn); border-color: rgba(217,119,6,.3); background: rgba(217,119,6,.05); }
+
+  .diag-fig {
+    font-size: 38pt;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+
+  .diag-fig .unit { font-size: 16pt; color: var(--ink-mute); font-weight: 500; margin-left: 2px; }
+  .diag-fig .gradient-text {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .diag-card h3 {
+    font-size: 12pt;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 4mm 0 2mm;
+    letter-spacing: -0.005em;
+  }
+
+  .diag-card p {
+    font-size: 9.5pt;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  /* Mini bar chart for credits consumption */
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 28mm;
+    margin-top: 4mm;
+    padding: 4mm 0 2mm;
+    border-top: 1px dashed var(--line);
+  }
+
+  .mini-chart .day {
+    flex: 1;
+    background: var(--gradient);
+    border-radius: 2px 2px 0 0;
+    opacity: 0.85;
+    position: relative;
+  }
+  .mini-chart .day:hover { opacity: 1; }
+
+  .chart-axis {
+    display: flex;
+    justify-content: space-between;
+    font-family: "Geist Mono", monospace;
+    font-size: 7pt;
+    color: var(--ink-mute);
+    margin-top: 2mm;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    color: var(--ink-3);
+    margin-top: 5mm;
+    padding-top: 4mm;
+    border-top: 1px solid var(--line-soft);
+  }
+  .chart-legend strong { color: var(--bad); font-weight: 600; }
+
+  /* ==== MAINTENANCE ==== */
+  .pillar-deck {
+    display: flex;
+    flex-direction: column;
+    gap: 6mm;
+  }
+
+  .pillar {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 7mm 8mm;
+    background: var(--bg);
+    display: grid;
+    grid-template-columns: 26mm 1fr;
+    gap: 6mm;
+    align-items: start;
+  }
+
+  .pillar-id {
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    color: var(--ink-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 3mm;
+  }
+  .pillar-id strong {
+    display: block;
+    font-family: "Geist", sans-serif;
+    font-size: 22pt;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-top: 2mm;
+  }
+
+  .pillar h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3mm;
+    letter-spacing: -0.005em;
+  }
+
+  .deliv {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3mm;
+  }
+
+  .deliv li {
+    display: grid;
+    grid-template-columns: 5mm 1fr;
+    gap: 3mm;
+    font-size: 9.5pt;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+
+  .deliv li::before {
+    content: "→";
+    color: var(--brand-magenta);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .deliv li .k {
+    font-family: "Geist Mono", monospace;
+    font-size: 8.5pt;
+    background: var(--bg-3);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--brand-purple);
+    font-weight: 500;
+  }
+
+  .deliv li b { color: var(--ink); font-weight: 600; }
+
+  .commit-box {
+    margin-top: 5mm;
+    padding: 4mm 5mm;
+    background: var(--gradient-soft);
+    border: 1px solid rgba(116,3,206,.2);
+    border-radius: 8px;
+    font-size: 9pt;
+    color: var(--ink-2);
+    display: flex;
+    align-items: flex-start;
+    gap: 4mm;
+  }
+
+  .commit-box .badge {
+    font-family: "Geist Mono", monospace;
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: var(--brand-purple);
+    color: white;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .commit-box .text b { color: var(--brand-purple); }
+
+  .exclusions {
+    margin-top: 7mm;
+    padding: 5mm 6mm;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .exclusions h4 {
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-mute);
+    margin-bottom: 3mm;
+  }
+
+  .exclusions ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4mm;
+    list-style: none;
+  }
+
+  .exclusions li {
+    font-size: 9pt;
+    color: var(--ink-2);
+  }
+
+  .exclusions li b {
+    display: block;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 1mm;
+    font-size: 9.5pt;
+  }
+
+  /* ==== COACH MOCKUP ==== */
+  .mockup-wrap {
+    margin: 6mm 0 8mm;
+    background: linear-gradient(155deg, #1a0c2e 0%, #0d0a14 100%);
+    border-radius: 14px;
+    padding: 8mm 8mm 6mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mockup-wrap::before {
+    content: "";
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 60%; height: 80%;
+    background: radial-gradient(circle, rgba(250,113,171,.28) 0%, transparent 65%);
+    z-index: 0;
+  }
+
+  .mockup-label {
+    position: relative;
+    z-index: 1;
+    font-family: "Geist Mono", monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,.55);
+    margin-bottom: 4mm;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mockup-label::before {
+    content: "";
+    display: inline-block;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #ffbb75;
+    box-shadow: 0 0 10px #ffbb75;
+  }
+
+  .mockup {
+    position: relative;
+    z-index: 1;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 8px 30px -10px rgba(116,3,206,.4);
+  }
+
+  .mockup-bar {
+    height: 22px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 6px;
+  }
+  .mockup-bar .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--line);
+  }
+  .mockup-bar .url {
+    margin-left: 12px;
+    font-family: "Geist Mono", monospace;
+    font-size: 7.5pt;
+    color: var(--ink-mute);
+    background: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    flex: 1;
+    max-width: 180px;
+  }
+
+  .mock-app {
+    display: grid;
+    grid-template-columns: 38mm 1fr;
+    min-height: 75mm;
+  }
+
+  .mock-side {
+    background: var(--bg-2);
+    border-right: 1px solid var(--line);
+    padding: 5mm 4mm;
+  }
+
+  .mock-side .logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 9pt;
+    margin-bottom: 6mm;
+    letter-spacing: -0.01em;
+  }
+  .mock-side .logo .d {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    background: var(--gradient);
+  }
+
+  .mock-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1mm;
+  }
+  .mock-nav li {
+    font-size: 8pt;
+    padding: 4px 6px;
+    border-radius: 4px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mock-nav li.active {
+    background: var(--gradient);
+    color: white;
+    font-weight: 500;
+  }
+  .mock-nav li .ico {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+
+  .mock-main { padding: 5mm 6mm; }
+
+  .mock-main .h {
+    font-size: 13pt;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1mm;
+    letter-spacing: -0.015em;
+  }
+  .mock-main .sub {
+    font-size: 8pt;
+    color: var(--ink-mute);
+    margin-bottom: 4mm;
+  }
+
+  .mock-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3mm;
+    margin-bottom: 5mm;
+  }
+  .mock-stat {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3mm;
+  }
+  .mock-stat .l {
+    font-family: "Geist Mono", monospace;
+    font-size: 6.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--ink-mute);
+  }
+  .mock-stat .v {
+    font-size: 14pt;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-top: 1mm;
+  }
+  .mock-stat .v small { color: var(--good); font-size: 8pt; font-weight: 500; margin-left: 4px; }
+
+  .mock-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+  }
+  .mock-table th {
+    text-align: left;
+    font-family: "Geist Mono", monospace;
+    font-size: 6.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--ink-mute);
+    font-weight: 500;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .mock-table td {
+    padding: 5px 6px;
+    border-bottom: 1px solid var(--line-soft);
+    color: var(--ink-2);
+  }
+  .mock-table tr:last-child td { border-bottom: 0; }
+
+  .mock-table .name {
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mock-table .name .av {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gradient);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+
+  .mock-table .score {
+    font-family: "Geist Mono", monospace;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .mock-table .score.good { color: var(--good); }
+  .mock-table .score.warn { color: var(--warn); }
+
+  .mock-table .spark {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 12px;
+  }
+  .mock-table .spark span {
+    width: 3px;
+    background: var(--brand-magenta);
+    border-radius: 1px;
+    opacity: 0.7;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #0d0a14;
+    color: #e7e3ee;
+    border-radius: 8px;
+    padding: 5mm 6mm;
+    font-family: "Geist Mono", monospace;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    margin: 5mm 0 0;
+    overflow-x: auto;
+    border: 1px solid #2a2535;
+  }
+
+  .code-block .label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3mm;
+    padding-bottom: 3mm;
+    border-bottom: 1px solid #2a2535;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,.4);
+  }
+  .code-block .label .file { color: #fa71ab; font-weight: 500; }
+
+  .code-block .kw { color: #fa71ab; }
+  .code-block .ty { color: #ffbb75; }
+  .code-block .id { color: #bc30c4; }
+  .code-block .cm { color: #5a5366; font-style: italic; }
+  .code-block .st { color: #18a957; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+    margin-bottom: 6mm;
+  }
+  .feat {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 5mm 6mm;
+    background: var(--bg);
+  }
+  .feat .num {
+    font-family: "Geist Mono", monospace;
+    font-size: 8pt;
+    color: var(--brand-magenta);
+    letter-spacing: 0.10em;
+    font-weight: 600;
+    margin-bottom: 2mm;
+  }
+  .feat h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2mm;
+    letter-spacing: -0.005em;
+  }
+  .feat p { font-size: 9pt; color: var(--ink-3); line-height: 1.45; }
+  .feat .specs {
+    margin-top: 3mm;
+    padding-top: 3mm;
+    border-top: 1px dashed var(--line);
+    font-family: "Geist Mono", monospace;
+    font-size: 7.5pt;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+  }
+  .feat .specs b { color: var(--brand-purple); font-weight: 500; }
+
+  /* SYNTHESIS */
+  .recap {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8mm;
+    font-size: 9.5pt;
+  }
+
+  .recap thead th {
+    text-align: left;
+    font-family: "Geist Mono", monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    font-weight: 600;
+    padding: 4mm 4mm 4mm 0;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .recap tbody td {
+    padding: 5mm 4mm 5mm 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  .recap .label-cell {
+    width: 50mm;
+  }
+
+  .recap .label-cell strong {
+    display: block;
+    font-size: 12pt;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .recap .label-cell small {
+    display: block;
+    font-size: 8pt;
+    color: var(--ink-mute);
+    margin-top: 1mm;
+    font-family: "Geist Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .recap .desc-cell { color: var(--ink-3); font-size: 9pt; line-height: 1.5; }
+
+  .recap .price-cell {
+    width: 36mm;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .recap .price-cell .price {
+    font-size: 16pt;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.02em;
+  }
+  .recap .price-cell small {
+    display: block;
+    font-family: "Geist Mono", monospace;
+    font-size: 7pt;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    margin-top: 1mm;
+  }
+
+  .next-steps {
+    counter-reset: step;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4mm;
+    margin-bottom: 8mm;
+  }
+
+  .next-steps li {
+    display: grid;
+    grid-template-columns: 14mm 1fr;
+    gap: 4mm;
+    padding: 4mm 5mm;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    counter-increment: step;
+  }
+
+  .next-steps li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: "Geist Mono", monospace;
+    font-size: 18pt;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+  }
+
+  .next-steps h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 1mm;
+  }
+
+  .next-steps p {
+    color: var(--ink-3);
+    font-size: 9pt;
+    line-height: 1.45;
+  }
+
+  .closing {
+    margin-top: auto;
+    padding-top: 6mm;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6mm;
+  }
+
+  .closing dt {
+    font-family: "Geist Mono", monospace;
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-mute);
+    margin-bottom: 1mm;
+  }
+  .closing dd {
+    font-size: 10pt;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ==== PRINT ==== */
+  @page { size: A4 portrait; margin: 0; }
+
+  @media print {
+    html, body { background: white; }
+    .page {
+      box-shadow: none !important;
+      margin: 0 !important;
+      page-break-after: always;
+      break-after: page;
+      width: 210mm;
+      min-height: 297mm;
+    }
+    .page:last-of-type { page-break-after: auto; break-after: auto; }
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- 01 — COVER                                                    -->
+<!-- ============================================================ -->
+<article class="page cover">
+  <div class="cover-bg"></div>
+  <div class="cover-grid-noise"></div>
+
+  <div class="cover-content">
+    <div class="cover-top">
+      <div class="cover-brand">
+        <span class="dot"></span>
+        <span>SforSales × rvvdev</span>
+      </div>
+      <div class="cover-meta-top">Ref. <strong>SHN-2026 / 001</strong> &nbsp;·&nbsp; 30 avril 2026</div>
+    </div>
+
+    <div class="cover-body">
+      <span class="cover-tag"><span class="pulse"></span>Proposition commerciale · Phase suivante</span>
+      <h1 class="cover-title">
+        Stabiliser, mesurer,<br>
+        <span class="accent">faire grandir</span> Shannen.
+      </h1>
+      <p class="cover-sub">
+        Plan de maintenance de la plateforme d&apos;entra&icirc;nement commercial,
+        et lancement d&apos;un Espace Coach pour piloter la progression des &eacute;l&egrave;ves
+        depuis une seule interface.
+      </p>
+    </div>
+
+    <dl class="cover-foot">
+      <div>
+        <dt>Pour</dt>
+        <dd>Shannen<small>SforSales</small></dd>
+      </div>
+      <div>
+        <dt>De</dt>
+        <dd>rvvdev<small>—&nbsp;contact &agrave; compl&eacute;ter</small></dd>
+      </div>
+      <div>
+        <dt>Validit&eacute;</dt>
+        <dd>30 jours<small>jusqu&apos;au 30/05/2026</small></dd>
+      </div>
+      <div>
+        <dt>Format</dt>
+        <dd>2 volets<small>Maintenance + Phase 2</small></dd>
+      </div>
+    </dl>
+  </div>
+</article>
+
+<!-- ============================================================ -->
+<!-- 02 — DIAGNOSTIC                                               -->
+<!-- ============================================================ -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark">
+      <span class="brand-dot"></span>
+      <span>Shannen</span>
+    </div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Diagnostic</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 01 — &Eacute;tat des lieux</span>
+  <h2 class="section">Trois faits objectifs<br>tir&eacute;s du code en prod.</h2>
+  <p class="section-lede">
+    Pas d&apos;analyse subjective : ces constats viennent de la base de donn&eacute;es,
+    de l&apos;historique git et des m&eacute;triques d&apos;usage ElevenLabs.
+    Ils orientent la totalit&eacute; des recommandations qui suivent.
+  </p>
+
+  <div class="diag-grid">
+
+    <!-- Diag #1 — featured with chart -->
+    <div class="diag-card featured">
+      <div class="diag-card-head">
+        <div>
+          <div class="diag-fig"><span class="gradient-text">500&#8239;000</span> <span class="unit">cr&eacute;dits / 12 j</span></div>
+          <h3>Compte ElevenLabs vid&eacute; en moins de deux semaines</h3>
+        </div>
+        <span class="diag-tag urgent">Urgent</span>
+      </div>
+      <p>
+        Aucun rate-limiting, aucun quota par utilisateur. Un seul &eacute;l&egrave;ve motiv&eacute;
+        peut consommer la totalit&eacute; du forfait mensuel en quelques jours. Le co&ucirc;t d&apos;usage
+        cro&icirc;t lin&eacute;airement avec les inscriptions, sans aucune visibilit&eacute; ni alerte.
+      </p>
+
+      <div class="mini-chart">
+        <div class="day" style="height:14%"></div>
+        <div class="day" style="height:22%"></div>
+        <div class="day" style="height:34%"></div>
+        <div class="day" style="height:28%"></div>
+        <div class="day" style="height:46%"></div>
+        <div class="day" style="height:52%"></div>
+        <div class="day" style="height:58%"></div>
+        <div class="day" style="height:71%"></div>
+        <div class="day" style="height:65%"></div>
+        <div class="day" style="height:82%"></div>
+        <div class="day" style="height:88%"></div>
+        <div class="day" style="height:100%"></div>
+      </div>
+      <div class="chart-axis">
+        <span>J+1</span><span>J+3</span><span>J+6</span><span>J+9</span><span>J+12 — quota &eacute;puis&eacute;</span>
+      </div>
+      <div class="chart-legend">
+        <span>Plan mensuel <strong>2&#8239;000&#8239;000 cr&eacute;dits</strong> — atteint en <strong>12 jours</strong>.</span>
+      </div>
+    </div>
+
+    <!-- Diag #2 -->
+    <div class="diag-card">
+      <div class="diag-card-head">
+        <span class="diag-tag med">Risque imminent</span>
+      </div>
+      <div class="diag-fig">&times;3 <span class="unit">/ 2 mois</span></div>
+      <h3>Fixes successifs li&eacute;s au mod&egrave;le Claude</h3>
+      <p>
+        L&apos;historique git montre trois correctifs cons&eacute;cutifs sur le nom ou la version
+        du mod&egrave;le. La prochaine d&eacute;pr&eacute;ciation Anthropic interrompra l&apos;application
+        sans veille active.
+      </p>
+    </div>
+
+    <!-- Diag #3 -->
+    <div class="diag-card">
+      <div class="diag-card-head">
+        <span class="diag-tag med">Bug fonctionnel</span>
+      </div>
+      <div class="diag-fig">0% <span class="unit">de fiabilit&eacute;</span></div>
+      <h3>Transcripts sauvegard&eacute;s par chance</h3>
+      <p>
+        L&apos;application stocke un identifiant erron&eacute; en base. L&apos;API ElevenLabs renvoie
+        syst&eacute;matiquement une erreur, seul un fallback c&ocirc;t&eacute; navigateur sauve la donn&eacute;e.
+        Si l&apos;onglet se ferme trop t&ocirc;t, la simulation est perdue.
+      </p>
+    </div>
+
+  </div>
+
+  <span class="page-mark">Diagnostic</span>
+  <span class="page-num"><strong>02</strong> / 05</span>
+</article>
+
+<!-- ============================================================ -->
+<!-- 03 — VOLET 1 · MAINTENANCE                                    -->
+<!-- ============================================================ -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark">
+      <span class="brand-dot"></span>
+      <span>Shannen</span>
+    </div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Volet 1 — Maintenance</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 02 — Forfait mensuel</span>
+  <h2 class="section">Maintenance op&eacute;rationnelle.</h2>
+  <p class="section-lede">
+    Trois piliers, des engagements chiffr&eacute;s, aucun SLA bidon.
+    Tout est livrable et v&eacute;rifiable.
+  </p>
+
+  <div class="pillar-deck">
+
+    <div class="pillar">
+      <div>
+        <div class="pillar-id">Pilier <strong>A</strong></div>
+      </div>
+      <div>
+        <h3>Veille IA &amp; d&eacute;pendances</h3>
+        <ul class="deliv">
+          <li><span><b>Surveillance hebdomadaire</b> de 4 sources : changelog Anthropic, blog ElevenLabs, releases GitHub Next.js, advisories Supabase.</span></li>
+          <li><span><b>SLA migration mod&egrave;le</b> : nouveau mod&egrave;le stable en prod sous <span class="k">14 jours</span> apr&egrave;s release ou avant la date de d&eacute;pr&eacute;ciation, le premier des deux.</span></li>
+          <li><span><b>Trimestriel</b> : audit <span class="k">npm audit</span> + mont&eacute;e Next / Supabase / Radix sur branche <span class="k">mission1_neocell</span>, recette en preview Vercel avant <span class="k">main</span>.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pillar">
+      <div>
+        <div class="pillar-id">Pilier <strong>B</strong></div>
+      </div>
+      <div>
+        <h3>Bug-fix garanti</h3>
+        <ul class="deliv">
+          <li><span><b>SLA temps de r&eacute;ponse</b> : <span class="k">&lt;&nbsp;24&nbsp;h ouvr&eacute;es</span> non-bloquant, <span class="k">&lt;&nbsp;4&nbsp;h ouvr&eacute;es</span> critique.</span></li>
+          <li><span><b>D&eacute;finition critique</b> : application inaccessible, perte de donn&eacute;es, paiement bloqu&eacute;.</span></li>
+          <li><span><b>Communication async</b> : email + canal partag&eacute; (Slack / Notion). Pas d&apos;astreinte t&eacute;l&eacute;phonique.</span></li>
+          <li><span><b>1 release de patches / mois</b> minimum, d&eacute;ploy&eacute;e en preview avant prod.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pillar">
+      <div>
+        <div class="pillar-id">Pilier <strong>C</strong></div>
+      </div>
+      <div>
+        <h3>Optimisation cr&eacute;dits ElevenLabs</h3>
+        <ul class="deliv">
+          <li><span><b>Plafonds par utilisateur</b> : ajout colonne <span class="k">users.monthly_credit_limit</span> (d&eacute;faut 50&#8239;000), v&eacute;rification au d&eacute;marrage de simulation, message UX d&eacute;di&eacute; si d&eacute;passement.</span></li>
+          <li><span><b>Ajustements TTS</b> : <span class="k">stability 0.5 &rarr; 0.3</span>, <span class="k">similarity_boost 0.8 &rarr; 0.6</span>. Audit chiffr&eacute; : &minus;10&#8239;000 cr&eacute;dits / mois sans baisse de qualit&eacute; perceptible.</span></li>
+          <li><span><b>Rapport mensuel</b> envoy&eacute; le 1er du mois : conso par user, top&nbsp;5 consommateurs, projection 30 jours, alerte si &gt;&nbsp;80&#8239;% du quota.</span></li>
+        </ul>
+
+        <div class="commit-box">
+          <span class="badge">Engagement</span>
+          <span class="text">Si la consommation moyenne par utilisateur ne baisse pas d&apos;au moins <b>X&#8239;%</b> au bout de 6 mois, <b>un mois de maintenance offert</b>.</span>
+        </div>
+
+        <div class="code-block">
+          <div class="label"><span>Exemple — migration ajout&eacute;e d&egrave;s J+7</span><span class="file">supabase/migrations/limit_credits.sql</span></div>
+<span class="kw">ALTER TABLE</span> <span class="ty">users</span>
+  <span class="kw">ADD COLUMN</span> <span class="id">monthly_credit_limit</span> <span class="ty">integer</span> <span class="kw">DEFAULT</span> <span class="st">50000</span>;
+
+<span class="cm">-- Hook au d&eacute;marrage de simulation</span>
+<span class="kw">SELECT</span> <span class="kw">SUM</span>(<span class="id">duration_seconds</span>)
+<span class="kw">FROM</span> <span class="ty">conversations</span>
+<span class="kw">WHERE</span> <span class="id">user_id</span> = $1
+  <span class="kw">AND</span> <span class="id">created_at</span> &gt;= <span class="id">date_trunc</span>(<span class="st">'month'</span>, <span class="kw">NOW</span>());
+<span class="cm">-- &rarr; bloquer si total &gt; monthly_credit_limit</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="exclusions">
+    <h4>Hors-p&eacute;rim&egrave;tre — explicitement exclu du forfait</h4>
+    <ul>
+      <li><b>Nouvelles fonctionnalit&eacute;s</b>Trait&eacute;es en avenant ou bank d&apos;heures.</li>
+      <li><b>Support utilisateur final</b>Pris en charge par l&apos;&eacute;quipe Shannen.</li>
+      <li><b>Astreinte 24/7</b>L&apos;application n&apos;est pas une infrastructure critique.</li>
+    </ul>
+  </section>
+
+  <span class="page-mark">Volet 1 — Maintenance</span>
+  <span class="page-num"><strong>03</strong> / 05</span>
+</article>
+
+<!-- ============================================================ -->
+<!-- 04 — VOLET 2 · ESPACE COACH avec MOCKUP                       -->
+<!-- ============================================================ -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark">
+      <span class="brand-dot"></span>
+      <span>Shannen</span>
+    </div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Volet 2 — Espace Coach</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 03 — Phase 2</span>
+  <h2 class="section">L&apos;Espace Coach,<br>vu de l&apos;int&eacute;rieur.</h2>
+  <p class="section-lede">
+    Aper&ccedil;u du tableau de bord livr&eacute; en deux &agrave; trois semaines.
+    Toutes les donn&eacute;es affich&eacute;es ici existent <em>d&eacute;j&agrave;</em> en base — il s&apos;agit d&apos;un module de lecture
+    sur les tables <span class="mono" style="color:var(--brand-purple);font-weight:500;">feedback</span> et
+    <span class="mono" style="color:var(--brand-purple);font-weight:500;">conversations</span>, pas d&apos;une refonte.
+  </p>
+
+  <!-- MOCKUP -->
+  <div class="mockup-wrap">
+    <div class="mockup-label">Mockup &middot; /coach/eleves</div>
+
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">shannen.app /coach/eleves</span>
+      </div>
+
+      <div class="mock-app">
+        <aside class="mock-side">
+          <div class="logo"><span class="d"></span>SforSales</div>
+          <ul class="mock-nav">
+            <li><span class="ico"></span>Dashboard</li>
+            <li class="active"><span class="ico"></span>&Eacute;l&egrave;ves</li>
+            <li><span class="ico"></span>Missions</li>
+            <li><span class="ico"></span>Personas</li>
+            <li><span class="ico"></span>Rapports</li>
+            <li style="margin-top:auto;padding-top:6mm;color:var(--ink-mute);font-size:7.5pt;">12 &eacute;l&egrave;ves actifs</li>
+          </ul>
+        </aside>
+
+        <main class="mock-main">
+          <div class="h">Mes &eacute;l&egrave;ves</div>
+          <div class="sub">12 actifs &middot; 38 simulations cette semaine</div>
+
+          <div class="mock-stats">
+            <div class="mock-stat">
+              <div class="l">Score moyen</div>
+              <div class="v">74<small>+6</small></div>
+            </div>
+            <div class="mock-stat">
+              <div class="l">Simus / 7&nbsp;j</div>
+              <div class="v">38<small>+12</small></div>
+            </div>
+            <div class="mock-stat">
+              <div class="l">Dur&eacute;e moy.</div>
+              <div class="v">14&apos;</div>
+            </div>
+            <div class="mock-stat">
+              <div class="l">Missions actives</div>
+              <div class="v">5</div>
+            </div>
+          </div>
+
+          <table class="mock-table">
+            <thead>
+              <tr>
+                <th>&Eacute;l&egrave;ve</th>
+                <th>Derni&egrave;re</th>
+                <th>Total</th>
+                <th>Score 30j</th>
+                <th>Tendance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="name"><span class="av">L</span>Lucas Beaumont</span></td>
+                <td>il y a 2&nbsp;h</td>
+                <td>24</td>
+                <td><span class="score good">82</span></td>
+                <td><span class="spark"><span style="height:30%"></span><span style="height:45%"></span><span style="height:55%"></span><span style="height:60%"></span><span style="height:75%"></span><span style="height:80%"></span><span style="height:88%"></span><span style="height:100%"></span></span></td>
+              </tr>
+              <tr>
+                <td><span class="name"><span class="av">M</span>Marie Cachat</span></td>
+                <td>hier</td>
+                <td>18</td>
+                <td><span class="score">71</span></td>
+                <td><span class="spark"><span style="height:50%"></span><span style="height:55%"></span><span style="height:48%"></span><span style="height:62%"></span><span style="height:68%"></span><span style="height:65%"></span><span style="height:70%"></span><span style="height:78%"></span></span></td>
+              </tr>
+              <tr>
+                <td><span class="name"><span class="av">A</span>Alex Diallo</span></td>
+                <td>3&nbsp;j</td>
+                <td>9</td>
+                <td><span class="score warn">58</span></td>
+                <td><span class="spark"><span style="height:65%"></span><span style="height:55%"></span><span style="height:50%"></span><span style="height:48%"></span><span style="height:45%"></span><span style="height:40%"></span><span style="height:42%"></span><span style="height:38%"></span></span></td>
+              </tr>
+              <tr>
+                <td><span class="name"><span class="av">S</span>Sarah K.</span></td>
+                <td>il y a 1&nbsp;h</td>
+                <td>31</td>
+                <td><span class="score good">88</span></td>
+                <td><span class="spark"><span style="height:60%"></span><span style="height:62%"></span><span style="height:70%"></span><span style="height:75%"></span><span style="height:78%"></span><span style="height:85%"></span><span style="height:90%"></span><span style="height:96%"></span></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 features in 2x2 -->
+  <div class="feature-grid">
+    <div class="feat">
+      <div class="num">01 — Vue &eacute;l&egrave;ve</div>
+      <h4>Tout l&apos;historique en un seul &eacute;cran</h4>
+      <p>Timeline des simulations avec acc&egrave;s direct au transcript et au feedback IA. Heatmap des points forts et axes d&apos;am&eacute;lioration r&eacute;currents (calcul&eacute;e sur les arrays existants).</p>
+      <div class="specs">Route <b>/coach/eleves/[id]</b> &middot; agr&eacute;gat sur 30/90 jours</div>
+    </div>
+
+    <div class="feat">
+      <div class="num">02 — Notes priv&eacute;es</div>
+      <h4>Annotations de coaching par &eacute;l&egrave;ve</h4>
+      <p>&Eacute;diteur Markdown, historique horodat&eacute;, recherche full-text. Visible uniquement par le coach. Une seule nouvelle table, RLS isol&eacute;e.</p>
+      <div class="specs">Table <b>coach_notes</b> &middot; <b>coach_id, student_id, content, created_at</b></div>
+    </div>
+
+    <div class="feat">
+      <div class="num">03 — Missions</div>
+      <h4>Prescription d&apos;exercices simples</h4>
+      <p>Le coach assigne &laquo;&nbsp;3 cold calls avec Pierre Moreau d&apos;ici dimanche&nbsp;&raquo;. Statut auto Pending / In&nbsp;progress / Done. Notification email &agrave; la compl&eacute;tion.</p>
+      <div class="specs">Table <b>missions</b> &middot; statut calcul&eacute; par requ&ecirc;te</div>
+    </div>
+
+    <div class="feat">
+      <div class="num">04 — Cohorte</div>
+      <h4>Filtres &amp; comparaisons</h4>
+      <p>Filtres par p&eacute;riode, type d&apos;appel, persona. Identification automatique des &eacute;l&egrave;ves qui d&eacute;crochent (3 simus en moins sur 14&nbsp;j vs moyenne).</p>
+      <div class="specs">Cron quotidien &middot; alerte coach par email</div>
+    </div>
+  </div>
+
+  <span class="page-mark">Volet 2 — Espace Coach</span>
+  <span class="page-num"><strong>04</strong> / 05</span>
+</article>
+
+<!-- ============================================================ -->
+<!-- 05 — SYNTH&Egrave;SE                                                 -->
+<!-- ============================================================ -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark">
+      <span class="brand-dot"></span>
+      <span>Shannen</span>
+    </div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Synth&egrave;se &amp; pricing</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 04 — D&eacute;cision</span>
+  <h2 class="section">Synth&egrave;se &amp; prochaines &eacute;tapes.</h2>
+  <p class="section-lede">
+    Les deux volets sont ind&eacute;pendants mais con&ccedil;us pour fonctionner ensemble.
+    Les montants sont &agrave; finaliser apr&egrave;s le cadrage commercial.
+  </p>
+
+  <table class="recap">
+    <thead>
+      <tr>
+        <th>Volet</th>
+        <th>P&eacute;rim&egrave;tre</th>
+        <th style="text-align:right;">Montant</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="label-cell">
+          <strong>Maintenance</strong>
+          <small>Forfait mensuel · 12 mois</small>
+        </td>
+        <td class="desc-cell">
+          Veille IA &amp; d&eacute;pendances avec SLA migration sous 14 jours.
+          Bug-fix garanti 24&nbsp;h / 4&nbsp;h.
+          Optimisation cr&eacute;dits ElevenLabs avec engagement chiffr&eacute; et rapport mensuel.
+        </td>
+        <td class="price-cell">
+          <span class="price">__&nbsp;€</span>
+          <small>HT / mois</small>
+        </td>
+      </tr>
+      <tr>
+        <td class="label-cell">
+          <strong>Espace Coach</strong>
+          <small>Forfait fixe · 2-3 semaines</small>
+        </td>
+        <td class="desc-cell">
+          Tableau de bord coach + vue &eacute;l&egrave;ve d&eacute;taill&eacute;e + notes priv&eacute;es + missions + filtres cohorte.
+          Migration DB minimaliste (1 colonne, 2 tables). Recette en preview avant prod.
+        </td>
+        <td class="price-cell">
+          <span class="price">__&nbsp;€</span>
+          <small>HT — fixe</small>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ol class="next-steps">
+    <li>
+      <div>
+        <h4>Validation du p&eacute;rim&egrave;tre</h4>
+        <p>Cadrage final : engagement chiffr&eacute; sur les cr&eacute;dits ElevenLabs (X%), arbitrage des exclusions, calage du planning Phase 2.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <h4>Signature</h4>
+        <p>Contrat de maintenance &agrave; effet imm&eacute;diat. Bon de commande Phase 2 &eacute;mis en parall&egrave;le pour planifier la livraison de l&apos;Espace Coach.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <h4>D&eacute;marrage Phase 2</h4>
+        <p>Sprint sur branche d&eacute;di&eacute;e, recette en preview Vercel sur <span class="mono" style="color:var(--brand-purple);">mission1_neocell</span>, mise en production progressive sans interruption pour les utilisateurs existants.</p>
+      </div>
+    </li>
+  </ol>
+
+  <dl class="closing">
+    <div>
+      <dt>&Eacute;metteur</dt>
+      <dd>rvvdev<br><span style="color:var(--ink-mute);font-size:8.5pt;font-weight:400;">contact &amp; coordonn&eacute;es &mdash; &eacute;ditable</span></dd>
+    </div>
+    <div>
+      <dt>Validit&eacute; de l&apos;offre</dt>
+      <dd>30 jours &mdash; jusqu&apos;au 30 mai 2026</dd>
+    </div>
+    <div>
+      <dt>R&eacute;f&eacute;rence</dt>
+      <dd>SHN-2026 / 001</dd>
+    </div>
+  </dl>
+
+  <span class="page-mark">Synth&egrave;se</span>
+  <span class="page-num"><strong>05</strong> / 05</span>
+</article>
+
+</body>
+</html>

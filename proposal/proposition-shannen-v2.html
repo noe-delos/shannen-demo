@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Proposition Shannen · Phase 2 — Axes d'évolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-orange: #ffbb75;
+    --brand-pink:   #fa71ab;
+    --brand-magenta:#bc30c4;
+    --brand-purple: #7403ce;
+    --brand-deep:   #3b026d;
+    --ink:          #0d0a14;
+    --ink-2:        #2a2535;
+    --ink-3:        #5a5366;
+    --ink-mute:     #8b8497;
+    --line:         #ebe7ef;
+    --line-soft:    #f3f0f5;
+    --bg:           #ffffff;
+    --bg-2:         #faf9fc;
+    --bg-3:         #f4f2f7;
+    --good:         #18a957;
+    --warn:         #d97706;
+    --bad:          #dc2626;
+    --gradient: linear-gradient(135deg, #ffbb75 0%, #fa71ab 30%, #bc30c4 60%, #7403ce 85%, #3b026d 100%);
+    --gradient-soft: linear-gradient(135deg, rgba(255,187,117,.10) 0%, rgba(250,113,171,.08) 30%, rgba(188,48,196,.08) 60%, rgba(116,3,206,.10) 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #e8e4ee;
+    color: var(--ink);
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10pt; line-height: 1.55;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga", "calt", "ss01", "ss02";
+  }
+  ::selection { background: var(--brand-magenta); color: white; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; font-feature-settings: "calt", "ss01"; }
+
+  .page {
+    width: 210mm; height: 297mm;
+    margin: 14mm auto;
+    background: var(--bg);
+    padding: 15mm 16mm 14mm;
+    display: flex; flex-direction: column; position: relative;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 24px 50px -22px rgba(60,30,90,.18);
+    overflow: hidden;
+  }
+  .page-num { position: absolute; bottom: 12mm; right: 18mm; font-family: "Geist Mono", monospace; font-size: 8pt; color: var(--ink-mute); letter-spacing: 0.06em; }
+  .page-num strong { color: var(--ink); font-weight: 600; }
+  .page-mark { position: absolute; bottom: 12mm; left: 18mm; font-family: "Geist Mono", monospace; font-size: 8pt; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.12em; }
+  .page-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6mm; margin-bottom: 8mm; border-bottom: 1px solid var(--line); }
+  .brand-mark { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 11pt; letter-spacing: -0.01em; }
+  .brand-dot { width: 22px; height: 22px; border-radius: 6px; background: var(--gradient); box-shadow: 0 1px 4px rgba(116,3,206,.3); }
+  .doc-meta { font-family: "Geist Mono", monospace; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.10em; color: var(--ink-mute); }
+  .doc-meta strong { color: var(--ink); font-weight: 600; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: "Geist Mono", monospace; font-size: 8pt; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-purple); font-weight: 600; margin-bottom: 4mm; }
+  .eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--gradient); border-radius: 2px; }
+  h2.section { font-size: 26pt; font-weight: 800; line-height: 1.05; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 3mm; max-width: 150mm; }
+  .section-lede { font-size: 10.5pt; line-height: 1.45; color: var(--ink-3); max-width: 140mm; margin-bottom: 7mm; }
+
+  /* COVER */
+  .page.cover { background: var(--ink); color: white; padding: 22mm 22mm 18mm; }
+  .cover-bg { position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 110% -10%, rgba(255,187,117,.55) 0%, transparent 35%),
+      radial-gradient(circle at -10% 30%, rgba(250,113,171,.45) 0%, transparent 35%),
+      radial-gradient(circle at 60% 110%, rgba(116,3,206,.65) 0%, transparent 50%),
+      linear-gradient(155deg, #1a0c2e 0%, #0d0a14 100%);
+    z-index: 0;
+  }
+  .cover-grid-noise { position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size: 48px 48px; z-index: 1;
+  }
+  .cover-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
+  .cover-top { display: flex; justify-content: space-between; align-items: center; }
+  .cover-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 12pt; }
+  .cover-brand .dot { width: 28px; height: 28px; border-radius: 8px; background: var(--gradient); box-shadow: 0 6px 24px rgba(250,113,171,.5); }
+  .cover-meta-top { font-family: "Geist Mono", monospace; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,.6); }
+  .cover-meta-top strong { color: white; font-weight: 600; }
+  .cover-body { margin: auto 0; }
+  .cover-tag { display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; font-family: "Geist Mono", monospace; font-size: 8.5pt; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,.85); margin-bottom: 14mm; }
+  .cover-tag .pulse { width: 6px; height: 6px; border-radius: 50%; background: #ffbb75; box-shadow: 0 0 10px #ffbb75; }
+  .cover-title { font-size: 60pt; line-height: 0.98; letter-spacing: -0.035em; font-weight: 800; color: white; margin-bottom: 8mm; }
+  .cover-title .accent { background: linear-gradient(120deg, #ffbb75, #fa71ab 50%, #bc30c4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .cover-sub { font-size: 14pt; color: rgba(255,255,255,.75); line-height: 1.45; max-width: 130mm; font-weight: 300; }
+  .cover-foot { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10mm; padding-top: 10mm; border-top: 1px solid rgba(255,255,255,.12); }
+  .cover-foot dt { font-family: "Geist Mono", monospace; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,.45); margin-bottom: 3mm; }
+  .cover-foot dd { font-size: 11pt; font-weight: 500; color: white; }
+  .cover-foot dd small { display: block; font-weight: 400; color: rgba(255,255,255,.6); font-size: 9pt; margin-top: 1mm; }
+
+  /* TOC */
+  .toc { display: flex; flex-direction: column; gap: 0; margin-top: 4mm; }
+  .toc-item { display: grid; grid-template-columns: 16mm 1fr 12mm; align-items: baseline; gap: 4mm; padding: 3.5mm 0; border-bottom: 1px dashed var(--line); font-size: 10.5pt; }
+  .toc-item:last-child { border-bottom: 0; }
+  .toc-num { font-family: "Geist Mono", monospace; font-size: 9pt; color: var(--brand-purple); font-weight: 600; letter-spacing: 0.08em; }
+  .toc-title { color: var(--ink); font-weight: 600; }
+  .toc-title small { display: block; font-weight: 400; color: var(--ink-mute); font-size: 9pt; margin-top: 1mm; }
+  .toc-page { font-family: "Geist Mono", monospace; text-align: right; color: var(--ink-2); font-weight: 500; }
+
+  /* Bilan cards */
+  .bilan-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5mm; margin-bottom: 7mm; }
+  .bilan-card { border: 1px solid var(--line); border-radius: 12px; padding: 6mm 6mm 7mm; background: var(--bg); }
+  .bilan-card .icon { width: 28px; height: 28px; border-radius: 8px; background: var(--gradient-soft); border: 1px solid rgba(116,3,206,.18); display: flex; align-items: center; justify-content: center; color: var(--brand-purple); font-weight: 700; font-size: 12pt; margin-bottom: 4mm; }
+  .bilan-card h3 { font-size: 11.5pt; font-weight: 600; color: var(--ink); margin-bottom: 2mm; letter-spacing: -0.005em; }
+  .bilan-card p { font-size: 9pt; color: var(--ink-3); line-height: 1.5; }
+  .quote-block { margin-top: 4mm; padding: 6mm 7mm; background: var(--bg-2); border-left: 3px solid var(--brand-purple); border-radius: 0 8px 8px 0; font-size: 10.5pt; color: var(--ink-2); line-height: 1.55; }
+  .quote-block strong { color: var(--ink); font-weight: 600; }
+
+  /* Pillar cards (axes maintenance) */
+  .pillar-deck { display: flex; flex-direction: column; gap: 5mm; }
+  .pillar { border: 1px solid var(--line); border-radius: 12px; padding: 6mm 7mm; background: var(--bg); display: grid; grid-template-columns: 24mm 1fr; gap: 6mm; align-items: start; }
+  .pillar-id { font-family: "Geist Mono", monospace; font-size: 8pt; color: var(--ink-mute); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2mm; }
+  .pillar-id strong { display: block; font-family: "Geist", sans-serif; font-size: 22pt; font-weight: 800; color: var(--ink); line-height: 1; letter-spacing: -0.02em; margin-top: 2mm; }
+  .pillar h3 { font-size: 13pt; font-weight: 600; color: var(--ink); margin-bottom: 3mm; letter-spacing: -0.005em; }
+  .deliv { list-style: none; display: flex; flex-direction: column; gap: 2.5mm; }
+  .deliv li { display: grid; grid-template-columns: 5mm 1fr; gap: 3mm; font-size: 9.5pt; color: var(--ink-2); line-height: 1.45; }
+  .deliv li::before { content: "→"; color: var(--brand-magenta); font-weight: 600; line-height: 1.4; }
+  .deliv li b { color: var(--ink); font-weight: 600; }
+
+  /* Mockup */
+  .mockup-wrap { margin: 4mm 0 7mm; background: linear-gradient(155deg, #1a0c2e 0%, #0d0a14 100%); border-radius: 14px; padding: 7mm 7mm 6mm; position: relative; overflow: hidden; }
+  .mockup-wrap::before { content: ""; position: absolute; top: -40%; right: -10%; width: 60%; height: 80%; background: radial-gradient(circle, rgba(250,113,171,.28) 0%, transparent 65%); z-index: 0; }
+  .mockup-label { position: relative; z-index: 1; font-family: "Geist Mono", monospace; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,.55); margin-bottom: 4mm; display: flex; align-items: center; gap: 8px; }
+  .mockup-label::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ffbb75; box-shadow: 0 0 10px #ffbb75; }
+  .mockup { position: relative; z-index: 1; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 8px 30px -10px rgba(116,3,206,.4); }
+  .mockup-bar { height: 22px; background: var(--bg-2); border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+  .mockup-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .mockup-bar .url { margin-left: 12px; font-family: "Geist Mono", monospace; font-size: 7.5pt; color: var(--ink-mute); background: white; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--line); flex: 1; max-width: 220px; }
+  .mock-app { display: grid; grid-template-columns: 36mm 1fr; min-height: 92mm; }
+  .mock-side { background: var(--bg-2); border-right: 1px solid var(--line); padding: 4mm 4mm; }
+  .mock-side .logo { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 9pt; margin-bottom: 5mm; letter-spacing: -0.01em; }
+  .mock-side .logo .d { width: 14px; height: 14px; border-radius: 4px; background: var(--gradient); }
+  .mock-nav { list-style: none; display: flex; flex-direction: column; gap: 1mm; }
+  .mock-nav li { font-size: 7.8pt; padding: 3.5px 6px; border-radius: 4px; color: var(--ink-3); display: flex; align-items: center; gap: 5px; }
+  .mock-nav li.active { background: var(--gradient); color: white; font-weight: 500; }
+  .mock-nav li .ico { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+  .mock-foot-side { margin-top: 6mm; padding-top: 4mm; border-top: 1px dashed var(--line); font-family: "Geist Mono", monospace; font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-mute); }
+  .mock-foot-side b { color: var(--ink); font-weight: 600; }
+  .mock-main { padding: 5mm 6mm; }
+  .mock-main .h { font-size: 13pt; font-weight: 700; color: var(--ink); margin-bottom: 1mm; letter-spacing: -0.015em; display: flex; justify-content: space-between; align-items: baseline; }
+  .mock-main .h .pill { font-family: "Geist Mono", monospace; font-size: 7pt; background: var(--bg-3); color: var(--brand-purple); padding: 2px 7px; border-radius: 999px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+  .mock-main .sub { font-size: 8pt; color: var(--ink-mute); margin-bottom: 4mm; }
+  .mock-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 4mm; }
+  .mock-stat { border: 1px solid var(--line); border-radius: 6px; padding: 3mm; }
+  .mock-stat .l { font-family: "Geist Mono", monospace; font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.10em; color: var(--ink-mute); }
+  .mock-stat .v { font-size: 14pt; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; margin-top: 1mm; }
+  .mock-stat .v small { color: var(--good); font-size: 8pt; font-weight: 500; margin-left: 4px; }
+  .mock-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 4mm; margin-bottom: 4mm; }
+  .mock-card { border: 1px solid var(--line); border-radius: 6px; padding: 4mm; overflow: hidden; }
+  .mock-card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3mm; }
+  .mock-card-head h5 { font-size: 9pt; font-weight: 700; color: var(--ink); letter-spacing: -0.005em; }
+  .mock-card-head .meta { font-family: "Geist Mono", monospace; font-size: 7pt; color: var(--ink-mute); }
+  .line-chart { height: 30mm; position: relative; padding: 2mm 0 3mm; }
+  .line-chart svg { width: 100%; height: 100%; display: block; }
+  .line-chart .axis { display: flex; justify-content: space-between; font-family: "Geist Mono", monospace; font-size: 6.5pt; color: var(--ink-mute); margin-top: 1mm; letter-spacing: 0.06em; }
+  .radar-wrap { display: flex; align-items: center; justify-content: center; height: 30mm; }
+  .mock-table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+  .mock-table th { text-align: left; font-family: "Geist Mono", monospace; font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.10em; color: var(--ink-mute); font-weight: 500; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  .mock-table td { padding: 5px 6px; border-bottom: 1px solid var(--line-soft); color: var(--ink-2); }
+  .mock-table tr:last-child td { border-bottom: 0; }
+  .mock-table .name { font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 5px; }
+  .mock-table .name .av { width: 14px; height: 14px; border-radius: 50%; background: var(--gradient); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 7pt; font-weight: 700; }
+  .mock-table .score { font-family: "Geist Mono", monospace; font-weight: 600; color: var(--ink); }
+  .mock-table .score.good { color: var(--good); }
+  .mock-table .score.warn { color: var(--warn); }
+  .mock-table .spark { display: inline-flex; align-items: flex-end; gap: 1px; height: 12px; }
+  .mock-table .spark span { width: 3px; background: var(--brand-magenta); border-radius: 1px; opacity: 0.7; }
+  .data-band { background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; padding: 5mm 6mm; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5mm; }
+  .data-band > div { font-size: 9pt; color: var(--ink-3); line-height: 1.4; }
+  .data-band > div b { display: block; color: var(--ink); font-weight: 600; font-size: 9.5pt; margin-bottom: 1mm; }
+  .data-band code { font-family: "Geist Mono", monospace; font-size: 8pt; background: white; border: 1px solid var(--line); padding: 1px 5px; border-radius: 3px; color: var(--brand-purple); }
+
+  /* Feature grid */
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 3mm; }
+  .feat { border: 1px solid var(--line); border-radius: 12px; padding: 5mm 5mm 5mm; background: var(--bg); display: flex; flex-direction: column; }
+  .feat-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3mm; gap: 3mm; }
+  .feat .num { font-family: "Geist Mono", monospace; font-size: 8pt; color: var(--brand-magenta); letter-spacing: 0.10em; font-weight: 600; }
+  .feat .badge-tag { font-family: "Geist Mono", monospace; font-size: 7pt; background: var(--gradient-soft); color: var(--brand-purple); padding: 3px 8px; border-radius: 4px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid rgba(116,3,206,.18); }
+  .feat h4 { font-size: 11.5pt; font-weight: 700; color: var(--ink); margin-bottom: 2mm; letter-spacing: -0.01em; }
+  .feat .obj { font-size: 8.5pt; color: var(--ink-3); line-height: 1.4; margin-bottom: 3mm; }
+  .feat ul.deliv-mini { list-style: none; display: flex; flex-direction: column; gap: 1.5mm; flex: 1; }
+  .feat ul.deliv-mini li { display: grid; grid-template-columns: 4mm 1fr; gap: 2mm; font-size: 8pt; color: var(--ink-2); line-height: 1.35; }
+  .feat ul.deliv-mini li::before { content: "→"; color: var(--brand-magenta); font-weight: 600; line-height: 1.3; }
+
+  /* Gantt */
+  .gantt { width: 100%; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg); margin-bottom: 6mm; }
+  .gantt-head { display: grid; grid-template-columns: 50mm repeat(5, 1fr); background: var(--bg-2); border-bottom: 1px solid var(--line); }
+  .gantt-head > div { padding: 3mm 4mm; font-family: "Geist Mono", monospace; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-mute); font-weight: 600; text-align: center; border-right: 1px solid var(--line); }
+  .gantt-head > div:first-child { text-align: left; color: var(--ink); }
+  .gantt-head > div:last-child { border-right: 0; }
+  .gantt-row { display: grid; grid-template-columns: 50mm 1fr; border-bottom: 1px solid var(--line-soft); align-items: center; }
+  .gantt-row:last-child { border-bottom: 0; }
+  .gantt-label { padding: 4mm 4mm; font-size: 9.5pt; color: var(--ink); font-weight: 600; border-right: 1px solid var(--line); }
+  .gantt-label small { display: block; font-family: "Geist Mono", monospace; font-size: 7pt; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1mm; font-weight: 500; }
+  .gantt-track { position: relative; height: 14mm;
+    background: repeating-linear-gradient(to right, transparent 0, transparent calc(100%/5 - 1px), var(--line-soft) calc(100%/5 - 1px), var(--line-soft) calc(100%/5));
+  }
+  .gantt-bar { position: absolute; top: 50%; transform: translateY(-50%); height: 6mm; background: var(--gradient); border-radius: 4px; color: white; font-family: "Geist Mono", monospace; font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; padding: 0 6px; box-shadow: 0 4px 10px -3px rgba(116,3,206,.4); }
+  .gantt-bar.flagship { background: linear-gradient(120deg, #7403ce, #bc30c4 70%, #fa71ab); }
+  .gantt-bar.maint { background: var(--ink-2); }
+  .gantt-legend { display: flex; gap: 6mm; font-family: "Geist Mono", monospace; font-size: 7.5pt; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.1em; }
+  .gantt-legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+
+  /* Next steps */
+  .next-steps { counter-reset: step; list-style: none; display: flex; flex-direction: column; gap: 3mm; margin-bottom: 6mm; }
+  .next-steps li { display: grid; grid-template-columns: 14mm 1fr; gap: 4mm; padding: 4mm 5mm; border: 1px solid var(--line); border-radius: 8px; counter-increment: step; }
+  .next-steps li::before { content: counter(step, decimal-leading-zero); font-family: "Geist Mono", monospace; font-size: 18pt; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+  .next-steps h4 { font-size: 11pt; font-weight: 600; color: var(--ink); margin-bottom: 1mm; }
+  .next-steps p { color: var(--ink-3); font-size: 9pt; line-height: 1.45; }
+
+  .closing { margin-top: auto; padding-top: 6mm; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; }
+  .closing dt { font-family: "Geist Mono", monospace; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-mute); margin-bottom: 1mm; }
+  .closing dd { font-size: 10pt; color: var(--ink); font-weight: 500; }
+
+  @page { size: A4 portrait; margin: 0; }
+  @media print {
+    html, body { background: white; }
+    .page { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; width: 210mm; height: 297mm; }
+    .page:last-of-type { page-break-after: auto; break-after: auto; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 01 — COVER -->
+<article class="page cover">
+  <div class="cover-bg"></div>
+  <div class="cover-grid-noise"></div>
+  <div class="cover-content">
+    <div class="cover-top">
+      <div class="cover-brand">
+        <span class="dot"></span>
+        <span>SforSales × rvvdev</span>
+      </div>
+      <div class="cover-meta-top">Ref. <strong>SHN-2026 / 003</strong> &nbsp;·&nbsp; 04 mai 2026</div>
+    </div>
+
+    <div class="cover-body">
+      <span class="cover-tag"><span class="pulse"></span>Phase 2 — Axes d&apos;&eacute;volution</span>
+      <h1 class="cover-title">
+        Faire grandir<br>
+        <span class="accent">Shannen.</span>
+      </h1>
+      <p class="cover-sub">
+        L&apos;application livr&eacute;e en mission&nbsp;1 fonctionne et s&apos;installe dans les usages.
+        Voici les axes d&apos;am&eacute;lioration que nous vous proposons pour passer la vitesse sup&eacute;rieure
+        &mdash; avec un dashboard administrateur en pi&egrave;ce ma&icirc;tresse.
+      </p>
+    </div>
+
+    <dl class="cover-foot">
+      <div>
+        <dt>Pour</dt>
+        <dd>Shannen<small>SforSales</small></dd>
+      </div>
+      <div>
+        <dt>De</dt>
+        <dd>rvvdev<small>projets@neocell.ai</small></dd>
+      </div>
+      <div>
+        <dt>Format</dt>
+        <dd>Note d&apos;intention<small>Sans tarification</small></dd>
+      </div>
+      <div>
+        <dt>Suite</dt>
+        <dd>Devis d&eacute;taill&eacute;<small>apr&egrave;s arbitrage</small></dd>
+      </div>
+    </dl>
+  </div>
+</article>
+
+<!-- 02 — SOMMAIRE -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Sommaire</strong></div>
+  </div>
+
+  <span class="eyebrow">Lecture du document</span>
+  <h2 class="section">Trois volets,<br>une m&ecirc;me logique : faire grandir l&apos;usage.</h2>
+  <p class="section-lede">
+    Ce document liste les <strong>axes d&apos;am&eacute;lioration</strong> que nous identifions apr&egrave;s
+    quelques semaines en production. Aucun prix ici&nbsp;: le devis d&eacute;taill&eacute; arrivera apr&egrave;s
+    arbitrage commun sur les priorit&eacute;s.
+  </p>
+
+  <nav class="toc">
+    <div class="toc-item">
+      <span class="toc-num">01</span>
+      <div class="toc-title">Bilan : l&apos;app fonctionne, l&apos;usage d&eacute;colle<small>Ce qu&apos;on observe apr&egrave;s la mission&nbsp;1</small></div>
+      <span class="toc-page">03</span>
+    </div>
+    <div class="toc-item">
+      <span class="toc-num">02</span>
+      <div class="toc-title">Volet 1 — Maintenance r&eacute;currente<small>Trois piliers pour s&eacute;curiser le quotidien</small></div>
+      <span class="toc-page">04</span>
+    </div>
+    <div class="toc-item">
+      <span class="toc-num">03</span>
+      <div class="toc-title">Volet 2 — Dashboard administrateur (pi&egrave;ce ma&icirc;tresse)<small>Suivi des &eacute;l&egrave;ves et lecture transverse de l&apos;activit&eacute;</small></div>
+      <span class="toc-page">05–06</span>
+    </div>
+    <div class="toc-item">
+      <span class="toc-num">04</span>
+      <div class="toc-title">Volet 3 — Quatre autres axes<small>Multi-utilisateurs, personas, plan IA, replay audio</small></div>
+      <span class="toc-page">07</span>
+    </div>
+    <div class="toc-item">
+      <span class="toc-num">05</span>
+      <div class="toc-title">Planning indicatif<small>S&eacute;quencement des sprints</small></div>
+      <span class="toc-page">08</span>
+    </div>
+    <div class="toc-item">
+      <span class="toc-num">06</span>
+      <div class="toc-title">Prochaines &eacute;tapes<small>De la note d&apos;intention au lancement</small></div>
+      <span class="toc-page">09</span>
+    </div>
+  </nav>
+
+  <span class="page-mark">Sommaire</span>
+  <span class="page-num"><strong>02</strong> / 09</span>
+</article>
+
+<!-- 03 — BILAN -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Bilan</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 01 — &Eacute;tat des lieux</span>
+  <h2 class="section">L&apos;app fonctionne,<br>l&apos;usage d&eacute;colle.</h2>
+  <p class="section-lede">
+    La plateforme livr&eacute;e en mission&nbsp;1 est stable, performante et utilis&eacute;e.
+    Les premi&egrave;res semaines en prod confirment que la base technique est solide&nbsp;:
+    on peut maintenant capitaliser dessus.
+  </p>
+
+  <div class="bilan-grid">
+    <div class="bilan-card">
+      <div class="icon">↗</div>
+      <h3>Adoption confirm&eacute;e</h3>
+      <p>Les commerciaux s&apos;entra&icirc;nent r&eacute;guli&egrave;rement. Le format simulation vocale + feedback IA est compris et appr&eacute;ci&eacute;. Premier signal&nbsp;: l&apos;outil trouve sa place dans le quotidien.</p>
+    </div>
+    <div class="bilan-card">
+      <div class="icon">◎</div>
+      <h3>Feedback IA structur&eacute;</h3>
+      <p>Chaque appel g&eacute;n&egrave;re une analyse riche par Claude&nbsp;: note, points forts, axes d&apos;am&eacute;lioration, moments cl&eacute;s. Cette donn&eacute;e est <strong>d&eacute;j&agrave;</strong> en base, prête à être agr&eacute;g&eacute;e.</p>
+    </div>
+    <div class="bilan-card">
+      <div class="icon">⚙</div>
+      <h3>Stack stable</h3>
+      <p>Next 15, Supabase, ElevenLabs, Anthropic. Aucune r&eacute;gression bloquante depuis la mise en prod, l&apos;architecture tient la route. Le socle est sain pour b&acirc;tir la suite.</p>
+    </div>
+  </div>
+
+  <div class="quote-block">
+    Le constat est positif&nbsp;: <strong>la plateforme tient debout et l&apos;usage s&apos;installe</strong>.
+    Pour transformer cet acquis en <strong>levier de pilotage</strong>, il faut maintenant donner aux managers
+    une <strong>vue transverse</strong> sur l&apos;activit&eacute; et la progression de leurs &eacute;quipes.
+    C&apos;est le c&oelig;ur de la Phase 2.
+  </div>
+
+  <span class="page-mark">Bilan</span>
+  <span class="page-num"><strong>03</strong> / 09</span>
+</article>
+
+<!-- 04 — VOLET 1 — MAINTENANCE (3 piliers, sans prix) -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Volet 1 — Maintenance</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 02 — Maintenance r&eacute;currente</span>
+  <h2 class="section">Trois piliers pour<br>s&eacute;curiser le quotidien.</h2>
+  <p class="section-lede">
+    Une plateforme comme Shannen repose sur des briques en &eacute;volution constante (mod&egrave;les IA,
+    framework, d&eacute;pendances). La maintenance garantit que tout reste fonctionnel,
+    performant et &agrave; jour, sans surprise.
+  </p>
+
+  <div class="pillar-deck">
+    <div class="pillar">
+      <div><div class="pillar-id">Pilier <strong>A</strong></div></div>
+      <div>
+        <h3>Veille IA &amp; d&eacute;pendances</h3>
+        <ul class="deliv">
+          <li><span><b>Surveillance hebdomadaire</b> des changelogs Anthropic, ElevenLabs, Next.js et Supabase&nbsp;: anticipation des d&eacute;pr&eacute;ciations avant qu&apos;elles n&apos;impactent l&apos;app.</span></li>
+          <li><span><b>Migration mod&egrave;le</b> sous d&eacute;lai garanti d&egrave;s qu&apos;une nouvelle version stable est annonc&eacute;e &mdash; recette en preview Vercel avant production.</span></li>
+          <li><span><b>Audit trimestriel</b> des d&eacute;pendances (npm, Supabase, Radix) avec mont&eacute;e de version contr&ocirc;l&eacute;e.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pillar">
+      <div><div class="pillar-id">Pilier <strong>B</strong></div></div>
+      <div>
+        <h3>Bug-fix garanti &amp; SLA</h3>
+        <ul class="deliv">
+          <li><span><b>SLA chiffr&eacute;s</b>&nbsp;: r&eacute;ponse rapide sur incident bloquant, traitement non-bloquant sous d&eacute;lai engagement&eacute;. R&eacute;solutions trac&eacute;es dans un canal partag&eacute;.</span></li>
+          <li><span><b>Release de patches</b> au moins une fois par mois, déploy&eacute;e sur preview avant prod, valid&eacute;e par le client.</span></li>
+          <li><span><b>Communication async</b> via canal partag&eacute; (Slack ou Notion). Pas d&apos;astreinte t&eacute;l&eacute;phonique &mdash; l&apos;app n&apos;est pas une infra critique.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pillar">
+      <div><div class="pillar-id">Pilier <strong>C</strong></div></div>
+      <div>
+        <h3>Suivi des performances &amp; rapport mensuel</h3>
+        <ul class="deliv">
+          <li><span><b>Monitoring 24/7</b>&nbsp;: uptime, erreurs Sentry, alertes automatiques. D&eacute;tection avant remont&eacute;e utilisateur.</span></li>
+          <li><span><b>Sauvegarde quotidienne</b> Supabase avec r&eacute;tention. Restauration testable.</span></li>
+          <li><span><b>Rapport mensuel</b> de sant&eacute; applicative : usage, perfs, recommandations d&apos;optimisation.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <span class="page-mark">Volet 1 — Maintenance</span>
+  <span class="page-num"><strong>04</strong> / 09</span>
+</article>
+
+<!-- 05 — VOLET 2 — DASHBOARD MANAGER -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Volet 2 — Dashboard</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 03 — Pi&egrave;ce ma&icirc;tresse</span>
+  <h2 class="section">Dashboard administrateur,<br>le vrai sujet de la Phase 2.</h2>
+  <p class="section-lede">
+    Aujourd&apos;hui chaque simulation g&eacute;n&egrave;re un feedback isol&eacute;. Le dashboard agr&egrave;ge tout
+    pour donner aux managers une <strong>vue transverse</strong>&nbsp;: progression de l&apos;&eacute;quipe,
+    identification des besoins de coaching, mesure de l&apos;impact de l&apos;outil. Une premi&egrave;re version
+    est <strong>d&eacute;j&agrave; cod&eacute;e</strong> sur la branche <span class="mono" style="color:var(--brand-purple);">feature/admin-dashboard</span> &mdash; lisible directement dans l&apos;app.
+  </p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-label">Mockup &middot; /admin &middot; vue Manager</div>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">shannen.app /admin</span>
+      </div>
+      <div class="mock-app">
+        <aside class="mock-side">
+          <div class="logo"><span class="d"></span>SforSales</div>
+          <ul class="mock-nav">
+            <li><span class="ico"></span>Dashboard</li>
+            <li class="active"><span class="ico"></span>Suivi &amp; analytics</li>
+            <li><span class="ico"></span>&Eacute;l&egrave;ves</li>
+            <li><span class="ico"></span>Personas</li>
+            <li><span class="ico"></span>Rapports</li>
+          </ul>
+          <div class="mock-foot-side"><b>12</b> &eacute;l&egrave;ves &middot; <b>3</b> coachs</div>
+        </aside>
+        <main class="mock-main">
+          <div class="h">Suivi de l&apos;activit&eacute; <span class="pill">Live</span></div>
+          <div class="sub">12 &eacute;l&egrave;ves actifs &middot; 156 simulations ce mois &middot; mise &agrave; jour il y a 2&nbsp;min</div>
+          <div class="mock-stats">
+            <div class="mock-stat"><div class="l">Score moyen</div><div class="v">73<small>+6</small></div></div>
+            <div class="mock-stat"><div class="l">Simu / 7&nbsp;j</div><div class="v">38<small>+12</small></div></div>
+            <div class="mock-stat"><div class="l">Dur&eacute;e moy.</div><div class="v">14&apos;</div></div>
+            <div class="mock-stat"><div class="l">Compl&eacute;tion</div><div class="v">81&nbsp;%</div></div>
+          </div>
+          <div class="mock-grid">
+            <div class="mock-card">
+              <div class="mock-card-head"><h5>&Eacute;volution du score</h5><span class="meta">30 derniers jours</span></div>
+              <div class="line-chart">
+                <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#bc30c4" stop-opacity="0.35"/>
+                      <stop offset="100%" stop-color="#bc30c4" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#7403ce"/>
+                      <stop offset="50%" stop-color="#bc30c4"/>
+                      <stop offset="100%" stop-color="#fa71ab"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,80 L0,72 L20,68 L40,75 L60,60 L80,55 L100,62 L120,48 L140,52 L160,40 L180,38 L200,30 L220,35 L240,25 L260,28 L280,18 L300,22 L300,100 L0,100 Z" fill="url(#lg1)"/>
+                  <path d="M0,72 L20,68 L40,75 L60,60 L80,55 L100,62 L120,48 L140,52 L160,40 L180,38 L200,30 L220,35 L240,25 L260,28 L280,18 L300,22" stroke="url(#lg2)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="0" y1="50" x2="300" y2="50" stroke="#ebe7ef" stroke-width="0.5" stroke-dasharray="2,3"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-head"><h5>R&eacute;partition par type d&apos;appel</h5><span class="meta">156 simu.</span></div>
+              <table class="mock-table" style="margin-top:2mm;">
+                <tbody>
+                  <tr><td><span class="name"><span class="av" style="background:#7403ce;">P</span>Prospection</span></td><td class="score">62</td></tr>
+                  <tr><td><span class="name"><span class="av" style="background:#bc30c4;">D</span>D&eacute;couverte</span></td><td class="score">38</td></tr>
+                  <tr><td><span class="name"><span class="av" style="background:#fa71ab;">C</span>Closing</span></td><td class="score">35</td></tr>
+                  <tr><td><span class="name"><span class="av" style="background:#ffbb75;">R</span>Relance</span></td><td class="score">21</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <table class="mock-table">
+            <thead><tr><th>Top &eacute;l&egrave;ves</th><th>Sessions</th><th>Score 30j</th><th>&Delta;</th><th>Tendance</th></tr></thead>
+            <tbody>
+              <tr><td><span class="name"><span class="av">S</span>Sarah K.</span></td><td>31</td><td><span class="score good">88</span></td><td><span class="score good">+12</span></td><td><span class="spark"><span style="height:40%"></span><span style="height:55%"></span><span style="height:62%"></span><span style="height:70%"></span><span style="height:78%"></span><span style="height:85%"></span><span style="height:92%"></span><span style="height:100%"></span></span></td></tr>
+              <tr><td><span class="name"><span class="av">L</span>Lucas Beaumont</span></td><td>24</td><td><span class="score good">82</span></td><td><span class="score good">+6</span></td><td><span class="spark"><span style="height:60%"></span><span style="height:55%"></span><span style="height:65%"></span><span style="height:75%"></span><span style="height:78%"></span><span style="height:80%"></span><span style="height:88%"></span><span style="height:92%"></span></span></td></tr>
+              <tr><td><span class="name"><span class="av">A</span>Alex Diallo</span></td><td>9</td><td><span class="score warn">58</span></td><td><span class="score warn">−4</span></td><td><span class="spark"><span style="height:65%;background:#d97706"></span><span style="height:55%;background:#d97706"></span><span style="height:50%;background:#d97706"></span><span style="height:48%;background:#d97706"></span><span style="height:45%;background:#d97706"></span><span style="height:42%;background:#d97706"></span><span style="height:40%;background:#d97706"></span><span style="height:38%;background:#d97706"></span></span></td></tr>
+            </tbody>
+          </table>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-band">
+    <div><b>Source des donn&eacute;es</b>Tables <code>conversations</code>, <code>feedback</code>. Aucune migration destructive.</div>
+    <div><b>Performance</b>Cache Supabase &mdash; latence cible &lt;&nbsp;200&nbsp;ms.</div>
+    <div><b>Permissions</b>Manager voit son &eacute;quipe, &eacute;l&egrave;ve voit son propre dashboard.</div>
+  </div>
+
+  <span class="page-mark">Volet 2 — Vue Manager</span>
+  <span class="page-num"><strong>05</strong> / 09</span>
+</article>
+
+<!-- 06 — VOLET 2 — VUE ÉLÈVE -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Volet 2 — Vue &eacute;l&egrave;ve</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 03 — Drill-down individuel</span>
+  <h2 class="section">Une vue par &eacute;l&egrave;ve,<br>jusqu&apos;au moment cl&eacute;.</h2>
+  <p class="section-lede">
+    Depuis la liste des &eacute;l&egrave;ves, le coach acc&egrave;de &agrave; un radar de comp&eacute;tences,
+    &agrave; l&apos;&eacute;volution du score sur 30 jours, &agrave; l&apos;historique des sessions, et au transcript de chaque
+    appel pour un d&eacute;briefing pr&eacute;cis.
+  </p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-label">Mockup &middot; /admin/eleves/[id] &middot; Sarah K.</div>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">shannen.app /admin/eleves/sarah-k</span>
+      </div>
+      <div class="mock-app">
+        <aside class="mock-side">
+          <div class="logo"><span class="d"></span>SforSales</div>
+          <ul class="mock-nav">
+            <li><span class="ico"></span>Dashboard</li>
+            <li><span class="ico"></span>Suivi &amp; analytics</li>
+            <li class="active"><span class="ico"></span>&Eacute;l&egrave;ves</li>
+            <li><span class="ico"></span>Personas</li>
+            <li><span class="ico"></span>Rapports</li>
+          </ul>
+          <div class="mock-foot-side"><b>Cohorte</b> Closers Q2</div>
+        </aside>
+        <main class="mock-main">
+          <div class="h">Sarah K. <span class="pill" style="background:rgba(24,169,87,.1);color:var(--good);">Score 88</span></div>
+          <div class="sub">Closers Q2 &middot; 31 sessions &middot; derni&egrave;re activit&eacute; il y a 1&nbsp;h &middot; +12 points sur 30&nbsp;j</div>
+          <div class="mock-stats">
+            <div class="mock-stat"><div class="l">Sessions</div><div class="v">31</div></div>
+            <div class="mock-stat"><div class="l">Temps cumul&eacute;</div><div class="v">7h28</div></div>
+            <div class="mock-stat"><div class="l">S&eacute;rie</div><div class="v">9j<small>+1</small></div></div>
+            <div class="mock-stat"><div class="l">Mission</div><div class="v" style="font-size:11pt;">2/3</div></div>
+          </div>
+          <div class="mock-grid">
+            <div class="mock-card">
+              <div class="mock-card-head"><h5>Score sur 30 derniers jours</h5><span class="meta">/100</span></div>
+              <div class="line-chart">
+                <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                  <defs><linearGradient id="lg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fa71ab" stop-opacity="0.35"/><stop offset="100%" stop-color="#fa71ab" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M0,68 L20,60 L40,65 L60,52 L80,48 L100,45 L120,38 L140,42 L160,30 L180,35 L200,22 L220,28 L240,20 L260,15 L280,12 L300,10 L300,100 L0,100 Z" fill="url(#lg3)"/>
+                  <path d="M0,68 L20,60 L40,65 L60,52 L80,48 L100,45 L120,38 L140,42 L160,30 L180,35 L200,22 L220,28 L240,20 L260,15 L280,12 L300,10" stroke="#fa71ab" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="0" y1="50" x2="300" y2="50" stroke="#ebe7ef" stroke-width="0.5" stroke-dasharray="2,3"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mock-card">
+              <div class="mock-card-head"><h5>Comp&eacute;tences</h5><span class="meta">5 axes</span></div>
+              <div class="radar-wrap">
+                <svg viewBox="0 0 140 130" width="100%" height="100%">
+                  <g stroke="#ebe7ef" stroke-width="0.6" fill="none">
+                    <polygon points="70,10 130,55 105,120 35,120 10,55"/>
+                    <polygon points="70,30 116,60 98,108 42,108 24,60"/>
+                    <polygon points="70,50 100,65 90,95 50,95 40,65"/>
+                  </g>
+                  <g stroke="#ebe7ef" stroke-width="0.5">
+                    <line x1="70" y1="65" x2="70" y2="10"/>
+                    <line x1="70" y1="65" x2="130" y2="55"/>
+                    <line x1="70" y1="65" x2="105" y2="120"/>
+                    <line x1="70" y1="65" x2="35" y2="120"/>
+                    <line x1="70" y1="65" x2="10" y2="55"/>
+                  </g>
+                  <polygon points="70,18 122,57 99,113 45,108 18,58" fill="rgba(188,48,196,0.25)" stroke="#7403ce" stroke-width="1.5"/>
+                  <g font-family="Geist Mono, monospace" font-size="6.5" fill="#5a5366" font-weight="500">
+                    <text x="70" y="6" text-anchor="middle">&Eacute;coute</text>
+                    <text x="135" y="56" text-anchor="start">Argum.</text>
+                    <text x="108" y="128" text-anchor="middle">Closing</text>
+                    <text x="32" y="128" text-anchor="middle">Object.</text>
+                    <text x="6" y="56" text-anchor="end">Relat.</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <table class="mock-table">
+            <thead><tr><th>Derni&egrave;res sessions</th><th>Persona</th><th>Type</th><th>Note</th><th>Dur&eacute;e</th></tr></thead>
+            <tbody>
+              <tr><td>il y a 1&nbsp;h</td><td>Marie Dubois</td><td>Closing</td><td><span class="score good">92</span></td><td>14&apos;</td></tr>
+              <tr><td>hier</td><td>Pierre Moreau</td><td>Prospection</td><td><span class="score good">85</span></td><td>18&apos;</td></tr>
+              <tr><td>il y a 2&nbsp;j</td><td>Anne Petit</td><td>Relance</td><td><span class="score">78</span></td><td>11&apos;</td></tr>
+            </tbody>
+          </table>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-band">
+    <div><b>Radar de comp&eacute;tences</b>Calcul agr&eacute;g&eacute; depuis les arrays <code>points_forts</code> / <code>axes_amelioration</code> du feedback Claude.</div>
+    <div><b>Drill-down session</b>Acc&egrave;s direct au transcript ElevenLabs et au feedback IA structur&eacute;.</div>
+    <div><b>Cible UX</b>Lecture en 5 secondes pour le manager, exploration approfondie possible en un clic.</div>
+  </div>
+
+  <span class="page-mark">Volet 2 — Vue &eacute;l&egrave;ve</span>
+  <span class="page-num"><strong>06</strong> / 09</span>
+</article>
+
+<!-- 07 — VOLET 3 — 4 MODULES (sans prix) -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Volet 3 — Modules</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 04 — Quatre autres axes</span>
+  <h2 class="section">Quatre modules<br>activables &agrave; la carte.</h2>
+  <p class="section-lede">
+    Ind&eacute;pendants du dashboard, ces modules adressent chacun un usage pr&eacute;cis. Aucun n&apos;est obligatoire&nbsp;:
+    on les active selon les priorit&eacute;s.
+  </p>
+
+  <div class="feature-grid">
+
+    <div class="feat">
+      <div class="feat-head"><div class="num">Module 01</div><span class="badge-tag">Industrialisation</span></div>
+      <h4>Multi-utilisateurs &amp; r&ocirc;les</h4>
+      <p class="obj">Permettre le déploiement en &eacute;quipe avec supervision managériale &mdash; condition pour passer du pilote &agrave; l&apos;adoption large.</p>
+      <ul class="deliv-mini">
+        <li><span>Invitation et gestion d&apos;utilisateurs (lien magique).</span></li>
+        <li><span>R&ocirc;les <span class="mono" style="color:var(--brand-purple);">admin</span> &middot; <span class="mono" style="color:var(--brand-purple);">manager</span> &middot; <span class="mono" style="color:var(--brand-purple);">commercial</span>.</span></li>
+        <li><span>Cr&eacute;ation et gestion de cohortes / &eacute;quipes.</span></li>
+        <li><span>RLS Supabase isol&eacute;e par r&ocirc;le.</span></li>
+      </ul>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><div class="num">Module 02</div><span class="badge-tag">Contenu</span></div>
+      <h4>Biblioth&egrave;que de personas enrichie</h4>
+      <p class="obj">Plus de vari&eacute;t&eacute; et de r&eacute;alisme dans les entra&icirc;nements. La diversit&eacute; des personas fait toute la diff&eacute;rence p&eacute;dagogique.</p>
+      <ul class="deliv-mini">
+        <li><span>Wizard de cr&eacute;ation guid&eacute; (5 &eacute;tapes).</span></li>
+        <li><span>Templates par secteur (B2B SaaS, immo, services).</span></li>
+        <li><span>Personnalit&eacute; configurable&nbsp;: assertivit&eacute;, objections, ton.</span></li>
+        <li><span>Partage au sein de l&apos;organisation.</span></li>
+      </ul>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><div class="num">Module 03</div><span class="badge-tag">Pédagogie</span></div>
+      <h4>Plan de progression IA</h4>
+      <p class="obj">Transformer les sessions isol&eacute;es en parcours d&apos;apprentissage coh&eacute;rent. L&apos;IA recommande la prochaine session selon les axes &agrave; travailler.</p>
+      <ul class="deliv-mini">
+        <li><span>Analyse Claude des derniers feedbacks de l&apos;&eacute;l&egrave;ve.</span></li>
+        <li><span>G&eacute;n&eacute;ration d&apos;un plan personnalis&eacute;.</span></li>
+        <li><span>Suggestions de sessions cibl&eacute;es (persona + type).</span></li>
+        <li><span>Gamification&nbsp;: badges, s&eacute;ries, milestones.</span></li>
+      </ul>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><div class="num">Module 04</div><span class="badge-tag">Coaching</span></div>
+      <h4>Replay audio annot&eacute;</h4>
+      <p class="obj">Permettre le débriefing approfondi et le coaching cibl&eacute;. Le coach isole un passage et le commente pour son &eacute;l&egrave;ve.</p>
+      <ul class="deliv-mini">
+        <li><span>Enregistrement audio des conversations.</span></li>
+        <li><span>Timeline interactive synchro avec le transcript.</span></li>
+        <li><span>Marqueurs de moments cl&eacute;s g&eacute;n&eacute;r&eacute;s par l&apos;IA.</span></li>
+        <li><span>Annotations coach par timestamp.</span></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <span class="page-mark">Volet 3 — Modules</span>
+  <span class="page-num"><strong>07</strong> / 09</span>
+</article>
+
+<!-- 08 — PLANNING -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Planning</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 05 — S&eacute;quencement</span>
+  <h2 class="section">Planning indicatif.</h2>
+  <p class="section-lede">
+    S&eacute;quencement par sprints, sans dates fig&eacute;es. La maintenance d&eacute;marre d&egrave;s la signature et tourne en parall&egrave;le.
+    Chaque sprint se termine par une recette en preview Vercel avant mise en production.
+  </p>
+
+  <div class="gantt">
+    <div class="gantt-head">
+      <div>Module</div>
+      <div>Sprint 1</div>
+      <div>Sprint 2</div>
+      <div>Sprint 3</div>
+      <div>Sprint 4</div>
+      <div>Sprint 5</div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label">Maintenance<small>R&eacute;current</small></div>
+      <div class="gantt-track">
+        <div class="gantt-bar maint" style="left:1%;width:97%;">Continu</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">Dashboard administrateur<small>Module flagship</small></div>
+      <div class="gantt-track">
+        <div class="gantt-bar flagship" style="left:1%;width:38%;">Sprint 1+2</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">Multi-utilisateurs<small>Module 01</small></div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:40%;width:18%;">Sprint 3</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">Biblioth&egrave;que personas<small>Module 02</small></div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:59%;width:13%;">Sprint 3-4</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">Plan de progression IA<small>Module 03</small></div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:60%;width:18%;">Sprint 4</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">Replay audio annot&eacute;<small>Module 04</small></div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:79%;width:18%;">Sprint 5</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gantt-legend">
+    <span><span class="swatch" style="background:linear-gradient(120deg,#7403ce,#bc30c4 70%,#fa71ab);"></span>Flagship</span>
+    <span><span class="swatch" style="background:var(--gradient);"></span>Module Phase 2</span>
+    <span><span class="swatch" style="background:#2a2535;"></span>Maintenance / Recette</span>
+  </div>
+
+  <div class="quote-block" style="margin-top:6mm;">
+    Les sprints sont s&eacute;quentiels par d&eacute;faut, mais la <strong>maintenance tourne en parall&egrave;le</strong>
+    sur toute la dur&eacute;e. Si un module n&apos;est pas s&eacute;lectionn&eacute;, son slot peut &ecirc;tre r&eacute;allou&eacute; ou rendu.
+    Le sprint est notre unit&eacute; de planification &mdash; les dates pr&eacute;cises se calent ensemble apr&egrave;s arbitrage.
+  </div>
+
+  <span class="page-mark">Planning</span>
+  <span class="page-num"><strong>08</strong> / 09</span>
+</article>
+
+<!-- 09 — PROCHAINES ÉTAPES -->
+<article class="page">
+  <div class="page-head">
+    <div class="brand-mark"><span class="brand-dot"></span><span>Shannen</span></div>
+    <div class="doc-meta">SHN-2026 &nbsp;·&nbsp; <strong>Suite</strong></div>
+  </div>
+
+  <span class="eyebrow">Section 06 — De la note d&apos;intention au lancement</span>
+  <h2 class="section">Prochaines &eacute;tapes.</h2>
+  <p class="section-lede">
+    Cette note d&eacute;crit le quoi. Le combien et le quand se calent ensemble lors d&apos;un atelier de cadrage,
+    une fois les priorit&eacute;s arbitr&eacute;es de votre c&ocirc;t&eacute;.
+  </p>
+
+  <ol class="next-steps">
+    <li>
+      <div>
+        <h4>Validation des priorit&eacute;s</h4>
+        <p>Vous nous dites lesquels des trois volets vous voulez activer en premier&nbsp;: maintenance seule, dashboard prioritaire, ou ensemble du scope. Aucun engagement &agrave; ce stade.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <h4>Atelier de cadrage</h4>
+        <p>Une session de 2&nbsp;h pour creuser les modules retenus, ajuster le scope, lever les questions techniques, et confirmer les acc&egrave;s.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <h4>Devis d&eacute;taill&eacute;</h4>
+        <p>&Agrave; l&apos;issue du cadrage, un devis pr&eacute;cis vous est transmis avec p&eacute;rim&egrave;tre, planning sprint par sprint et conditions. C&apos;est &agrave; ce moment que les chiffres apparaissent.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <h4>D&eacute;marrage</h4>
+        <p>Branche de travail d&eacute;di&eacute;e (le dashboard est <strong>d&eacute;j&agrave; en cours</strong> sur <span class="mono" style="color:var(--brand-purple);">feature/admin-dashboard</span>), recette en preview Vercel, mise en production progressive sans interruption.</p>
+      </div>
+    </li>
+  </ol>
+
+  <dl class="closing">
+    <div>
+      <dt>Contact</dt>
+      <dd>rvvdev<br><span style="color:var(--ink-mute);font-size:8.5pt;font-weight:400;">projets@neocell.ai</span></dd>
+    </div>
+    <div>
+      <dt>R&eacute;f&eacute;rence</dt>
+      <dd>SHN-2026 / 003</dd>
+    </div>
+    <div>
+      <dt>Date d&apos;&eacute;mission</dt>
+      <dd>04 mai 2026</dd>
+    </div>
+  </dl>
+
+  <span class="page-mark">Suite &amp; signature</span>
+  <span class="page-num"><strong>09</strong> / 09</span>
+</article>
+
+</body>
+</html>
