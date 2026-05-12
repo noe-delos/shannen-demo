@@ -48,6 +48,12 @@ const items = [
     adminOnly: true,
   },
   {
+    title: "Choix éditeur prompt",
+    url: "/admin/prompt-preview",
+    icon: "fluent:options-24-filled",
+    adminOnly: true,
+  },
+  {
     title: "Prospect",
     url: "/agents",
     icon: "fluent:people-12-filled",
