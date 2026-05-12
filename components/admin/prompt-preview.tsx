@@ -76,6 +76,30 @@ function parseBlocs(prompt: string): BlocParts {
 
 type BlocOverride = { mode: "append" | "replace"; text: string };
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function templatize(rendered: string, agent: AgentLike, ctx: typeof SAMPLE_CONTEXT): string {
+  let t = rendered;
+  const fullName =
+    agent.firstname && agent.lastname
+      ? `${agent.firstname} ${agent.lastname}`
+      : agent.name ?? "";
+  if (fullName) t = t.replace(new RegExp(escapeRegExp(fullName), "g"), "{{prospect_name}}");
+  if (agent.job_title)
+    t = t.replace(new RegExp(escapeRegExp(agent.job_title), "g"), "{{prospect_job_title}}");
+  if (agent.personnality) {
+    const json = JSON.stringify(agent.personnality, null, 2);
+    t = t.replace(json, "{{prospect_personnality}}");
+  }
+  t = t
+    .replace(new RegExp(escapeRegExp(ctx.secteur), "g"), "{{secteur}}")
+    .replace(new RegExp(escapeRegExp(ctx.company), "g"), "{{company}}")
+    .replace(new RegExp(escapeRegExp(ctx.historique_relation), "g"), "{{historique_relation}}");
+  return t;
+}
+
 function reassembleWithOverrides(
   parsed: BlocParts,
   overrides: Record<number, BlocOverride>
@@ -125,6 +149,44 @@ export function PromptPreview({ sampleAgents }: { sampleAgents: AgentLike[] }) {
   }, [agent, callType]);
 
   const parsedDefault = useMemo(() => parseBlocs(defaultPrompt), [defaultPrompt]);
+
+  const templatePrompt = useMemo(
+    () => (agent ? templatize(defaultPrompt, agent, SAMPLE_CONTEXT) : ""),
+    [defaultPrompt, agent]
+  );
+
+  const scenarioLabel = useMemo(() => {
+    if (!agent) return "";
+    const fullName =
+      agent.firstname && agent.lastname
+        ? `${agent.firstname} ${agent.lastname}`
+        : agent.name ?? "Prospect";
+    const callLabel = CALL_TYPES.find((c) => c.value === callType)?.label ?? callType;
+    return `${fullName} · ${callLabel}`;
+  }, [agent, callType]);
+
+  const substitute = useMemo(() => {
+    if (!agent) return (s: string) => s;
+    const fullName =
+      agent.firstname && agent.lastname
+        ? `${agent.firstname} ${agent.lastname}`
+        : agent.name ?? "";
+    const map: Record<string, string> = {
+      "{{prospect_name}}": fullName,
+      "{{prospect_job_title}}": agent.job_title ?? "",
+      "{{prospect_personnality}}": JSON.stringify(agent.personnality, null, 2),
+      "{{secteur}}": SAMPLE_CONTEXT.secteur,
+      "{{company}}": SAMPLE_CONTEXT.company,
+      "{{historique_relation}}": SAMPLE_CONTEXT.historique_relation,
+    };
+    return (s: string) => {
+      let out = s;
+      for (const [k, v] of Object.entries(map)) {
+        out = out.replace(new RegExp(escapeRegExp(k), "g"), v);
+      }
+      return out;
+    };
+  }, [agent]);
 
   if (sampleAgents.length === 0 || !agent) {
     return (
@@ -192,13 +254,23 @@ export function PromptPreview({ sampleAgents }: { sampleAgents: AgentLike[] }) {
         </TabsList>
 
         <TabsContent value="option1" className="mt-6">
-          <Option1 defaultPrompt={defaultPrompt} scenarioKey={`${agentId}:${callType}`} />
+          <Option1
+            templatePrompt={templatePrompt}
+            scenarioKey={`${agentId}:${callType}`}
+            scenarioLabel={scenarioLabel}
+            substitute={substitute}
+          />
         </TabsContent>
         <TabsContent value="option2" className="mt-6">
-          <Option2 agent={agent} callType={callType} parsedDefault={parsedDefault} />
+          <Option2
+            agent={agent}
+            callType={callType}
+            parsedDefault={parsedDefault}
+            scenarioLabel={scenarioLabel}
+          />
         </TabsContent>
         <TabsContent value="option3" className="mt-6">
-          <Option3 parsedDefault={parsedDefault} />
+          <Option3 parsedDefault={parsedDefault} scenarioLabel={scenarioLabel} />
         </TabsContent>
       </Tabs>
     </div>
@@ -350,30 +422,42 @@ function fakeSave(option: string) {
 
 /* ──────────────────────────── OPTION 1 ──────────────────────────── */
 
-function Option1({ defaultPrompt, scenarioKey }: { defaultPrompt: string; scenarioKey: string }) {
-  const [value, setValue] = useState(defaultPrompt);
+function Option1({
+  templatePrompt,
+  scenarioKey,
+  scenarioLabel,
+  substitute,
+}: {
+  templatePrompt: string;
+  scenarioKey: string;
+  scenarioLabel: string;
+  substitute: (s: string) => string;
+}) {
+  const [value, setValue] = useState(templatePrompt);
   const [lastKey, setLastKey] = useState(scenarioKey);
 
   if (scenarioKey !== lastKey) {
     setLastKey(scenarioKey);
-    setValue(defaultPrompt);
+    setValue(templatePrompt);
   }
 
-  const dirty = value !== defaultPrompt;
+  const dirty = value !== templatePrompt;
+
+  const liveRendered = useMemo(() => substitute(value), [substitute, value]);
 
   return (
     <div className="flex flex-col gap-4">
       <OptionHeader
         badge="⚠️ Le plus puissant, le plus risqué"
-        title="Tu réécris l'intégralité du prompt système"
-        description="Cette zone montre le prompt EXACT qui est envoyé à l'IA pour le scénario sélectionné en haut. Tu peux tout modifier : identité, comportements, paliers de résistance, format de sortie. À chaque simulation, on remplace automatiquement le nom du prospect, le secteur, le type d'appel, etc. Mais si tu supprimes un bloc critique, les simulations partent en vrille."
+        title="Tu réécris l'intégralité du prompt système (template global)"
+        description="Le textarea ci-dessous est le TEMPLATE GLOBAL — celui qu'on stocke une seule fois et qu'on applique à TOUTES les simulations. Les placeholders {{prospect_name}}, {{secteur}}, {{prospect_personnality}}, etc. sont remplacés automatiquement à chaque appel par les vraies données du prospect choisi. Tu modifies la structure du prompt, pas les données dynamiques."
         tone="warning"
       />
 
       <Card className="p-5">
         <div className="flex items-center justify-between mb-2">
           <Label htmlFor="full-prompt" className="text-sm font-semibold">
-            Prompt système complet (envoyé à ElevenLabs)
+            Template global du prompt système
           </Label>
           {dirty && (
             <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
@@ -389,13 +473,21 @@ function Option1({ defaultPrompt, scenarioKey }: { defaultPrompt: string; scenar
           className="font-mono text-[11px] leading-relaxed"
         />
         <p className="text-xs text-muted-foreground mt-2">
-          Les noms de prospect, secteurs, et types d&apos;appel changent automatiquement à chaque simulation.
-          Tu modifies la <strong>structure</strong>, pas les données dynamiques.
+          Les zones <code className="bg-purple-50 text-purple-700 px-1 rounded">{`{{...}}`}</code> sont
+          remplies automatiquement à chaque simulation : <code>{`{{prospect_name}}`}</code>,{" "}
+          <code>{`{{prospect_job_title}}`}</code>, <code>{`{{prospect_personnality}}`}</code>,{" "}
+          <code>{`{{secteur}}`}</code>, <code>{`{{company}}`}</code>,{" "}
+          <code>{`{{historique_relation}}`}</code>.
         </p>
       </Card>
 
+      <CollapsiblePreview
+        title={`Aperçu rendu pour ${scenarioLabel} — voir comment le template ressort au runtime`}
+        content={liveRendered}
+      />
+
       <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => setValue(defaultPrompt)} disabled={!dirty}>
+        <Button variant="outline" onClick={() => setValue(templatePrompt)} disabled={!dirty}>
           Réinitialiser au défaut
         </Button>
         <Button
@@ -416,10 +508,12 @@ function Option2({
   agent,
   callType,
   parsedDefault,
+  scenarioLabel,
 }: {
   agent: AgentLike;
   callType: string;
   parsedDefault: BlocParts;
+  scenarioLabel: string;
 }) {
   const [persona, setPersona] = useState("");
   const [behavior, setBehavior] = useState("");
@@ -511,11 +605,7 @@ function Option2({
       </div>
 
       <CollapsiblePreview
-        title={
-          dirty
-            ? "Aperçu du prompt final (avec tes ajouts) — envoyé à l'IA"
-            : "Aperçu du prompt final — envoyé à l'IA (identique au défaut tant que tu n'as rien écrit)"
-        }
+        title={`Aperçu rendu pour ${scenarioLabel}${dirty ? " (avec tes ajouts injectés dans BLOC 1 + BLOC 2)" : " — tes zones sont vides, donc identique au défaut"}`}
         content={finalPrompt}
         defaultOpen={false}
       />
@@ -569,7 +659,13 @@ const BLOC_META: Record<number, { icon: string; title: string; helper: string }>
   },
 };
 
-function Option3({ parsedDefault }: { parsedDefault: BlocParts }) {
+function Option3({
+  parsedDefault,
+  scenarioLabel,
+}: {
+  parsedDefault: BlocParts;
+  scenarioLabel: string;
+}) {
   const [overrides, setOverrides] = useState<Record<number, BlocOverride>>({});
 
   const setOverride = (num: number, patch: Partial<BlocOverride>) =>
@@ -673,11 +769,7 @@ function Option3({ parsedDefault }: { parsedDefault: BlocParts }) {
       </div>
 
       <CollapsiblePreview
-        title={
-          dirty
-            ? "Aperçu du prompt final (avec tes overrides) — envoyé à l'IA"
-            : "Aperçu du prompt final — envoyé à l'IA (identique au défaut tant que tu n'as rien écrit)"
-        }
+        title={`Aperçu rendu pour ${scenarioLabel}${dirty ? " (avec tes overrides bloc par bloc)" : " — pas d'override, identique au défaut"}`}
         content={finalPrompt}
       />
 
