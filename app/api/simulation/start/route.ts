@@ -34,20 +34,20 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ User authenticated:", user.id);
 
-    // Check daily simulation limit (exclure la conversation courante car créée avant /start)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { count: dailyCount } = await supabase
+    // Check monthly simulation limit (exclure la conversation courante car créée avant /start)
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const { count: monthlyCount } = await supabase
       .from("conversations")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .neq("id", conversation_id)
-      .gte("created_at", today.toISOString());
+      .gte("created_at", monthStart.toISOString());
 
-    if ((dailyCount ?? 0) >= 3) {
-      console.warn("⚠️ Daily simulation limit reached for user:", user.id);
+    if ((monthlyCount ?? 0) >= 90) {
+      console.warn("⚠️ Monthly simulation limit reached for user:", user.id);
       return NextResponse.json(
-        { error: "Limite de 3 simulations par jour atteinte. Revenez demain !" },
+        { error: "Limite de 90 simulations par mois atteinte. Réinitialisation le 1er du mois prochain." },
         { status: 429 }
       );
     }
