@@ -63,7 +63,7 @@ const items = [
 
 export function AppSidebar() {
   const [conversations, setConversations] = useState<any[]>([]);
-  const [dailyCount, setDailyCount] = useState(0);
+  const [monthlyCount, setMonthlyCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
   const router = useRouter();
@@ -101,10 +101,10 @@ export function AppSidebar() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        const [conversationsResponse, dailyResponse, profileResponse] = await Promise.all([
+        const [conversationsResponse, monthlyResponse, profileResponse] = await Promise.all([
           supabase
             .from("conversations")
             .select(`*, agents:agent_id (name, job_title), feedback:feedback_id (note)`)
@@ -115,7 +115,7 @@ export function AppSidebar() {
             .from("conversations")
             .select("id", { count: "exact", head: true })
             .eq("user_id", user.id)
-            .gte("created_at", today.toISOString()),
+            .gte("created_at", monthStart.toISOString()),
           supabase
             .from("users")
             .select("firstname, lastname, picture_url, email, is_admin")
@@ -124,7 +124,7 @@ export function AppSidebar() {
         ]);
 
         setConversations(conversationsResponse.data || []);
-        setDailyCount(dailyResponse.count ?? 0);
+        setMonthlyCount(monthlyResponse.count ?? 0);
         setUserProfile(profileResponse.data);
       }
     } catch (error) {
@@ -199,7 +199,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="pt-4">
             <div className="mb-4">
-              {dailyCount >= 3 ? (
+              {monthlyCount >= 90 ? (
                 <div className="flex flex-col items-center gap-3">
                   <Button
                     className="w-full shannen-gradient font-bold py-5 border-purple-200/50 text-white opacity-50 cursor-not-allowed"
@@ -209,7 +209,7 @@ export function AppSidebar() {
                     Démarrer !
                   </Button>
                   <p className="text-xs text-red-500 font-medium text-center">
-                    Limite atteinte · Revenez demain
+                    Limite atteinte · Réinitialisation le 1er
                   </p>
                 </div>
               ) : (
@@ -222,13 +222,13 @@ export function AppSidebar() {
                   </Link>
                   <div className="w-full">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs text-muted-foreground">Simulations aujourd&apos;hui</span>
-                      <span className="text-xs font-semibold text-[#9516C7]">{dailyCount}/3</span>
+                      <span className="text-xs text-muted-foreground">Simulations ce mois-ci</span>
+                      <span className="text-xs font-semibold text-[#9516C7]">{monthlyCount}/90</span>
                     </div>
                     <div className="h-1 w-full bg-purple-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-[#9516C7] rounded-full transition-all duration-300"
-                        style={{ width: `${(dailyCount / 3) * 100}%` }}
+                        style={{ width: `${(monthlyCount / 90) * 100}%` }}
                       />
                     </div>
                   </div>
