@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { isDegradedFeedback } from "@/lib/feedback/degraded";
 
 interface ConversationDetailsProps {
   conversationId: string;
@@ -30,6 +32,7 @@ export function ConversationDetails({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,6 +68,30 @@ export function ConversationDetails({
 
     fetchConversation();
   }, [conversationId, router]);
+
+  const regenerateFeedback = async () => {
+    setRegenerating(true);
+    try {
+      const res = await fetch(`/api/simulation/${conversationId}/feedback`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        toast.error(json?.error || "L'analyse n'a pas pu être générée");
+        return;
+      }
+
+      setConversation((prev: any) => ({ ...prev, feedback: json.feedback }));
+      toast.success("Analyse générée !");
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("L'analyse n'a pas pu être générée");
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -268,6 +295,16 @@ export function ConversationDetails({
     );
   }
 
+  // Les feedbacks de repli d'avant le correctif #29 (note fixe de 70, textes
+  // génériques) sont traités comme absents et peuvent être régénérés.
+  const feedback = isDegradedFeedback(conversation.feedback)
+    ? null
+    : conversation.feedback;
+  const canRegenerateFeedback =
+    !feedback &&
+    Array.isArray(conversation.transcript) &&
+    conversation.transcript.length > 0;
+
   const metrics = [
     {
       title: "Durée totale",
@@ -337,13 +374,13 @@ export function ConversationDetails({
                         </span>
                       )}
                     </span>
-                    {conversation.feedback?.note && (
+                    {feedback?.note && (
                       <Badge
                         className={`${getScoreBadgeColor(
-                          conversation.feedback.note
+                          feedback.note
                         )} rounded-sm font-mono px-1 text-white text-[.6rem] font-bold`}
                       >
-                        {conversation.feedback.note}/100
+                        {feedback.note}/100
                       </Badge>
                     )}
                   </h1>
@@ -353,21 +390,52 @@ export function ConversationDetails({
                 </div>
               </div>
 
-              {conversation.feedback?.note && (
+              {feedback?.note && (
                 <div className="text-center md:text-right">
                   <p className="text-sm text-muted-foreground">Score global</p>
                   <p
                     className={`text-2xl font-bold ${getScoreColor(
-                      conversation.feedback.note
+                      feedback.note
                     )}`}
                   >
-                    {conversation.feedback.note}/100
+                    {feedback.note}/100
                   </p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
+
+        {canRegenerateFeedback && (
+          <Card className="shadow-soft border-amber-200 bg-amber-50">
+            <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <Icon
+                  icon="mdi:alert-circle-outline"
+                  className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0"
+                />
+                <p className="text-sm text-amber-900">
+                  L'analyse de cette simulation n'a pas pu être générée
+                  correctement. Vous pouvez la relancer à partir du transcript.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={regenerateFeedback}
+                disabled={regenerating}
+                className="w-fit"
+              >
+                <Icon
+                  icon={
+                    regenerating ? "svg-spinners:ring-resize" : "mdi:refresh"
+                  }
+                  className="h-4 w-4 mr-2"
+                />
+                {regenerating ? "Analyse en cours..." : "Régénérer l'analyse"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -568,7 +636,7 @@ export function ConversationDetails({
 
                   <TabsContent value="feedback">
                     <div className="space-y-6">
-                      {!conversation.feedback ? (
+                      {!feedback ? (
                         <Card className="shadow-soft">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -598,7 +666,7 @@ export function ConversationDetails({
                       ) : (
                         <>
                           {/* Score Overview */}
-                          {conversation.feedback.note && (
+                          {feedback.note && (
                             <Card className="shadow-soft border-2">
                               <CardContent className="p-6">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -613,19 +681,19 @@ export function ConversationDetails({
                                   <div className="text-center">
                                     <div
                                       className={`text-5xl font-bold ${getScoreColor(
-                                        conversation.feedback.note
+                                        feedback.note
                                       )}`}
                                     >
-                                      {conversation.feedback.note}
+                                      {feedback.note}
                                       <span className="text-2xl">/100</span>
                                     </div>
                                     <Badge
                                       className={`${getScoreBadgeColor(
-                                        conversation.feedback.note
+                                        feedback.note
                                       )} rounded-sm font-mono px-2 py-1 text-white font-bold`}
                                     >
                                       {getScoreLevel(
-                                        conversation.feedback.note
+                                        feedback.note
                                       )}
                                     </Badge>
                                   </div>
@@ -635,8 +703,8 @@ export function ConversationDetails({
                           )}
 
                           {/* Points forts */}
-                          {conversation.feedback.points_forts &&
-                            conversation.feedback.points_forts.length > 0 && (
+                          {feedback.points_forts &&
+                            feedback.points_forts.length > 0 && (
                               <Card className="shadow-soft">
                                 <CardHeader>
                                   <CardTitle className="flex items-center gap-2 text-green-600">
@@ -649,7 +717,7 @@ export function ConversationDetails({
                                 </CardHeader>
                                 <CardContent>
                                   <div className="space-y-2">
-                                    {conversation.feedback.points_forts.map(
+                                    {feedback.points_forts.map(
                                       (point: string, index: number) => (
                                         <div
                                           key={index}
@@ -669,8 +737,8 @@ export function ConversationDetails({
                             )}
 
                           {/* Axes d'amélioration */}
-                          {conversation.feedback.axes_amelioration &&
-                            conversation.feedback.axes_amelioration.length >
+                          {feedback.axes_amelioration &&
+                            feedback.axes_amelioration.length >
                               0 && (
                               <Card className="shadow-soft">
                                 <CardHeader>
@@ -684,7 +752,7 @@ export function ConversationDetails({
                                 </CardHeader>
                                 <CardContent>
                                   <div className="space-y-2">
-                                    {conversation.feedback.axes_amelioration.map(
+                                    {feedback.axes_amelioration.map(
                                       (axe: string, index: number) => (
                                         <div
                                           key={index}
@@ -704,7 +772,7 @@ export function ConversationDetails({
                             )}
 
                           {/* Complete analysis */}
-                          {conversation.feedback.analyse_complete && (
+                          {feedback.analyse_complete && (
                             <Card className="shadow-soft">
                               <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
@@ -717,7 +785,7 @@ export function ConversationDetails({
                               </CardHeader>
                               <CardContent>
                                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                  {conversation.feedback.analyse_complete}
+                                  {feedback.analyse_complete}
                                 </p>
                               </CardContent>
                             </Card>

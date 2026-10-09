@@ -460,47 +460,8 @@ export function SimulationConversation({
       console.log("📡 End API response:", data);
 
       if (response.ok) {
-        let processedFeedback = data.feedback;
-
-        // Check if analyse_complete contains JSON wrapped in backticks
-        if (
-          data.feedback?.analyse_complete &&
-          typeof data.feedback.analyse_complete === "string"
-        ) {
-          try {
-            let jsonContent = data.feedback.analyse_complete.trim();
-
-            // Remove JSON backticks if present
-            if (
-              jsonContent.startsWith("```json") &&
-              jsonContent.endsWith("```")
-            ) {
-              jsonContent = jsonContent
-                .replace(/^```json\s*/, "")
-                .replace(/\s*```$/, "");
-            }
-
-            // Try to parse as JSON
-            const parsedContent = JSON.parse(jsonContent);
-            console.log("✅ Successfully parsed JSON content:", parsedContent);
-
-            // Replace the entire feedback with the parsed content
-            processedFeedback = {
-              id: data.feedback.id,
-              conversation_id: data.feedback.conversation_id,
-              created_at: data.feedback.created_at,
-              ...parsedContent,
-            };
-          } catch (parseError) {
-            console.warn(
-              "⚠️ Failed to parse JSON content, using original feedback:",
-              parseError
-            );
-            // Keep original feedback if parsing fails
-          }
-        }
-
-        setFeedback(processedFeedback);
+        // Le feedback arrive déjà structuré et validé par l'API (#29).
+        setFeedback(data.feedback);
         setMessages(data.transcript || messages);
         setConversationStatus("ended");
         toast.success("Conversation analysée avec succès !", {
@@ -509,7 +470,9 @@ export function SimulationConversation({
       } else {
         console.error("❌ End API failed:", data);
         setConversationStatus("ended");
-        toast.error("Erreur lors de l'analyse de la conversation");
+        toast.error(
+          data.error || "Erreur lors de l'analyse de la conversation"
+        );
       }
     } catch (error) {
       console.error("❌ Error ending conversation:", error);
@@ -1150,7 +1113,7 @@ export function SimulationConversation({
         {/* Actions below iPhone */}
         <div className="flex justify-center mt-6">
           <div className="flex gap-4">
-            {feedback && (
+            {(feedback || conversationStatus === "ended") && (
               <Link href={`/conversations/${conversationId}`}>
                 <Button variant="outline" className="flex items-center gap-2">
                   <Icon
