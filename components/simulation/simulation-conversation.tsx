@@ -76,6 +76,7 @@ export function SimulationConversation({
   const elapsedTimeRef = useRef<number>(0); // ref pour éviter stale closure dans onDisconnect
   const endConversationRef = useRef<() => Promise<void>>(async () => {}); // ref pour éviter stale closure
   const messagesRef = useRef<ConversationMessage[]>([]); // ref pour éviter stale closure
+  const isEndingRef = useRef(false); // une seule fin de simulation par session (#30)
   const router = useRouter();
 
 
@@ -364,6 +365,7 @@ export function SimulationConversation({
     }
 
     try {
+      isEndingRef.current = false;
       console.log("📊 Setting initializing to true");
       setInitializing(true);
 
@@ -422,6 +424,15 @@ export function SimulationConversation({
   };
 
   const endConversation = async () => {
+    // Raccrocher déclenche endConversation, puis endSession() déclenche
+    // onDisconnect qui la rappelle : sans ce verrou, deux POST /end partaient
+    // en parallèle et créaient deux feedbacks (#30).
+    if (isEndingRef.current) {
+      console.log("⏭️ Conversation end already in progress, skipping");
+      return;
+    }
+    isEndingRef.current = true;
+
     console.log("🔚 Ending conversation");
     console.log("💬 Messages to send:", messages);
 

@@ -76,6 +76,28 @@ export async function POST(
       elevenlabsId: conversation.elevenlabs_conversation_id,
     });
 
+    // Fin d'appel déjà traitée : on renvoie le feedback existant au lieu d'en
+    // générer un second, sans toucher au transcript enregistré (#30).
+    if (conversation.feedback_id) {
+      const { data: existingFeedback } = await supabase
+        .from("feedback")
+        .select("*")
+        .eq("id", conversation.feedback_id)
+        .single();
+
+      if (existingFeedback) {
+        console.log(
+          "♻️ Conversation already analyzed, returning existing feedback:",
+          existingFeedback.id
+        );
+        return NextResponse.json({
+          feedback: existingFeedback,
+          transcript: conversation.transcript ?? [],
+          conversation_id: conversationId,
+        });
+      }
+    }
+
     // Use messages from frontend, or try to get from ElevenLabs as fallback
     let transcript = messages;
     let finalDuration = duration;
