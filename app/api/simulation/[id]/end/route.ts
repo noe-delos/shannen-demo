@@ -3,8 +3,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { buildFeedbackPrompt, generateFeedback } from "@/lib/feedback/generate";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// La génération du feedback peut faire un second essai avec un budget plus large.
+export const maxDuration = 300;
 
 export async function POST(
   request: NextRequest,
@@ -71,6 +75,28 @@ export async function POST(
       callType: conversation.call_type,
       elevenlabsId: conversation.elevenlabs_conversation_id,
     });
+
+    // Fin d'appel déjà traitée : on renvoie le feedback existant au lieu d'en
+    // générer un second, sans toucher au transcript enregistré (#30).
+    if (conversation.feedback_id) {
+      const { data: existingFeedback } = await supabase
+        .from("feedback")
+        .select("*")
+        .eq("id", conversation.feedback_id)
+        .single();
+
+      if (existingFeedback) {
+        console.log(
+          "♻️ Conversation already analyzed, returning existing feedback:",
+          existingFeedback.id
+        );
+        return NextResponse.json({
+          feedback: existingFeedback,
+          transcript: conversation.transcript ?? [],
+          conversation_id: conversationId,
+        });
+      }
+    }
 
     // Use messages from frontend, or try to get from ElevenLabs as fallback
     let transcript = messages;
@@ -142,150 +168,24 @@ export async function POST(
       console.log("✅ Conversation updated successfully");
     }
 
-    // Generate feedback using Claude via AWS Bedrock
-    console.log("🤖 Preparing Claude feedback prompt...");
-    const feedbackPrompt = `
-Analysez cette conversation commerciale et fournissez un feedback détaillé en français.
-
-**CONTEXTE:**
-- Agent: ${conversation.agents?.name} (${conversation.agents?.job_title})
-- Produit: ${conversation.products?.name}
-- Type d'appel: ${conversation.call_type}
-- Objectif: ${conversation.goal}
-- Durée: ${finalDuration} secondes
-
-**TRANSCRIPT:**
-${transcript
-  .map(
-    (msg: any, i: number) =>
-      `${i + 1}. ${
-        msg.role === "user" || msg.source === "user"
-          ? "**Commercial**"
-          : "**Client**"
-      }: ${msg.content || msg.message || msg.text}`
-  )
-  .join("\n")}
-
-**INSTRUCTIONS:**
-Fournissez un feedback structuré avec:
-1. Une note sur 100 (basée sur la performance commerciale)
-2. 3-5 points forts identifiés dans la conversation
-3. 3-5 axes d'amélioration concrets
-4. 2-3 moments clés de la conversation
-5. 3-5 suggestions pratiques pour améliorer les performances
-6. Une analyse complète (2-3 paragraphes détaillés)
-
-**IMPORTANT:** Votre réponse DOIT être au format JSON valide exactement comme ceci:
-{
-  "note": 75,
-  "points_forts": ["Point 1", "Point 2", "Point 3"],
-  "axes_amelioration": ["Axe 1", "Axe 2", "Axe 3"],
-  "moments_cles": ["Moment 1", "Moment 2"],
-  "suggestions": ["Suggestion 1", "Suggestion 2", "Suggestion 3"],
-  "analyse_complete": "Analyse détaillée en 2-3 paragraphes..."
-}`;
-
-    console.log("📤 Sending request to Claude via Anthropic API...");
+    // Generate feedback with Claude (sortie structurée, voir lib/feedback/generate.ts)
+    const feedbackPrompt = buildFeedbackPrompt(
+      conversation,
+      transcript,
+      finalDuration
+    );
     console.log("🤖 Prompt length:", feedbackPrompt.length);
 
     try {
-      console.log("📡 Sending request to Anthropic...");
-      const response = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 2000,
-        temperature: 0.1,
-        messages: [{ role: "user", content: feedbackPrompt }],
+      const feedbackData = await generateFeedback(anthropic, feedbackPrompt);
+      console.log("✅ Feedback generated:", {
+        note: feedbackData.note,
+        pointsForts: feedbackData.points_forts.length,
+        axesAmelioration: feedbackData.axes_amelioration.length,
+        momentsCles: feedbackData.moments_cles.length,
+        suggestions: feedbackData.suggestions.length,
+        analyseComplete: feedbackData.analyse_complete.length,
       });
-      console.log("✅ Response received from Anthropic");
-
-      // Extract content from response
-      let feedbackText = "";
-      const firstBlock = response.content[0];
-      if (firstBlock?.type === "text") {
-        feedbackText = firstBlock.text;
-      }
-
-      console.log("✅ Claude response received, length:", feedbackText.length);
-      console.log(
-        "🤖 Raw Claude feedback:",
-        feedbackText.substring(0, 200) + "..."
-      );
-
-      // Try to parse JSON feedback
-      let feedbackData;
-      try {
-        // Clean the response - remove markdown code blocks if present
-        let cleanedText = feedbackText.trim();
-        if (cleanedText.startsWith("```json")) {
-          cleanedText = cleanedText
-            .replace(/^```json\s*/, "")
-            .replace(/\s*```$/, "");
-        } else if (cleanedText.startsWith("```")) {
-          cleanedText = cleanedText
-            .replace(/^```\s*/, "")
-            .replace(/\s*```$/, "");
-        }
-
-        console.log(
-          "🧹 Cleaned Claude response:",
-          cleanedText.substring(0, 200) + "..."
-        );
-
-        // Escape raw control characters (Claude sometimes emits real newlines
-        // inside string values, which breaks JSON.parse).
-        // Walk the string, tracking whether we're inside a quoted string,
-        // and escape control chars only inside strings.
-        let sanitized = "";
-        let inString = false;
-        let escapeNext = false;
-        for (const ch of cleanedText) {
-          if (escapeNext) {
-            sanitized += ch;
-            escapeNext = false;
-            continue;
-          }
-          if (ch === "\\" && inString) {
-            sanitized += ch;
-            escapeNext = true;
-            continue;
-          }
-          if (ch === '"') {
-            inString = !inString;
-            sanitized += ch;
-            continue;
-          }
-          if (inString && (ch === "\n" || ch === "\r" || ch === "\t")) {
-            sanitized += ch === "\n" ? "\\n" : ch === "\r" ? "\\r" : "\\t";
-            continue;
-          }
-          sanitized += ch;
-        }
-
-        feedbackData = JSON.parse(sanitized);
-        console.log("✅ Successfully parsed Claude JSON feedback:", {
-          note: feedbackData.note,
-          pointsForts: feedbackData.points_forts?.length,
-          axesAmelioration: feedbackData.axes_amelioration?.length,
-          suggestions: feedbackData.suggestions?.length,
-          analysComplete: feedbackData.analyse_complete?.length,
-        });
-      } catch (parseError) {
-        console.warn(
-          "⚠️ Failed to parse Claude JSON, using fallback:",
-          parseError
-        );
-        console.log("🔍 Raw feedback text for debugging:", feedbackText);
-
-        // Fallback if JSON parsing fails - but keep the original text for potential frontend parsing
-        feedbackData = {
-          note: 70,
-          points_forts: ["Feedback généré avec succès"],
-          axes_amelioration: ["Améliorer la structuration"],
-          moments_cles: ["Conversation complétée"],
-          suggestions: ["Continuer à pratiquer"],
-          analyse_complete: feedbackText, // Keep original text for frontend parsing attempt
-        };
-      }
 
       // Create feedback record
       console.log("💾 Creating feedback record in database...");
@@ -357,10 +257,13 @@ Ce résumé sera utilisé pour contextualiser les prochains appels avec ce prosp
 
         const summaryResponse = await anthropic.messages.create({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 300,
+          max_tokens: 1024,
           temperature: 0.1,
           messages: [{ role: "user", content: summaryPrompt }],
         });
+        if (summaryResponse.stop_reason === "max_tokens") {
+          console.warn("⚠️ Summary truncated at max_tokens");
+        }
         let summaryText = "";
         const summaryBlock = summaryResponse.content[0];
         if (summaryBlock?.type === "text") {
@@ -385,34 +288,18 @@ Ce résumé sera utilisé pour contextualiser les prochains appels avec ce prosp
         conversation_id: conversationId,
       });
     } catch (error) {
+      // Plus de feedback de repli avec une note inventée (#29) : l'élève peut
+      // relancer l'analyse depuis la page de la conversation (transcript sauvegardé).
       console.error("❌ Error generating feedback:", error);
-
-      // Create basic feedback if AI fails
-      console.log("🔄 Creating fallback feedback...");
-      const { data: basicFeedback } = await supabase
-        .from("feedback")
-        .insert({
+      return NextResponse.json(
+        {
+          error:
+            "L'analyse de la conversation n'a pas pu être générée. Vous pouvez la relancer depuis la page de la conversation.",
+          transcript,
           conversation_id: conversationId,
-          user_id: user.id,
-          note: 70,
-          points_forts: ["Conversation complétée"],
-          axes_amelioration: ["Continuer à pratiquer"],
-          moments_cles: ["Simulation terminée"],
-          suggestions: ["Refaire des simulations régulièrement"],
-          analyse_complete:
-            "Conversation terminée. Le feedback détaillé n'a pas pu être généré automatiquement.",
-        })
-        .select()
-        .single();
-
-      console.log("⚠️ Fallback feedback created");
-
-      return NextResponse.json({
-        feedback: basicFeedback,
-        transcript,
-        conversation_id: conversationId,
-        warning: "Feedback de base généré (erreur IA)",
-      });
+        },
+        { status: 502 }
+      );
     }
   } catch (error) {
     console.error("💥 Fatal error in conversation end process:", error);
